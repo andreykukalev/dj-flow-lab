@@ -34,10 +34,6 @@ Code layout and design rules are described in [docs/architecture.md](docs/archit
 
 The app is hosted on [Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/). The `Deploy` workflow builds the app, deploys `main` to production, and gives every pull request its own preview URL (posted as a comment on the pull request and removed when it closes). Routing and security headers live in `public/staticwebapp.config.json`.
 
-One-time setup:
-
-1. In the Azure portal, create a Static Web App (the Free plan is enough) and choose **Other** as the deployment source.
-2. Copy its deployment token (**Overview → Manage deployment token**).
-3. Add it to this repository as the Actions secret `AZURE_STATIC_WEB_APPS_API_TOKEN`.
+One-time setup: provision the Azure resources with the Bicep template in [`infra/`](infra/README.md) (`./infra/deploy.ps1 -SetGitHubSecret` on Windows), which creates the Static Web App and stores its deployment token as the repository secret `AZURE_STATIC_WEB_APPS_API_TOKEN`.
 
 Until the secret exists, the workflow builds the app and skips the deploy step.
