@@ -75,6 +75,10 @@ S1, S3, and S5 together form the **proof of concept** below.
 - **Pass/fail:** offline tests pass 20/20 on both engines; real-time smoke test passes ≥ 19/20 (otherwise real-time checks stay manual).
 - **Time-box:** 0.5 day.
 - **Decision:** which integration tests are automated per engine; whether WebKit runs in CI at all (only as a smoke test, never as a stand-in for Safari).
+- **Result (2026-10-24, #41):** run locally in the Linux container used for development (headless Chromium 153 and Firefox from Playwright 1.63), `--repeat-each=20`, no retries.
+  - Offline tests (gain-ramp envelope, sample-accurate source start): **20/20 on both engines**.
+  - Real-time smoke test: **20/20 on Chromium** with no audio device (Chromium uses a fake output). **Firefox keeps the `AudioContext` suspended when there is no audio output device**, even after a real click; with a PulseAudio null sink it passes **20/20**. With PulseAudio running, Chromium's clock stalled after one buffer, so the null sink is set up only for the Firefox CI job.
+  - **Decision:** offline and real-time tests are automated on Chromium and Firefox in CI (one job per engine). WebKit is not run in CI yet.
 
 ## S2 — Decoding matrix, MP3 offsets, memory
 
