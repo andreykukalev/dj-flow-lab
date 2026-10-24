@@ -18,7 +18,7 @@ Each milestone ends with something you can open in a browser and try. Issues are
 
 Goal: an empty but real app, with CI and the core types in place.
 
-1. **[01] Scaffold the web app** — Vite + React + TypeScript (strict), ESLint, Prettier, Vitest, Playwright, folder layout from architecture §3. `type:chore` `area:infra`
+1. **[01] Scaffold the web app** — Vite + React + TypeScript (strict), oxlint, Prettier, Vitest, Playwright, folder layout from architecture §3. `type:chore` `area:infra`
 2. **[02] CI on pull requests** — GitHub Actions: install, typecheck, lint, unit tests, build. `type:chore` `area:infra`
 3. **[03] Engine data model and time conversion** — `model.ts` and `time.ts` with tests (bars/beats ↔ seconds, tempo ratio, beat 0 at exit point). `type:feature` `area:engine` `mvp:must`
 

@@ -17,7 +17,7 @@
 |---|---|---|
 | Language | TypeScript (strict) | One language for engine, analysis, and UI; the engine's types document the plan format. |
 | Build and dev server | Vite | Fast, simple, first-class Web Worker support. |
-| UI | React 18 | Widely known; component model suits decks, mixer, and timeline. |
+| UI | React 19 | Widely known; component model suits decks, mixer, and timeline. |
 | State | Zustand | Small store with selectors; keeps the audio clock out of React renders. |
 | Audio | Web Audio API (native) | Sample-accurate scheduling of gain and filter changes; no dependency needed for the MVP mixer. |
 | Analysis | Own TypeScript code in a Web Worker | The MVP needs a constant-tempo grid and bar-level energy, which are simple enough to own. Avoids AGPL/GPL libraries (Essentia.js, aubio) that would constrain licensing. |
@@ -25,7 +25,7 @@
 | Controller | SVG React components | Crisp at any size, easy to animate from the plan. |
 | Local storage | IndexedDB (via `idb`) | Analysis results and user corrections, keyed by a file fingerprint. |
 | Tests | Vitest (unit), Playwright (end-to-end) | The engine is pure TypeScript and runs in Node; Playwright drives a real browser for audio-graph and UI checks. |
-| Lint and format | ESLint, Prettier | Standard. |
+| Lint and format | oxlint, Prettier | oxlint is the Vite template default and is fast enough to run on every save. |
 | CI | GitHub Actions | Typecheck, lint, unit tests, build on every PR. |
 | Hosting | Static site (GitHub Pages, Cloudflare Pages, or Vercel) | No server needed for M0–M5. |
 | Later: Assisted mode | Claude API via a small serverless function | Keeps the API key off the client; the model returns structured choices that the engine validates. |
