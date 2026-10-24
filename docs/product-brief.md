@@ -1,6 +1,6 @@
 # DJ Flow Lab — Product Brief
 
-- **Version:** 0.2 (draft for review)
+- **Version:** 0.2 (superseded by [PRODUCT_BRIEF_v0.3.md](PRODUCT_BRIEF_v0.3.md); kept for history)
 - **Status:** Refined product definition, MVP scope proposed
 - **Product category:** Music learning and creative technology
 - **Changes from v0.1:** added a shared vocabulary (§4a), the learning loop (§5a), working assumptions for the MVP (§9a), acceptance criteria for each must-have (§9b), the information layers as a product rule (§10), privacy and rights (§12a) and open questions (§15). The original text is otherwise kept. New or changed passages are marked _(v0.2)_.

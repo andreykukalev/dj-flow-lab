@@ -1,0 +1,29 @@
+# Technical risk register
+
+- **Status:** v0.3, 2026-10-24
+- **Scale:** Impact and Likelihood are High / Medium / Low. Ordered by impact × likelihood, then by rewrite cost.
+- **References:** decisions D-xx in [TECHNICAL_DECISIONS.md](TECHNICAL_DECISIONS.md), spikes S-x in [TECHNICAL_SPIKES.md](TECHNICAL_SPIKES.md).
+
+| ID | Risk | Impact | Likelihood | Mitigation | Early warning signal |
+|---|---|---|---|---|---|
+| R-01 | **Grid imprecision makes long blends flam.** BPM error of 0.1 at 124 BPM drifts ~100 ms over 64 bars, while the engine itself is sample-accurate. | High | High | BPM by whole-track regression; two-point correction (D-09); BPM to 0.01; grid-fit score (D-10); shorter default overlaps when fit is poor. | S6: BPM within 0.02 on fewer than 16/20 tracks; testers report "echoing kicks" late in a blend. |
+| R-02 | **AIFF and other formats fail to decode** in Chromium/Firefox. | High | High (AIFF verified failing in Chromium) | In-house AIFF/AIFC PCM parser (D-03); clear message and conversion advice for the rest. | S2 matrix; pilot users' first files fail. |
+| R-03 | **Engine rewrite if anchor/start-at-beat model breaks** in an engine (e.g. start offsets with non-unit rate, automation edge cases). | High | Low (validated offline in Chromium) | S1 on Chromium and Firefox before any UI work; single code path (D-05). | P1/P2 failing in Firefox. |
+| R-04 | **Memory exhaustion** with long tracks (≈161 MB per 7-min stereo track at 48 kHz). | High | Medium | Release file buffers; downsampled mono for analysis; 15-min limit (provisional); one pair loaded at a time. | S2 peak memory > 1 GB; tab crashes on 8 GB machines. |
+| R-05 | **MP3 decoder offset differs across engines**, shifting stored grids by 25–50 ms. | Medium | Medium | Store `decodedFrames` + engine per analysis; warn and offer re-check on mismatch (D-24). | S2 onset differences between engines. |
+| R-06 | **Bass kill not clean** with shelving EQ; isolator not flat. | Medium | Medium | Isolator EQ with compensation; shelving fallback (D-12); S3 measurements. | S3 flatness > ±0.5 dB or kill < 40 dB; listening check "muddy swap". |
+| R-07 | **Visuals out of step with sound** on high-latency outputs (Bluetooth 100–250 ms) or where latency is misreported. | Medium | Medium | Latency compensation chain + manual calibration (D-21). | S5 perceived offset > 40 ms on wired output. |
+| R-08 | **Clicks and pops** at steps, seeks, starts, stops. | Medium | Medium | Declick rules (D-15); automated discontinuity test. | P6 failures; testers hear clicks on A/B switching. |
+| R-09 | **Output clipping** when both decks overlap at full level. | Medium | Medium | −6 dB master headroom, clip indicator, trim (D-11). | S3 summed peaks > 0 dBFS on many pairs. |
+| R-10 | **Tracks with tempo drift** (live-played disco edits) cannot be gridded. | Medium | Medium (target genre includes disco house) | Grid-fit warning; recommend short transitions; variable-tempo grids deferred. | S6 flags > 20% of disco tracks. |
+| R-11 | **Local data loss** (Safari eviction, cleared site data, quota). | Medium | Medium | `storage.persist()`, export/import backup, quota error handling (D-24). | S7 failures; users report lost corrections. |
+| R-12 | **Fingerprint changes after tag edits**, so corrections are not found. | Low | High | Name + duration secondary match with confirmation (D-22). | S7 tag-edit test; pilot feedback. |
+| R-13 | **Safari not covered by CI**; Playwright WebKit on Linux uses a different media stack. | Medium | Medium | Tier 2 manual checklist on macOS before pilot (D-27); optional macOS CI runner later. | No Mac available to the team; Safari-specific bug reports. |
+| R-14 | **Real-time audio tests flaky in headless CI.** | Low | Medium | Prefer `OfflineAudioContext` tests; real-time as smoke tests; S8 measures flakiness. | S8 real-time pass rate < 19/20. |
+| R-15 | **Automation API exceptions or engine differences** (`setValueCurveAtTime` overlaps, k-rate biquad parameters, missing `cancelAndHoldAtTime`). | Medium | Low | Sampled linear ramps only (D-18); validation forbids overlaps (D-19). | Exceptions in S1/S3 logs; timing differences between engines. |
+| R-16 | **Analysis blocks the UI** on slower machines. | Low | Medium | Worker on decimated mono (D-25); long-task observer in tests. | Long tasks > 50 ms during analysis. |
+| R-17 | **AudioContext suspended or interrupted** without the transport noticing. | Medium | Low | `statechange` handling → Paused (D-06). | P8 failures. |
+| R-18 | **Privacy claim inaccurate** (accidental third-party request, analytics added later). | High | Low | CSP `connect-src 'self'`, network e2e test (D-28). | Network test failure in CI. |
+| R-19 | **Test fixture licensing** blocks committing real music. | Low | High | Synthetic fixtures; CC-licensed tracks with recorded licences; real-track spikes run locally with annotations only. | Need for real-music regression tests. |
+| R-20 | **Pitch shift from rate sync is larger than expected** in users' pairs. | Low | Medium | Show semitones, warn at ≥ 0.5 st (D-07); key lock deferred. | Pilot pairs with tempo gaps > 4%. |
+| R-21 | **Plan schema churn** breaks saved variants. | Low | Medium | `schemaVersion` with explicit migrations (D-16); export format tests. | Frequent schema changes during M2–M3. |

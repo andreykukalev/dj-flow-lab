@@ -6,6 +6,34 @@ The first product is the **Transition Builder**: load two of your own tracks, ch
 
 ## Documents
 
-- [Product brief](docs/product-brief.md)
-- [MVP architecture](docs/architecture.md)
-- [MVP backlog](docs/backlog.md)
+- [Product brief v0.3](docs/PRODUCT_BRIEF_v0.3.md) (current) and [v0.2](docs/product-brief.md) (history)
+- [Technical audit of v0.2](docs/TECHNICAL_AUDIT_v0.2.md)
+- [Technical decisions](docs/TECHNICAL_DECISIONS.md)
+- [Technical spikes and proof of concept](docs/TECHNICAL_SPIKES.md)
+- [MVP implementation plan](docs/MVP_IMPLEMENTATION_PLAN.md)
+- [Technical risks](docs/RISKS.md)
+- [MVP backlog](docs/backlog.md) and [architecture proposal](docs/architecture.md) (v0.2)
+
+## Development
+
+Requires Node 22 or later.
+
+```sh
+npm install
+npm run dev        # start the app at http://localhost:5173
+npm test           # unit tests (Vitest)
+npm run test:e2e   # browser tests (Playwright; run `npx playwright install chromium` once)
+npm run typecheck
+npm run lint
+npm run format
+```
+
+Code layout and design rules are described in [docs/architecture.md](docs/architecture.md). The short version: `src/engine` is pure TypeScript with no browser dependencies, and the audio, the virtual mixer, and the explanations all read from the same transition plan.
+
+## Deployment
+
+The app is hosted on [Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/). The `Deploy` workflow builds the app, deploys `main` to production, and gives every pull request its own preview URL (posted as a comment on the pull request and removed when it closes). Routing and security headers live in `public/staticwebapp.config.json`.
+
+One-time setup: provision the Azure resources with the Bicep template in [`infra/`](infra/README.md) (`./infra/deploy.ps1 -SetGitHubSecret` on Windows), which creates the Static Web App and stores its deployment token as the repository secret `AZURE_STATIC_WEB_APPS_API_TOKEN`.
+
+Until the secret exists, the workflow builds the app and skips the deploy step.
