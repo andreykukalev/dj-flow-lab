@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iPhone compare and reflect</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.r{font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;color:#e8e9ed;-webkit-font-smoothing:antialiased}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:15px;font-weight:600;box-sizing:border-box}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.hear{flex:1;min-height:92px;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:12px;border-radius:16px;text-align:left}
+</style>
+</head>
+<body>
+<div class="r" style="width: 390px; height: 844px; box-sizing: border-box; background: #111216; padding: 54px 16px 34px; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+
+<div style="display: flex; align-items: center; gap: 4px">
+<button class="btn" aria-label="Back" style="background: transparent; border-color: transparent; padding: 0; color: #4fb3ff"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center"><span style="font-size: 15px; font-weight: 700">Compare</span><span class="muted" style="font-size: 12px">Step 4 of 5</span></div>
+<span style="width: 44px"></span>
+</div>
+
+<div style="display: flex; gap: 10px">
+<button class="btn hear" style="background: #e8e9ed; color: #111216; border-color: #e8e9ed">
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">1 · Long blend</span><span style="font-size: 12px; font-weight: 500">32 bars · hearing now</span></span>
+<svg width="100%" height="28" viewBox="0 0 190 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 8H130L170 40H190" fill="none" stroke="#1f6fb0" stroke-width="3" vector-effect="non-scaling-stroke"></path><path d="M30 40L70 8H190" fill="none" stroke="#c4561f" stroke-width="3" vector-effect="non-scaling-stroke"></path></svg>
+</button>
+<button class="btn hear">
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">2 · Phrase cut</span><span class="muted" style="font-size: 12px; font-weight: 500">1 bar</span></span>
+<svg width="100%" height="28" viewBox="0 0 190 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 8H95V40H190" fill="none" stroke="#4fb3ff" stroke-width="3" vector-effect="non-scaling-stroke"></path><path d="M0 40H95V8H190" fill="none" stroke="#ff8a4f" stroke-width="3" vector-effect="non-scaling-stroke"></path></svg>
+</button>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px">
+<button class="btn btn-primary" aria-label="Pause" style="width: 48px; height: 48px; border-radius: 24px; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg></button>
+<span class="muted" style="flex: 1; font-size: 13px; line-height: 1.35">Tap either side to switch at the same beat, <span class="mono" style="color: #e8e9ed">bar 111.1</span></span>
+<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600"><span>Blind</span><span style="position: relative; width: 50px; height: 30px; border-radius: 15px; background: #3a3e4a"><input type="checkbox" aria-label="Blind test: hide which variant is playing" style="position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0"><span style="position: absolute; left: 2px; top: 2px; width: 26px; height: 26px; border-radius: 13px; background: #e8e9ed"></span></span></label>
+</div>
+
+<div class="card" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+<span class="lbl">What is different</span>
+<div style="display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 6px 10px; font-size: 14px; line-height: 1.35">
+<span class="muted">Overlap</span><span>32 bars against 1 bar</span>
+<span class="muted">Bass</span><span>Swapped on 113, against all of B arriving on 113</span>
+<span class="muted">Feel</span><span><span style="color: #cbbcff">interpretation:</span> continuation against arrival</span>
+</div>
+</div>
+
+<div style="height: 1px; background: #2c2f38; margin: 2px 0"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 17px; font-weight: 700">Which served "keep the groove rolling" better?</span>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px"><button class="btn" style="background: #e8e9ed; color: #111216; border-color: #e8e9ed">1</button><button class="btn">2</button><button class="btn">Neither</button></div>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0">
+<span style="font-size: 15px; font-weight: 600">What changed when you switched?</span>
+<span style="display: block; flex: 1; padding: 12px; border-radius: 12px; background: #1b1d23; border: 1px solid #3a3e4a; font-size: 15px; line-height: 1.5">The cut woke me up but broke the groove. With the blend I only noticed the bass swap when I listened for it.</span>
+</label>
+<div style="display: flex; gap: 8px"><button class="btn" style="flex: 1; min-height: 50px">Render both</button><button class="btn btn-primary" style="flex: 1; min-height: 50px">Save note</button></div>
+</div>
+</body>
+</html>

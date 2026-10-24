@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iPad Transition Builder</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.r{font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;color:#e8e9ed;-webkit-font-smoothing:antialiased}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-interp{background:#2b2645;color:#cbbcff}
+.l-choice{background:#e8e9ed;color:#111216}
+.l-action{background:#2c2f38;color:#e8e9ed}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:15px;font-weight:600;box-sizing:border-box}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.seg{display:flex;padding:3px;gap:2px;background:#23262e;border-radius:12px}
+.seg button{min-height:38px;padding:0 13px;border:0;border-radius:9px;background:transparent;color:#9a9ead;font:inherit;font-size:14px;font-weight:600}
+.seg button.on{background:#3a3e4a;color:#e8e9ed}
+.knob{display:flex;flex-direction:column;align-items:center;gap:1px;font-size:10px;font-weight:700;letter-spacing:.06em;color:#9a9ead}
+.cap{font-size:10px;font-weight:600;letter-spacing:0;height:12px}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div class="r" style="width: 1194px; height: 834px; box-sizing: border-box; background: #111216; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 64px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+<button class="btn" style="padding: 0 10px 0 6px; background: transparent; border-color: transparent; color: #4fb3ff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Pairs</button>
+<div style="display: flex; flex-direction: column; min-width: 0; flex: 1">
+<div style="font-size: 17px; font-weight: 700; white-space: nowrap"><span style="color: #4fb3ff">Deep Current</span> <span class="muted">→</span> <span style="color: #ff8a4f">Lantern Haze</span></div>
+<div class="muted" style="font-size: 13px">Long blend with bass swap · Variant 1</div>
+</div>
+<nav class="seg" aria-label="Learning loop">
+<button>Listen</button><button>Intend</button><button class="on" aria-current="step">Try</button><button>Compare</button><button>Reflect</button>
+</nav>
+<div class="seg" aria-label="Mode">
+<button>Manual</button><button class="on">Assisted</button><button>Auto</button>
+</div>
+<button class="btn" aria-label="Render and share"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"></path></svg></button>
+</header>
+
+<div style="flex: 1; min-height: 0; display: flex; gap: 12px; padding: 0 12px 12px">
+
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+
+<section class="card" aria-label="Transition timeline" style="padding: 10px 12px 8px; display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 8px">
+<div></div>
+<div style="display: flex; justify-content: space-between; align-items: center; height: 22px">
+<div class="mono muted" style="position: relative; flex: 1; height: 14px; font-size: 11px">
+<span style="position: absolute; left: 0%">A 81</span><span style="position: absolute; left: 25%; transform: translateX(-50%)">97</span><span style="position: absolute; left: 50%; transform: translateX(-50%)">113</span><span style="position: absolute; left: 75%; transform: translateX(-50%)">129</span><span style="position: absolute; right: 0">145</span>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 92px">
+<div style="font-size: 20px; font-weight: 800; color: #4fb3ff">A</div>
+<div class="mono muted" style="font-size: 11px">124.00</div>
+<span class="chip l-measured" style="align-self: flex-start; padding: 0 6px">BPM</span>
+</div>
+<div style="position: relative; grid-row: span 3">
+<div style="height: 92px; position: relative">
+<svg width="100%" height="92" viewBox="0 0 640 80" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12v56M6 16v47M10 10v61M14 17v45M18 11v58M22 11v57M26 18v45M30 12v57M34 18v44M38 13v55M42 16v49M46 17v46M50 13v55M54 7v65M58 17v47M62 13v53M66 10v60M70 6v69M74 11v59M78 13v54M82 3v74M86 18v45M90 7v66M94 14v51M98 16v47M102 15v50M106 14v52M110 7v65M114 16v48M118 11v59M122 7v65M126 13v53M130 11v58M134 17v45M138 18v45M142 14v53M146 9v61M150 13v55M154 14v52M158 11v59M162 17v47M166 20v40M170 15v50M174 16v48M178 20v39M182 15v50M186 18v45M190 14v52M194 15v49M198 20v40M202 11v59M206 22v36M210 19v43M214 15v50M218 21v37M222 16v48M226 23v35M230 16v48M234 15v50M238 17v46M242 12v56M246 20v40M250 16v48M254 17v46M258 17v46M262 17v47M266 14v51M270 13v54M274 18v44M278 16v48M282 21v38M286 16v49M290 16v47M294 13v55M298 14v51M302 18v43M306 19v42M310 16v48M314 23v34M318 18v44M322 20v40M326 22v36M330 22v35M334 15v50M338 22v37M342 19v42M346 19v42M350 14v52M354 22v36M358 18v43M362 16v49M366 14v52M370 15v51M374 14v52M378 20v40M382 17v46M386 19v41M390 14v52M394 13v54M398 21v37M402 20v41M406 21v39M410 21v39M414 18v44M418 17v46M422 19v43M426 23v34M430 19v43M434 19v42M438 17v46M442 11v58M446 16v48M450 18v45M454 17v47M458 16v48M462 21v38M466 14v53M470 15v50M474 14v52M478 15v51M482 26v28M486 27v26M490 29v23M494 25v29M498 29v22M502 28v24M506 28v24M510 28v23M514 27v26M518 29v22M522 29v23M526 28v23M530 29v23M534 27v26M538 29v22M542 22v35M546 25v29M550 28v23M554 28v24M558 27v26M562 26v28M566 29v23M570 24v32M574 23v34M578 26v27M582 25v30M586 29v22M590 29v23M594 27v26M598 28v25M602 23v35M606 28v23M610 29v22M614 23v34M618 26v28M622 28v25M626 26v28M630 29v22M634 26v28M638 23v34" stroke="#4fb3ff" stroke-width="2.4" stroke-linecap="round" opacity="0.9"></path></svg>
+<div style="position: absolute; left: 6px; top: 4px; display: flex; gap: 6px"><span class="chip" style="background: #111216cc; color: #e8e9ed">Drop</span></div>
+<div style="position: absolute; left: calc(25% + 6px); top: 4px"><span class="chip l-likely" style="background: #111216cc">Outro · likely</span></div>
+<div style="position: absolute; left: calc(75% + 6px); top: 4px"><span class="chip l-likely" style="background: #111216cc">Tail · likely</span></div>
+</div>
+
+<div style="height: 36px; position: relative">
+<div style="position: absolute; left: 25%; top: 6px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; opacity: 0.55"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0l5 5-5 5-5-5z" fill="#cbbcff"></path></svg><span style="font-size: 11px; white-space: nowrap">B in, no bass</span></div>
+<div style="position: absolute; left: 37.5%; top: 6px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; opacity: 0.55"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0l5 5-5 5-5-5z" fill="#cbbcff"></path></svg><span style="font-size: 11px; white-space: nowrap">B at full</span></div>
+<div style="position: absolute; left: 50%; top: 6px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0l5 5-5 5-5-5z" fill="#cbbcff"></path></svg><span style="font-size: 11px; font-weight: 700; white-space: nowrap">Bass swap</span></div>
+<div style="position: absolute; left: 62.5%; top: 6px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0l5 5-5 5-5-5z" fill="#cbbcff"></path></svg><span style="font-size: 11px; white-space: nowrap">A fades</span></div>
+<div style="position: absolute; left: 75%; top: 6px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 0l5 5-5 5-5-5z" fill="#cbbcff"></path></svg><span style="font-size: 11px; white-space: nowrap">A out</span></div>
+</div>
+
+<div style="height: 92px; position: relative">
+<svg width="100%" height="92" viewBox="0 0 640 80" preserveAspectRatio="none" aria-hidden="true"><path d="M162 26v27M166 27v27M170 24v31M174 27v25M178 27v26M182 25v29M186 29v22M190 27v26M194 26v27M198 25v29M202 29v23M206 28v23M210 30v21M214 25v30M218 26v28M222 29v22M226 24v32M230 24v31M234 26v28M238 26v27M242 28v23M246 30v20M250 27v26M254 30v21M258 29v22M262 28v25M266 30v20M270 27v25M274 27v25M278 25v30M282 26v28M286 26v28M290 27v26M294 26v28M298 27v25M302 27v25M306 24v32M310 24v32M314 25v30M318 26v28M322 19v43M326 21v38M330 21v39M334 23v34M338 16v48M342 18v44M346 15v50M350 20v41M354 14v52M358 15v50M362 22v36M366 21v37M370 14v51M374 19v42M378 14v53M382 18v44M386 23v34M390 17v46M394 16v49M398 21v38M402 21v38M406 20v40M410 14v52M414 16v48M418 22v35M422 19v41M426 22v35M430 23v34M434 15v49M438 22v37M442 16v48M446 19v42M450 22v37M454 16v48M458 22v36M462 15v50M466 22v35M470 19v41M474 21v37M478 21v38M482 3v74M486 7v67M490 13v53M494 5v69M498 15v51M502 10v60M506 6v68M510 9v62M514 16v48M518 4v72M522 13v55M526 14v52M530 7v66M534 13v54M538 14v53M542 15v51M546 16v47M550 10v61M554 14v51M558 9v61M562 10v59M566 11v57M570 4v71M574 11v58M578 10v61M582 3v74M586 15v50M590 16v49M594 5v70M598 6v67M602 12v56M606 15v50M610 7v65M614 5v71M618 15v50M622 3v74M626 6v69M630 9v61M634 12v56M638 16v48" stroke="#ff8a4f" stroke-width="2.4" stroke-linecap="round" opacity="0.9"></path></svg>
+<div style="position: absolute; left: calc(25% + 6px); bottom: 4px"><span class="chip" style="background: #111216cc; color: #e8e9ed">Intro</span></div>
+<div style="position: absolute; left: calc(50% + 6px); bottom: 4px"><span class="chip l-likely" style="background: #111216cc">Groove · likely</span></div>
+<div style="position: absolute; left: calc(75% + 6px); bottom: 4px"><span class="chip l-likely" style="background: #111216cc">Drop · likely</span></div>
+</div>
+
+<div aria-hidden="true" style="position: absolute; left: 25%; width: 50%; top: 0; bottom: 0; background: #e8e9ed0d; border-left: 2px solid #e8e9ed; border-right: 1px solid #e8e9ed55"></div>
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px dashed #cbbcff"></div>
+<div aria-hidden="true" style="position: absolute; left: 46.875%; top: -6px; bottom: -6px; width: 2px; background: #ffffff; box-shadow: 0 0 0 3px #11121699"></div>
+<div aria-hidden="true" style="position: absolute; left: calc(46.875% - 6px); top: -12px; width: 14px; height: 10px; background: #ffffff; clip-path: polygon(0 0, 100% 0, 50% 100%)"></div>
+</div>
+
+<div style="height: 36px"></div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 92px">
+<div style="font-size: 20px; font-weight: 800; color: #ff8a4f">B</div>
+<div class="mono muted" style="font-size: 11px">122.50</div>
+<span class="chip l-measured" style="align-self: flex-start; padding: 0 6px">BPM</span>
+</div>
+
+<div></div>
+<div class="mono muted" style="position: relative; height: 18px; font-size: 11px; margin-top: 4px">
+<span style="position: absolute; left: 25%; transform: translateX(-50%)">B 1</span><span style="position: absolute; left: 50%; transform: translateX(-50%)">17</span><span style="position: absolute; left: 75%; transform: translateX(-50%)">33</span><span style="position: absolute; right: 0">49</span>
+</div>
+</section>
+
+<section class="card" aria-label="Plan lanes" style="padding: 8px 12px; display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 8px; row-gap: 3px; align-items: center">
+<div class="lbl" style="font-size: 10px; color: #4fb3ff">A low</div>
+<div style="position: relative; height: 18px"><svg width="100%" height="18" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H320V17H640" fill="none" stroke="#4fb3ff" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg></div>
+<div class="lbl" style="font-size: 10px; color: #ff8a4f">B low</div>
+<div style="position: relative; height: 18px"><svg width="100%" height="18" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M160 17H320V3H640" fill="none" stroke="#ff8a4f" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg></div>
+<div class="lbl" style="font-size: 10px; color: #ff8a4f">B fader</div>
+<div style="position: relative; height: 18px"><svg width="100%" height="18" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M160 17L240 3H640" fill="none" stroke="#ff8a4f" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg></div>
+<div class="lbl" style="font-size: 10px; color: #4fb3ff">A fader</div>
+<div style="position: relative; height: 18px"><svg width="100%" height="18" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H400L480 17H640" fill="none" stroke="#4fb3ff" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg></div>
+</section>
+
+<section class="card" aria-label="Virtual mixer" style="flex: 1; min-height: 0; padding: 10px 16px; display: flex; align-items: stretch; gap: 16px">
+
+<div style="flex: 1; display: flex; gap: 10px; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 4px"><div class="lbl" style="color: #4fb3ff; height: 16px">Deck A</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px">
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="A high EQ at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>HIGH<span class="cap"></span></div>
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="A trim at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>TRIM<span class="cap"></span></div>
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="A mid EQ at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>MID<span class="cap"></span></div>
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="A filter off"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>FILTER<span class="cap"></span></div>
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="A low EQ at full, will be killed at bar 113"><circle cx="24" cy="24" r="22.5" fill="none" stroke="#4fb3ff" stroke-width="1.5" stroke-dasharray="3 3"></circle><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path><path d="M8.6 39.4l3.2-3.2" stroke="#4fb3ff" stroke-width="2.5" stroke-linecap="round"></path></svg>LOW<span class="cap" style="color: #8fd0ff">kill at 113</span></div>
+</div></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin-left: auto; padding-top: 20px">
+<div style="position: relative; width: 36px; height: 168px"><div style="position: absolute; left: 16px; top: 0; bottom: 0; width: 4px; border-radius: 2px; background: #2c2f38"></div><div style="position: absolute; left: 16px; bottom: 0; height: 100%; width: 4px; border-radius: 2px; background: #4fb3ff"></div><div style="position: absolute; left: 2px; top: -6px; width: 32px; height: 14px; border-radius: 4px; background: #d9dbe1; box-shadow: 0 2px 6px #0008"></div></div>
+<div class="knob">FADER</div>
+</div>
+</div>
+
+<div style="width: 1px; background: #2c2f38"></div>
+
+<div style="width: 170px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 10px; padding-bottom: 8px">
+<div class="muted" style="font-size: 12px; text-align: center; text-wrap: pretty">Both channels fully open. The crossfader stays in the middle.</div>
+<div style="position: relative; width: 150px; height: 30px"><div style="position: absolute; top: 13px; left: 0; right: 0; height: 4px; border-radius: 2px; background: #2c2f38"></div><div style="position: absolute; left: 61px; top: 3px; width: 28px; height: 24px; border-radius: 4px; background: #d9dbe1; box-shadow: 0 2px 6px #0008"></div></div>
+<div class="knob" style="flex-direction: row; gap: 50px"><span style="color: #4fb3ff">A</span>CROSSFADER<span style="color: #ff8a4f">B</span></div>
+</div>
+
+<div style="width: 1px; background: #2c2f38"></div>
+
+<div style="flex: 1; display: flex; gap: 10px; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 4px"><div class="lbl" style="color: #ff8a4f; height: 16px">Deck B</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px">
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="B high EQ at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>HIGH<span class="cap"></span></div>
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="B trim at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>TRIM<span class="cap"></span></div>
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="B mid EQ at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>MID<span class="cap"></span></div>
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="B filter off"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>FILTER<span class="cap"></span></div>
+<div class="knob"><svg width="48" height="48" viewBox="0 0 48 48" role="img" aria-label="B low EQ killed, returns to full at bar 113"><circle cx="24" cy="24" r="22.5" fill="none" stroke="#ff8a4f" stroke-width="1.5" stroke-dasharray="3 3"></circle><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 5A19 19 0 0 0 10.56 37.44" fill="none" stroke="#ff8a4f" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L15.51 32.49" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path><path d="M24 1.5v4" stroke="#ff8a4f" stroke-width="2.5" stroke-linecap="round"></path></svg>LOW<span class="cap" style="color: #ffb08a">full at 113</span></div>
+</div></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin-left: auto; padding-top: 20px">
+<div style="position: relative; width: 36px; height: 168px"><div style="position: absolute; left: 16px; top: 0; bottom: 0; width: 4px; border-radius: 2px; background: #2c2f38"></div><div style="position: absolute; left: 16px; bottom: 0; height: 100%; width: 4px; border-radius: 2px; background: #ff8a4f"></div><div style="position: absolute; left: 2px; top: -6px; width: 32px; height: 14px; border-radius: 4px; background: #d9dbe1; box-shadow: 0 2px 6px #0008"></div></div>
+<div class="knob">FADER</div>
+</div>
+</div>
+</section>
+</div>
+
+<aside style="width: 340px; flex: none; display: flex; flex-direction: column; gap: 12px">
+<section class="card" aria-label="Why it moves" style="flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; justify-content: space-between"><div class="lbl">Why it moves</div><button class="btn" style="min-height: 32px; padding: 0 10px; font-size: 13px; border-color: transparent; background: transparent; color: #4fb3ff">All notes</button></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; gap: 6px; align-items: center"><span class="muted mono" style="font-size: 12px">Now · since bar 97</span><span class="chip l-interp">interpretation</span></div>
+<div style="font-size: 19px; font-weight: 700; line-height: 1.25">B plays without its bass</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.45; color: #c9ccd5; text-wrap: pretty">B's drums and chords are in, but its low end is cut. Two bass lines at once would blur the groove, so A keeps the bass while B introduces itself.</p>
+<div style="display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; background: #23262e"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cbbcff" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M3 14v-2a9 9 0 0118 0v2M3 14h3v6H4a1 1 0 01-1-1zM21 14h-3v6h2a1 1 0 001-1z"></path></svg><span style="font-size: 14px; line-height: 1.4">Listen for the hi-hats getting busier while the low end stays A's.</span></div>
+</div>
+
+<div style="height: 1px; background: #2c2f38"></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; gap: 8px; align-items: center"><span class="mono" style="font-size: 12px; font-weight: 700">Next · bar 113 · in 2 bars</span><span style="display: flex; gap: 3px" aria-label="8 beats to go"><span style="width: 7px; height: 7px; border-radius: 4px; background: #cbbcff"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #3a3e4a"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #3a3e4a"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #3a3e4a"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #3a3e4a"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #3a3e4a"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #3a3e4a"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #3a3e4a"></span></span></div>
+<div style="font-size: 17px; font-weight: 700">Bass swap on the phrase line</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.45; color: #c9ccd5; text-wrap: pretty">On the downbeat of bar 113, A's bass goes out and B's comes in. On a phrase boundary the handover feels intended, not accidental.</p>
+</div>
+
+<div class="muted" style="font-size: 13px; line-height: 1.4; margin-top: auto">Later · bars 121–128: A fades out over one phrase.</div>
+</section>
+
+<section class="card" aria-label="Variants" style="padding: 12px; display: flex; flex-direction: column; gap: 8px">
+<div class="lbl">Variants · switch at the same beat</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button class="btn" style="flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; border-color: #e8e9ed; background: #2c2f38; min-height: 56px"><span style="font-size: 14px">1 · Long blend</span><span class="muted" style="font-size: 12px; font-weight: 500">Playing · 32 bars</span></button>
+<button class="btn" style="flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; min-height: 56px"><span style="font-size: 14px">2 · Phrase cut</span><span class="muted" style="font-size: 12px; font-weight: 500">1 bar</span></button>
+</div>
+</section>
+</aside>
+</div>
+
+<footer style="height: 76px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 16px; background: #1b1d23; border-top: 1px solid #2c2f38">
+<button class="btn" aria-label="Replay from the start"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 109-9 9.7 9.7 0 00-6.7 2.8L3 8M3 3v5h5"></path></svg></button>
+<button class="btn" aria-label="Back one phrase"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 6v12l-8-6zM20 6v12l-8-6z"></path></svg></button>
+<button class="btn btn-primary" aria-label="Pause" style="width: 56px; height: 56px; border-radius: 28px; padding: 0"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg></button>
+<button class="btn" aria-label="Forward one phrase"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6v12l8-6zM13 6v12l8-6z"></path></svg></button>
+<button class="btn" aria-pressed="true" style="border-color: #e8e9ed55; background: #2c2f38"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3"></path></svg>Loop overlap</button>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center">
+<div class="mono" style="font-size: 22px; font-weight: 700">Bar 15.1 <span class="muted" style="font-size: 14px; font-weight: 500">of 32</span></div>
+<div class="mono muted" style="font-size: 12px"><span style="color: #8fd0ff">A 111.1</span> · <span style="color: #ffb08a">B 15.1</span></div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px">
+<span class="chip l-measured mono">B +1.22% · +0.21 st</span>
+<span class="chip l-action">AirPods · 182 ms offset</span>
+</div>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iPad listen, grid and points</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.r{font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;color:#e8e9ed;-webkit-font-smoothing:antialiased}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-choice{background:#e8e9ed;color:#111216}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:15px;font-weight:600;box-sizing:border-box}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.seg{display:flex;padding:3px;gap:2px;background:#23262e;border-radius:12px}
+.seg button{min-height:38px;padding:0 13px;border:0;border-radius:9px;background:transparent;color:#9a9ead;font:inherit;font-size:14px;font-weight:600}
+.seg button.on{background:#3a3e4a;color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.tool{min-height:40px;font-size:13px;padding:0 10px}
+.wave{position:relative;height:190px;border-radius:8px;background-color:#15171c;background-image:repeating-linear-gradient(to right,#ffffff12 0 1px,transparent 1px calc(100% / 64))}
+.sug{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;border:1px solid #2c2f38;background:#1b1d23;text-align:left;font:inherit;color:#e8e9ed}
+</style>
+</head>
+<body>
+<div class="r" style="width: 1194px; height: 834px; box-sizing: border-box; background: #111216; display: flex; flex-direction: column; overflow: hidden; position: relative">
+
+<header style="height: 64px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+<button class="btn" style="padding: 0 10px 0 6px; background: transparent; border-color: transparent; color: #4fb3ff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Pairs</button>
+<div style="display: flex; flex-direction: column; min-width: 0; flex: 1">
+<div style="font-size: 17px; font-weight: 700; white-space: nowrap"><span style="color: #4fb3ff">Deep Current</span> <span class="muted">→</span> <span style="color: #ff8a4f">Lantern Haze</span></div>
+<div class="muted" style="font-size: 13px">Choose where to leave A and where B comes in</div>
+</div>
+<nav class="seg" aria-label="Learning loop"><button class="on" aria-current="step">Listen</button><button>Intend</button><button>Try</button><button>Compare</button><button>Reflect</button></nav>
+<div class="seg" aria-label="Mode"><button>Manual</button><button class="on">Assisted</button><button>Auto</button></div>
+</header>
+
+<div style="flex: 1; min-height: 0; display: flex; gap: 12px; padding: 0 12px 12px">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+
+<section class="card" aria-label="Deck A" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="font-size: 20px; font-weight: 800; color: #4fb3ff">A</span>
+<span style="font-size: 15px; font-weight: 600">Deep Current</span>
+<span class="chip l-measured mono">124.00 BPM · confident</span>
+<span style="flex: 1"></span>
+<span class="mono muted" style="font-size: 13px">Showing bars 81–144</span>
+</div>
+<div style="position: relative; height: 16px; border-radius: 4px; background: #23262e"><div style="position: absolute; left: 50%; width: 38%; top: 0; bottom: 0; border-radius: 4px; border: 1.5px solid #4fb3ff; background: #4fb3ff22"></div><div class="muted" style="position: absolute; left: 6px; top: 1px; font-size: 10px">Whole track</div></div>
+<div class="wave">
+<svg width="100%" height="190" viewBox="0 0 640 80" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12v56M6 16v47M10 10v61M14 17v45M18 11v58M22 11v57M26 18v45M30 12v57M34 18v44M38 13v55M42 16v49M46 17v46M50 13v55M54 7v65M58 17v47M62 13v53M66 10v60M70 6v69M74 11v59M78 13v54M82 3v74M86 18v45M90 7v66M94 14v51M98 16v47M102 15v50M106 14v52M110 7v65M114 16v48M118 11v59M122 7v65M126 13v53M130 11v58M134 17v45M138 18v45M142 14v53M146 9v61M150 13v55M154 14v52M158 11v59M162 17v47M166 20v40M170 15v50M174 16v48M178 20v39M182 15v50M186 18v45M190 14v52M194 15v49M198 20v40M202 11v59M206 22v36M210 19v43M214 15v50M218 21v37M222 16v48M226 23v35M230 16v48M234 15v50M238 17v46M242 12v56M246 20v40M250 16v48M254 17v46M258 17v46M262 17v47M266 14v51M270 13v54M274 18v44M278 16v48M282 21v38M286 16v49M290 16v47M294 13v55M298 14v51M302 18v43M306 19v42M310 16v48M314 23v34M318 18v44M322 20v40M326 22v36M330 22v35M334 15v50M338 22v37M342 19v42M346 19v42M350 14v52M354 22v36M358 18v43M362 16v49M366 14v52M370 15v51M374 14v52M378 20v40M382 17v46M386 19v41M390 14v52M394 13v54M398 21v37M402 20v41M406 21v39M410 21v39M414 18v44M418 17v46M422 19v43M426 23v34M430 19v43M434 19v42M438 17v46M442 11v58M446 16v48M450 18v45M454 17v47M458 16v48M462 21v38M466 14v53M470 15v50M474 14v52M478 15v51M482 26v28M486 27v26M490 29v23M494 25v29M498 29v22M502 28v24M506 28v24M510 28v23M514 27v26M518 29v22M522 29v23M526 28v23M530 29v23M534 27v26M538 29v22M542 22v35M546 25v29M550 28v23M554 28v24M558 27v26M562 26v28M566 29v23M570 24v32M574 23v34M578 26v27M582 25v30M586 29v22M590 29v23M594 27v26M598 28v25M602 23v35M606 28v23M610 29v22M614 23v34M618 26v28M622 28v25M626 26v28M630 29v22M634 26v28M638 23v34" stroke="#4fb3ff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"></path></svg>
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; border-left: 1px solid #ffffff55"></div>
+<div aria-hidden="true" style="position: absolute; left: 25%; top: 0; bottom: 0; border-left: 1px solid #ffffff55"></div>
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px solid #ffffff55"></div>
+<div aria-hidden="true" style="position: absolute; left: 75%; top: 0; bottom: 0; border-left: 1px solid #ffffff55"></div>
+<div class="mono muted" style="position: absolute; left: 4px; bottom: 4px; font-size: 11px">81</div>
+<div class="mono muted" style="position: absolute; left: calc(50% + 4px); bottom: 4px; font-size: 11px">113</div>
+<div class="mono muted" style="position: absolute; left: calc(75% + 4px); bottom: 4px; font-size: 11px">129</div>
+<div style="position: absolute; left: calc(25% + 30px); bottom: 6px"><span class="chip l-likely" style="background: #15171ccc">Outro · likely</span></div>
+<div aria-hidden="true" style="position: absolute; left: calc(25% - 1px); top: 0; bottom: 0; width: 3px; background: #e8e9ed"></div>
+<div aria-hidden="true" style="position: absolute; left: calc(25% - 18px); top: 122px; width: 36px; height: 36px; border-radius: 18px; background: #e8e9ed; box-shadow: 0 0 0 6px #e8e9ed33; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111216" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6"></path></svg></div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+<span class="lbl" style="font-size: 10px">Grid</span>
+<button class="btn tool">Tap the 1</button>
+<button class="btn tool">Set the 1 here</button>
+<button class="btn tool">Two-point fix</button>
+<button class="btn tool">×2</button>
+<button class="btn tool">÷2</button>
+<button class="btn tool" aria-label="Nudge grid earlier"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<button class="btn tool" aria-label="Nudge grid later"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+<span style="flex: 1"></span>
+<span class="muted" style="font-size: 12px">Phrases every 16 bars from bar 1</span>
+</div>
+</section>
+
+<div aria-hidden="true" style="position: absolute; left: 159px; top: 104px; width: 150px; height: 150px; border-radius: 75px; overflow: hidden; border: 3px solid #e8e9ed; background: #15171c; box-shadow: 0 12px 30px #000a">
+<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-image: repeating-linear-gradient(to right, #ffffff1c 0 1px, transparent 1px 37px)"></div>
+<svg width="150" height="150" viewBox="0 0 150 150" style="position: absolute; left: 0; top: 0"><path d="M20 30v90M57 34v82M94 28v94M131 33v84M8 60v30M45 58v34M82 61v28M119 57v36M32 66v18M69 64v22M106 66v18M143 65v20" stroke="#4fb3ff" stroke-width="5" stroke-linecap="round"></path><path d="M94 0v150" stroke="#e8e9ed" stroke-width="3"></path></svg>
+<div class="mono" style="position: absolute; left: 0; right: 0; bottom: 14px; text-align: center; font-size: 12px; font-weight: 700">Bar 97 · beat 1</div>
+</div>
+<div style="position: absolute; left: 320px; top: 150px; padding: 8px 12px; border-radius: 10px; background: #e8e9ed; color: #111216; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 8px 20px #0008">
+<span style="font-size: 14px; font-weight: 700">Exit at bar 97</span>
+<span style="font-size: 12px">Snapped to a phrase line</span>
+</div>
+
+<section class="card" aria-label="Deck B" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; position: relative">
+<div style="display: flex; align-items: center; gap: 10px">
+<span style="font-size: 20px; font-weight: 800; color: #ff8a4f">B</span>
+<span style="font-size: 15px; font-weight: 600">Lantern Haze</span>
+<span class="chip l-likely mono">122.50 BPM · please check</span>
+<span style="flex: 1"></span>
+<span class="mono muted" style="font-size: 13px">Showing bars 1–64</span>
+</div>
+<div style="position: relative; height: 16px; border-radius: 4px; background: #23262e"><div style="position: absolute; left: 0%; width: 38%; top: 0; bottom: 0; border-radius: 4px; border: 1.5px solid #ff8a4f; background: #ff8a4f22"></div></div>
+<div class="wave">
+<svg width="100%" height="190" viewBox="160 0 640 80" preserveAspectRatio="none" aria-hidden="true"><path d="M162 26v27M166 27v27M170 24v31M174 27v25M178 27v26M182 25v29M186 29v22M190 27v26M194 26v27M198 25v29M202 29v23M206 28v23M210 30v21M214 25v30M218 26v28M222 29v22M226 24v32M230 24v31M234 26v28M238 26v27M242 28v23M246 30v20M250 27v26M254 30v21M258 29v22M262 28v25M266 30v20M270 27v25M274 27v25M278 25v30M282 26v28M286 26v28M290 27v26M294 26v28M298 27v25M302 27v25M306 24v32M310 24v32M314 25v30M318 26v28M322 19v43M326 21v38M330 21v39M334 23v34M338 16v48M342 18v44M346 15v50M350 20v41M354 14v52M358 15v50M362 22v36M366 21v37M370 14v51M374 19v42M378 14v53M382 18v44M386 23v34M390 17v46M394 16v49M398 21v38M402 21v38M406 20v40M410 14v52M414 16v48M418 22v35M422 19v41M426 22v35M430 23v34M434 15v49M438 22v37M442 16v48M446 19v42M450 22v37M454 16v48M458 22v36M462 15v50M466 22v35M470 19v41M474 21v37M478 21v38M482 3v74M486 7v67M490 13v53M494 5v69M498 15v51M502 10v60M506 6v68M510 9v62M514 16v48M518 4v72M522 13v55M526 14v52M530 7v66M534 13v54M538 14v53M542 15v51M546 16v47M550 10v61M554 14v51M558 9v61M562 10v59M566 11v57M570 4v71M574 11v58M578 10v61M582 3v74M586 15v50M590 16v49M594 5v70M598 6v67M602 12v56M606 15v50M610 7v65M614 5v71M618 15v50M622 3v74M626 6v69M630 9v61M634 12v56M638 16v48M642 4v72M646 8v64M650 12v56M654 5v70M658 14v52M662 9v62M666 6v68M670 10v60M674 15v50M678 4v72M682 12v56M686 13v54M690 7v66M694 12v56M698 14v52M702 15v50M706 16v48M710 10v60M714 13v54M718 9v62M722 11v58M726 12v56M730 4v72M734 11v58M738 10v60M742 3v74M746 14v52M750 16v48M754 6v68M758 6v68M762 12v56M766 14v52M770 7v66M774 5v70M778 15v50M782 3v74M786 6v68M790 9v62M794 12v56M798 16v48" stroke="#ff8a4f" stroke-width="2.4" stroke-linecap="round" opacity="0.85"></path></svg>
+<div aria-hidden="true" style="position: absolute; left: 25%; top: 0; bottom: 0; border-left: 1px solid #ffffff55"></div>
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px solid #ffffff55"></div>
+<div aria-hidden="true" style="position: absolute; left: 75%; top: 0; bottom: 0; border-left: 1px solid #ffffff55"></div>
+<div class="mono muted" style="position: absolute; left: calc(25% + 4px); bottom: 4px; font-size: 11px">17</div>
+<div class="mono muted" style="position: absolute; left: calc(75% + 4px); bottom: 4px; font-size: 11px">49</div>
+<div style="position: absolute; left: calc(50% + 6px); top: 6px"><span class="chip l-likely" style="background: #15171ccc; border-color: #e8e9ed; color: #e8e9ed">Drop · likely</span></div>
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #e8e9ed"></div>
+<div style="position: absolute; left: 8px; top: 6px"><span class="chip" style="background: #e8e9ed; color: #111216">Entry · bar 1</span></div>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+<span class="lbl" style="font-size: 10px">Grid</span>
+<button class="btn tool">Tap the 1</button>
+<button class="btn tool">Set the 1 here</button>
+<button class="btn tool">Two-point fix</button>
+<button class="btn tool">×2</button>
+<button class="btn tool">÷2</button>
+<span style="flex: 1"></span>
+<span class="muted" style="font-size: 12px">Long-press a section to confirm, move or remove it</span>
+</div>
+
+<div role="menu" aria-label="Section drop at bar 33" style="position: absolute; left: calc(50% + 40px); top: 190px; width: 230px; border-radius: 14px; background: #2c2f38; box-shadow: 0 16px 40px #000c; overflow: hidden; display: flex; flex-direction: column">
+<div style="padding: 10px 14px; border-bottom: 1px solid #3a3e4a"><div style="font-size: 13px; font-weight: 700">Drop starts at bar 33?</div><div class="muted" style="font-size: 12px; color: #b6bac6">Energy jumps here. A guess from the audio.</div></div>
+<button role="menuitem" style="min-height: 44px; padding: 0 14px; border: 0; background: transparent; color: #e8e9ed; font: inherit; font-size: 15px; text-align: left; border-bottom: 1px solid #3a3e4a">Yes, that's the drop</button>
+<button role="menuitem" style="min-height: 44px; padding: 0 14px; border: 0; background: transparent; color: #e8e9ed; font: inherit; font-size: 15px; text-align: left; border-bottom: 1px solid #3a3e4a">Move to another bar</button>
+<button role="menuitem" style="min-height: 44px; padding: 0 14px; border: 0; background: transparent; color: #ffb08a; font: inherit; font-size: 15px; text-align: left">Remove</button>
+</div>
+</section>
+</div>
+
+<aside style="width: 300px; flex: none; display: flex; flex-direction: column; gap: 10px">
+<div class="card" style="flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div class="lbl">Suggested exits from A</div>
+<button class="sug" style="border-color: #e8e9ed; background: #23262e"><span style="display: flex; justify-content: space-between; align-items: center"><span class="mono" style="font-size: 15px; font-weight: 700">Bar 97</span><span class="chip l-choice">your choice</span></span><span style="font-size: 13px; line-height: 1.4; color: #c9ccd5">The melody drops out; drums and bass carry on. There is room for B's chords.</span></button>
+<button class="sug"><span style="display: flex; justify-content: space-between; align-items: center"><span class="mono" style="font-size: 15px; font-weight: 700">Bar 129</span><span class="chip l-likely">likely</span></span><span style="font-size: 13px; line-height: 1.4; color: #c9ccd5">Drums only. The most room for B, but less time to blend.</span></button>
+<button class="sug"><span style="display: flex; justify-content: space-between; align-items: center"><span class="mono" style="font-size: 15px; font-weight: 700">Bar 65</span><span class="chip l-likely">likely</span></span><span style="font-size: 13px; line-height: 1.4; color: #c9ccd5">After the breakdown. Leaving early is a bolder move.</span></button>
+<div class="lbl" style="margin-top: 6px">Suggested entries into B</div>
+<button class="sug" style="border-color: #e8e9ed; background: #23262e"><span style="display: flex; justify-content: space-between; align-items: center"><span class="mono" style="font-size: 15px; font-weight: 700">Bar 1</span><span class="chip l-choice">your choice</span></span><span style="font-size: 13px; line-height: 1.4; color: #c9ccd5">Intro drums with no bass, so nothing clashes with A.</span></button>
+<button class="sug"><span style="display: flex; justify-content: space-between; align-items: center"><span class="mono" style="font-size: 15px; font-weight: 700">Bar 17</span><span class="chip l-likely">likely</span></span><span style="font-size: 13px; line-height: 1.4; color: #c9ccd5">Starts on B's groove: a shorter, punchier blend.</span></button>
+</div>
+<div class="card" style="padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+<div style="flex: 1"><div class="mono" style="font-size: 14px; font-weight: 700">A 97 meets B 1</div><div class="muted" style="font-size: 12px">B plays 1.22% faster, +0.21 semitones</div></div>
+<a href="ipad-3-intend.html" class="btn btn-primary" style="text-decoration: none">Next</a>
+</div>
+</aside>
+</div>
+</div>
+</body>
+</html>

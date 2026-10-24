@@ -1,0 +1,36 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-10-24T23:30:00Z"},
+  "title": "DJ Flow Lab iOS mockups",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "iPad-Library.dc.html": {"x": 0, "y": 0, "w": 1194, "h": 834, "title": "iPad 1 · Import and pairs", "radius": 18},
+    "iPad-Listen.dc.html": {"x": 1274, "y": 0, "w": 1194, "h": 834, "title": "iPad 2 · Listen: grid and points", "radius": 18},
+    "iPad-Intend.dc.html": {"x": 2548, "y": 0, "w": 1194, "h": 834, "title": "iPad 3 · Intend: Assisted mode", "radius": 18},
+    "Main.dc.html": {"x": 3822, "y": 0, "w": 1194, "h": 834, "title": "iPad 4 · Try: Transition Builder", "radius": 18},
+    "iPad-Compare.dc.html": {"x": 5096, "y": 0, "w": 1194, "h": 834, "title": "iPad 5 · Compare and reflect", "radius": 18},
+    "iPhone-Home.dc.html": {"x": 0, "y": 1234, "w": 390, "h": 844, "title": "iPhone 1 · Pairs and import", "radius": 44},
+    "iPhone-Points.dc.html": {"x": 470, "y": 1234, "w": 390, "h": 844, "title": "iPhone 2 · Listen: points", "radius": 44},
+    "iPhone-Try.dc.html": {"x": 940, "y": 1234, "w": 390, "h": 844, "title": "iPhone 3 · Try: focus mixer", "radius": 44},
+    "iPhone-Compare.dc.html": {"x": 1410, "y": 1234, "w": 390, "h": 844, "title": "iPhone 4 · Compare and reflect", "radius": 44},
+    "iPhone-Mixer.dc.html": {"x": 1880, "y": 1234, "w": 844, "h": 390, "title": "iPhone 5 · Landscape: full mixer", "radius": 44}
+  },
+  "order": [
+    "iPad-Library.dc.html",
+    "iPad-Listen.dc.html",
+    "iPad-Intend.dc.html",
+    "Main.dc.html",
+    "iPad-Compare.dc.html",
+    "iPhone-Home.dc.html",
+    "iPhone-Points.dc.html",
+    "iPhone-Try.dc.html",
+    "iPhone-Compare.dc.html",
+    "iPhone-Mixer.dc.html"
+  ],
+  "notes": {
+    "rowIpad": {"x": 0, "y": -300, "text": "iPad, landscape: the mixing canvas. Listen, Intend, Try, Compare, Reflect", "kind": "title1", "maxW": 6290},
+    "rowIphone": {"x": 0, "y": 934, "text": "iPhone: one step of the loop per screen", "kind": "title1", "maxW": 2724}
+  },
+  "designSystems": []
+}

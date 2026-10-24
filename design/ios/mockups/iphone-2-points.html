@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iPhone listen, points</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.r{font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;color:#e8e9ed;-webkit-font-smoothing:antialiased}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:15px;font-weight:600;box-sizing:border-box}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.step{flex:1;min-height:44px;padding:0;font-size:14px}
+.wave{position:relative;height:96px;border-radius:10px;background-color:#15171c;background-image:repeating-linear-gradient(to right,#ffffff12 0 1px,transparent 1px calc(100% / 32));overflow:hidden}
+.sg{min-height:36px;padding:0 12px;border-radius:18px;border:1px dashed #9a9ead;background:transparent;color:#e8e9ed;font:inherit;font-size:14px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="r" style="width: 390px; height: 844px; box-sizing: border-box; background: #111216; padding: 54px 16px 34px; display: flex; flex-direction: column; gap: 12px; overflow: hidden">
+
+<div style="display: flex; align-items: center; gap: 4px">
+<button class="btn" aria-label="Back" style="background: transparent; border-color: transparent; padding: 0; color: #4fb3ff"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center"><span style="font-size: 15px; font-weight: 700">Listen</span><span class="muted" style="font-size: 12px">Step 1 of 5</span></div>
+<button class="btn" style="min-height: 36px; font-size: 13px; padding: 0 10px">Assisted<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px" aria-hidden="true"><span style="height: 4px; border-radius: 2px; background: #e8e9ed"></span><span style="height: 4px; border-radius: 2px; background: #3a3e4a"></span><span style="height: 4px; border-radius: 2px; background: #3a3e4a"></span><span style="height: 4px; border-radius: 2px; background: #3a3e4a"></span><span style="height: 4px; border-radius: 2px; background: #3a3e4a"></span></div>
+
+<section aria-label="Exit point in A" style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 8px"><span style="font-size: 18px; font-weight: 800; color: #4fb3ff">A</span><span style="font-size: 15px; font-weight: 600; flex: 1">Deep Current</span><span class="chip l-measured mono">124.00</span></div>
+<div class="wave">
+<svg width="100%" height="96" viewBox="0 0 320 80" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12v56M6 16v47M10 10v61M14 17v45M18 11v58M22 11v57M26 18v45M30 12v57M34 18v44M38 13v55M42 16v49M46 17v46M50 13v55M54 7v65M58 17v47M62 13v53M66 10v60M70 6v69M74 11v59M78 13v54M82 3v74M86 18v45M90 7v66M94 14v51M98 16v47M102 15v50M106 14v52M110 7v65M114 16v48M118 11v59M122 7v65M126 13v53M130 11v58M134 17v45M138 18v45M142 14v53M146 9v61M150 13v55M154 14v52M158 11v59M162 17v47M166 20v40M170 15v50M174 16v48M178 20v39M182 15v50M186 18v45M190 14v52M194 15v49M198 20v40M202 11v59M206 22v36M210 19v43M214 15v50M218 21v37M222 16v48M226 23v35M230 16v48M234 15v50M238 17v46M242 12v56M246 20v40M250 16v48M254 17v46M258 17v46M262 17v47M266 14v51M270 13v54M274 18v44M278 16v48M282 21v38M286 16v49M290 16v47M294 13v55M298 14v51M302 18v43M306 19v42M310 16v48M314 23v34M318 18v44" stroke="#4fb3ff" stroke-width="2.6" stroke-linecap="round" opacity="0.85"></path></svg>
+<div aria-hidden="true" style="position: absolute; left: calc(50% - 1px); top: 0; bottom: 0; width: 3px; background: #e8e9ed"></div>
+<div style="position: absolute; left: calc(50% + 6px); top: 6px"><span class="chip l-likely" style="background: #15171ccc">Outro · likely</span></div>
+<div class="mono muted" style="position: absolute; left: 4px; bottom: 4px; font-size: 11px">89</div>
+<div class="mono muted" style="position: absolute; right: 4px; bottom: 4px; font-size: 11px">105</div>
+</div>
+<div class="card" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span class="mono" style="font-size: 20px; font-weight: 800">Exit · bar 97</span><span class="muted" style="font-size: 13px">phrase line</span></div>
+<div style="display: flex; gap: 6px"><button class="btn step" aria-label="Back one phrase">−16</button><button class="btn step" aria-label="Back one bar">−1</button><button class="btn step" aria-label="Forward one bar">+1</button><button class="btn step" aria-label="Forward one phrase">+16</button></div>
+<div style="display: flex; gap: 6px; align-items: center"><span class="muted" style="font-size: 12px">Suggested</span><button class="sg" style="border-style: solid; background: #e8e9ed; color: #111216; border-color: #e8e9ed">97</button><button class="sg">129</button><button class="sg">65</button><button class="btn" style="min-height: 36px; padding: 0 8px; font-size: 13px; background: transparent; border-color: transparent; color: #4fb3ff; margin-left: auto">Why?</button></div>
+</div>
+</section>
+
+<section aria-label="Entry point in B" style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 8px"><span style="font-size: 18px; font-weight: 800; color: #ff8a4f">B</span><span style="font-size: 15px; font-weight: 600; flex: 1">Lantern Haze</span><span class="chip l-likely mono">122.50 · check</span></div>
+<div class="wave">
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; width: 50%; background-image: repeating-linear-gradient(135deg, #ffffff0a 0 6px, transparent 6px 12px)"></div>
+<svg width="100%" height="96" viewBox="0 0 320 80" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; left: 0; top: 0"><path d="M162 26v27M166 27v27M170 24v31M174 27v25M178 27v26M182 25v29M186 29v22M190 27v26M194 26v27M198 25v29M202 29v23M206 28v23M210 30v21M214 25v30M218 26v28M222 29v22M226 24v32M230 24v31M234 26v28M238 26v27M242 28v23M246 30v20M250 27v26M254 30v21M258 29v22M262 28v25M266 30v20M270 27v25M274 27v25M278 25v30M282 26v28M286 26v28M290 27v26M294 26v28M298 27v25M302 27v25M306 24v32M310 24v32M314 25v30M318 26v28" stroke="#ff8a4f" stroke-width="2.6" stroke-linecap="round" opacity="0.85"></path></svg>
+<div aria-hidden="true" style="position: absolute; left: calc(50% - 1px); top: 0; bottom: 0; width: 3px; background: #e8e9ed"></div>
+<div class="muted" style="position: absolute; left: 8px; top: 38px; font-size: 12px">track starts →</div>
+<div style="position: absolute; left: calc(50% + 6px); top: 6px"><span class="chip" style="background: #15171ccc; color: #e8e9ed">Intro</span></div>
+<div class="mono muted" style="position: absolute; right: 4px; bottom: 4px; font-size: 11px">9</div>
+</div>
+<div class="card" style="padding: 10px 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span class="mono" style="font-size: 20px; font-weight: 800">Entry · bar 1</span><span class="muted" style="font-size: 13px">lines up with A 97</span></div>
+<div style="display: flex; gap: 6px"><button class="btn step" aria-label="Back one phrase">−16</button><button class="btn step" aria-label="Back one bar">−1</button><button class="btn step" aria-label="Forward one bar">+1</button><button class="btn step" aria-label="Forward one phrase">+16</button></div>
+</div>
+</section>
+
+<div class="muted" style="font-size: 13px; line-height: 1.4; text-align: center">Drag a waveform under the line. It clicks on every bar and bumps on phrase lines.</div>
+
+<div style="margin-top: auto; display: flex; gap: 8px">
+<button class="btn" aria-label="Preview the overlap" style="min-height: 50px; width: 56px"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button>
+<a href="iphone-3-try.html" class="btn btn-primary" style="flex: 1; min-height: 50px; text-decoration: none">Next: what should it do?</a>
+</div>
+</div>
+</body>
+</html>
