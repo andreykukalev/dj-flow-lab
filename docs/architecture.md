@@ -1,6 +1,6 @@
 # DJ Flow Lab — MVP Architecture (proposal)
 
-- **Status:** Proposal for review, alongside [product brief v0.2](product-brief.md)
+- **Status:** Proposal from v0.2. Where it conflicts with [TECHNICAL_DECISIONS.md](TECHNICAL_DECISIONS.md) (v0.3), the decisions log wins. Notable changes: event-based plan schema (D-16), sampled linear-ramp scheduling (D-18), isolator EQ (D-12), grid anchor model (D-09), no Zustand (D-26), separate sync tolerances (D-20).
 - **Scope:** The Transition Builder MVP (milestones M0–M5 in [backlog.md](backlog.md))
 
 ## 1. Goals that shape the design

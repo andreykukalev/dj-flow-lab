@@ -6,9 +6,13 @@ The first product is the **Transition Builder**: load two of your own tracks, ch
 
 ## Documents
 
-- [Product brief](docs/product-brief.md)
-- [MVP architecture](docs/architecture.md)
-- [MVP backlog](docs/backlog.md)
+- [Product brief v0.3](docs/PRODUCT_BRIEF_v0.3.md) (current) and [v0.2](docs/product-brief.md) (history)
+- [Technical audit of v0.2](docs/TECHNICAL_AUDIT_v0.2.md)
+- [Technical decisions](docs/TECHNICAL_DECISIONS.md)
+- [Technical spikes and proof of concept](docs/TECHNICAL_SPIKES.md)
+- [MVP implementation plan](docs/MVP_IMPLEMENTATION_PLAN.md)
+- [Technical risks](docs/RISKS.md)
+- [MVP backlog](docs/backlog.md) and [architecture proposal](docs/architecture.md) (v0.2)
 
 ## Development
 
