@@ -1,10 +1,11 @@
 name: Deploy
 
-# Production deploys on pushes to main; every pull request gets its own preview
-# environment, which is removed when the pull request closes.
+# Production deploys on pushes to main (or a manual run on main); every pull request
+# gets its own preview environment, which is removed when the pull request closes.
 # Deployment is skipped until the AZURE_STATIC_WEB_APPS_API_TOKEN secret is set.
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -17,7 +18,9 @@ permissions:
 
 jobs:
   deploy:
-    if: github.event_name == 'push' || github.event.action != 'closed'
+    if: >-
+      (github.event_name == 'pull_request' && github.event.action != 'closed') ||
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       SWA_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}

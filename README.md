@@ -22,7 +22,7 @@ Requires Node 22 or later.
 npm install
 npm run dev        # start the app at http://localhost:5173
 npm test           # unit tests (Vitest)
-npm run test:e2e   # browser tests (Playwright; run `npx playwright install chromium` once)
+npm run test:e2e   # browser tests on Chromium and Firefox (run `npx playwright install chromium firefox` once)
 npm run typecheck
 npm run lint
 npm run format
@@ -37,3 +37,7 @@ The app is hosted on [Azure Static Web Apps](https://learn.microsoft.com/azure/s
 One-time setup: provision the Azure resources with the Bicep template in [`infra/`](infra/README.md) (`./infra/deploy.ps1 -SetGitHubSecret` on Windows), which creates the Static Web App and stores its deployment token as the repository secret `AZURE_STATIC_WEB_APPS_API_TOKEN`.
 
 Until the secret exists, the workflow builds the app and skips the deploy step.
+
+### Audio tests
+
+Browser tests live in `e2e/` (app) and `tests/` (audio integration). Audio tests open the test-only page `/harness/`, which exposes synthetic signals, measurements and offline rendering on `window.harness`, and run the same checks in every engine. The page is served by the Vite dev server and is not part of the production build. On Linux without a sound card, Firefox needs a virtual audio device for real-time tests (see the CI workflow).
