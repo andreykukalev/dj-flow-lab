@@ -67,6 +67,23 @@ S1, S3, and S5 together form the **proof of concept** below.
 - **Time-box:** 3 days.
 - **Decision:** confirm D-04, D-05, D-18; set the scheduling lead and fade lengths.
 
+- **Result (2026-10-24, #42):** run locally on headless Chromium 153 and Firefox (Playwright 1.63), 44.1 kHz, three times each; the same tests run in CI. The engine lives in `src/audio/` (`mixerGraph.ts`, `scheduler.ts`, `transport.ts`) rather than `spikes/engine/`, because it passed. The scenarios are in [`harness/engine.ts`](../harness/engine.ts) and the assertions in [`tests/audio/engine.spec.ts`](../tests/audio/engine.spec.ts). Synthetic decks: smooth 0.8 ms pulses on every beat (one-sample clicks lose their shape through resampling and the isolator), plus tones for level checks.
+
+  | # | Chromium | Firefox |
+  |---|---|---|
+  | P1 inter-deck alignment, 64 bars, 124 vs 120 BPM | **0.006 ms** | **1.215 ms raw**; 0.002 ms after removing the resampler error below |
+  | P2 100 random seeks, then 8 bars (3 seeds) | onsets ≤ 0.38 sample; parameters = `stateAt` within 5.3e-6; tone levels ≤ 1.3e-4 | deck A ≤ 0.59 sample; deck B 11.7 samples raw (accumulated drift in the play-through), ≤ 0.25 sample corrected; tone levels ≤ 7.3e-5 (parameter reads not possible, see below) |
+  | P3 50 pause/resume cycles | ≤ 0.04 sample | deck A ≤ 0.10 sample; deck B ≤ 0.29 sample corrected |
+  | P4 bass swap crossing vs handoff downbeat | +3.2 ms (limit 2.9 + 5 ms) | +3.2 ms |
+  | P6 largest sample step / allowed | 0.081 / 0.088 | 0.081 / 0.088 |
+  | Real-time, onsets vs anchor | exact (≤ 0.0001 ms) apart from whole-quantum jitter of the capture's timestamps | same |
+
+  - **Firefox rounds the output rate of a resampled source to whole hertz.** Deck B at rate 124/120 plays at 44100/42677 instead of 44100/42677.42, which is 9.8 ppm fast, so it drifts linearly from the moment its source starts. The prediction matches the measurement (1.217 vs 1.215 ms over 64 bars), and the drift disappears for a tempo where 44100/rate is a whole number. The worst case is about 12 ppm: ≤ 0.8 ms over a 32-bar overlap, ≤ 1.5 ms over 64 bars. Every seek or resume restarts the source and resets the drift. Chromium plays the exact rate.
+  - **Biquad `Q` is in dB for low-pass and high-pass filters** in Web Audio (a plain ratio for all-pass). The first run used linear Q = 0.707 as dB, which resonated (+3 dB at 100 Hz). The mixer now converts.
+  - **Firefox has no `OfflineAudioContext.suspend()`.** Transport actions take an explicit context time (default: now), so tests script a whole session before rendering. Reading parameter values mid-render (P2's direct `stateAt` check) is Chromium-only. Firefox is checked through tone levels instead, which are within 1e-4 of the play-through. Biquad history during a filter sweep sets the floor of that check at about 1e-4.
+  - **P4:** the +3.2 ms is the 5 ms declick (crossing near its midpoint) plus the low-band filters' group delay. It is the same in both engines.
+  - **Decisions:** D-04, D-05 and D-18 are confirmed, with a 30 ms scheduling lead, a 10 ms transport gate fade, a 5 ms step declick and 1/32-beat ramp sampling. P1 passes on Chromium. On Firefox it fails as written (≤ 1 ms over 64 bars) because of the resampler rounding; how to handle that is open (see D-07 and R-22) and goes to the PoC gate (#46).
+
 ## S8 — Browser audio testing in CI
 
 - **Question:** can GitHub Actions run `OfflineAudioContext` and real-time `AudioContext` tests headless on Chromium and Firefox reliably?

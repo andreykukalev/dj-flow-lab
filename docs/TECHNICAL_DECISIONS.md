@@ -45,7 +45,7 @@
 - **Alternatives:** `AudioContext.suspend()/resume()` for pause; incremental rescheduling.
 - **Rationale:** one pure entry point, `startAt(beat)`: fade out 10 ms if playing, stop and discard sources, cancel automation, compute the state at `beat`, create two sources with offsets from the grids, set every parameter to its state value at `ctxTime₀`, schedule the rest of the plan. One code path is one thing to test.
 - **Consequences:** a seek costs ~10 ms of fade and a ~30 ms scheduling lead (`ctxTime₀ = currentTime + lead`, provisional). Repeated seeks cannot accumulate error.
-- **Confidence:** High (validated offline in Chromium: seek restoration accurate to < 1 sample).
+- **Confidence:** High. S1 (#42) confirmed it on Chromium and Firefox: after 100 random seeks or 50 pause/resume cycles, onsets match a play-through within 0.6 sample (Firefox deck B after removing the resampler drift, D-07). Lead set to 30 ms and gate fade to 10 ms. Transport actions take an explicit context time (default now), so tests can script sessions offline.
 - **Reconsider if:** S1 shows audible gaps on seek that users find disruptive during A/B switching.
 
 ### D-06 AudioContext lifecycle and interruptions
@@ -59,8 +59,9 @@
 - **Decision:** deck A is the tempo master at rate 1. Deck B plays at `rate = bpmA / bpmB`, constant for the whole playback session. The pitch change `12·log₂(rate)` semitones is shown on deck B; warning at ≥ 0.5 semitone (provisional). No tempo ramps.
 - **Alternatives:** time-stretch (deferred); ramping B back to its own tempo after the transition.
 - **Consequences:** source position is linear in context time, so offsets are exact. B stays pitch-shifted after the handoff, as on a controller without key lock.
-- **Confidence:** High.
-- **Reconsider if:** users find pitch shifts above ~1 semitone common in their pairs.
+- **Engine finding (S1):** Firefox rounds a resampled source's output rate to whole hertz, so deck B drifts by up to ~12 ppm there (≤ 0.8 ms over a 32-bar overlap, ≤ 1.5 ms over 64 bars). The drift restarts from zero at every start, seek or resume. Chromium plays the exact rate. Alternative if this matters: resample deck B in a worker and play it at rate 1 (exact everywhere, costs a second copy of B and a few seconds per tempo change).
+- **Confidence:** High (Chromium), Medium (Firefox: within 1.5 ms over 64 bars, above P1's 1 ms; decision at the PoC gate).
+- **Reconsider if:** users find pitch shifts above ~1 semitone common in their pairs; Safari drifts more than Firefox; testers hear the Firefox drift on long blends.
 
 ## Musical timing
 
@@ -120,7 +121,7 @@ Per deck: `AudioBufferSourceNode (playbackRate) → trim Gain → isolator EQ �
 - **Reconsider if:** S3 fails, or CPU on low-end laptops exceeds budget.
 
 ### D-13 Bipolar filter
-Low-pass and high-pass biquads are always in the chain (no graph changes during playback). Centre: LP at Nyquist (identity), HP at 10 Hz. Dead zone |x| < 0.02. Negative x: LP cutoff from Nyquist down to 100 Hz, log-mapped. Positive x: HP cutoff from 10 Hz up to 8 kHz, log-mapped. Q = 0.9 (provisional, mild resonance). **Confidence:** Medium (S3 checks sweeps for zipper noise in each engine).
+Low-pass and high-pass biquads are always in the chain (no graph changes during playback). Web Audio takes their `Q` in dB, so the linear Q values here are converted (found in S1). Centre: LP at Nyquist (identity), HP at 10 Hz. Dead zone |x| < 0.02. Negative x: LP cutoff from Nyquist down to 100 Hz, log-mapped. Positive x: HP cutoff from 10 Hz up to 8 kHz, log-mapped. Q = 0.9 (provisional, mild resonance). **Confidence:** Medium (S3 checks sweeps for zipper noise in each engine).
 
 ### D-14 Control units, ranges, mappings, defaults
 Plans and UI use **normalized control positions**; mapping functions in `src/engine/mixer.ts` are the only conversion to audio units and are shared by scheduler and UI.
@@ -187,7 +188,7 @@ interface Annotation {
 - Each segment from the start beat onward is sampled in control space every 1/32 beat (provisional; adaptive so mapping error ≤ 0.1 dB), mapped to audio units, and scheduled with `setValueAtTime` (first point) and `linearRampToValueAtTime` (rest). Context times come from the anchor.
 - A segment already in progress at the start beat is cut at that beat; the first scheduled value equals `stateAt(beat)`.
 - Not used: `setValueCurveAtTime` (throws on overlapping events, historical interpolation differences), `cancelAndHoldAtTime` (not available in every engine), `exponentialRampToValueAtTime` (cannot reach 0).
-- **Confidence:** Medium-High (S1/S3 compare offline renders across engines).
+- **Confidence:** High for timing (S1: parameters equal the mapped `stateAt` within 5.3e-6 after random seeks; the bass swap lands within the declick of the downbeat in both engines). Sampling at 1/32 beat kept. Ramp quality in filter sweeps is still checked in S3.
 
 ### D-19 Validation
 `validate(plan, mixerCapabilities) → { errors[], warnings[] }`. Plans with errors are never scheduled.
@@ -260,4 +261,5 @@ No audio, analysis, FFT, animation, or charting libraries. Test fixtures are syn
 - **E2E (Playwright):** load fixtures, set points, play, seek, switch variant; network-privacy test.
 - **Manual listening checks:** per milestone, with a written checklist (pass/fail).
 - **Support tiers:** Tier 1 = current Chrome/Edge and Firefox desktop (automated). Tier 2 = current Safari desktop on macOS (manual before pilot; Playwright WebKit on Linux is not representative of Safari's media stack). Mobile = unsupported in the MVP.
-- **Confidence:** High (strategy), Medium (Firefox real-time audio in headless CI, checked in S8).
+- **Offline scripting:** Firefox has no `OfflineAudioContext.suspend()`, so integration tests script transport actions at explicit context times before rendering. Mid-render parameter reads run on Chromium only; Firefox is checked through rendered levels.
+- **Confidence:** High (strategy and Firefox real-time audio in headless CI, S8).

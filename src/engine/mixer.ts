@@ -83,6 +83,7 @@ export function crossfaderGains(x: number): Record<DeckId, number> {
 }
 
 export const FILTER_DEAD_ZONE = 0.02
+/** Filter resonance as a linear Q (D-13, provisional). */
 export const FILTER_Q = 0.9
 export const FILTER_LP_MIN_HZ = 100
 export const FILTER_HP_MIN_HZ = 10
