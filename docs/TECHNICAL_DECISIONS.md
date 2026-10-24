@@ -24,13 +24,25 @@
 - **Confidence:** High.
 - **Reconsider if:** key lock moves into scope.
 
-### D-03 Decoding: native first, in-house AIFF fallback, provisional length limit
-- **Context:** Chromium fails to decode AIFF (verified); AIFF is common in DJ libraries.
+### D-03 Decoding: native first, in-house AIFF fallback, 15-minute limit
+- **Context:** neither Chromium nor Firefox decodes AIFF (verified in S2), and AIFF is common in DJ libraries.
 - **Alternatives:** require conversion; WASM ffmpeg (~25 MB, LGPL/GPL builds); a decoding library.
-- **Rationale:** AIFF/AIFC-uncompressed is a trivial container over PCM; a ~200-line parser covers it with no dependency. Everything else uses `decodeAudioData`.
-- **Consequences:** formats outside the engine's support and outside uncompressed AIFF show "not supported in this browser" with conversion advice. Tracks over 15 minutes (provisional) are refused with a clear message. The file's `ArrayBuffer` is hashed before decoding (decoding detaches it) and released afterwards.
-- **Confidence:** High (AIFF parser), Medium (15-minute limit, set by S2).
-- **Reconsider if:** S2 shows a common format failing in a supported engine.
+- **Rationale:** uncompressed AIFF/AIFF-C is a simple container over PCM; a ~150-line parser covers it with no dependency. Everything else uses `decodeAudioData`.
+- **Supported in Tier 1 (S2):**
+  - natively in Chromium and Firefox: WAV (16/24-bit, 32-bit float), FLAC, MP3, AAC (M4A), Ogg Vorbis, Opus;
+  - through the fallback: AIFF and AIFF-C (8/16/24/32-bit integer, `NONE`/`twos`/`sowt`, `fl32`, `fl64`), mono or stereo.
+
+  ALAC fails in both engines. Safari is unverified (Tier 2).
+- **Messages:**
+  - Unsupported format: "This browser can't open {type} files. Convert the track to WAV, AIFF or FLAC (or MP3/AAC) and load it again."
+  - ALAC: "Apple Lossless (ALAC) isn't supported in this browser. Convert it to AIFF or FLAC; both are lossless."
+  - Compressed AIFF-C: "This AIFF uses {compression} compression, which isn't supported. Convert it to uncompressed AIFF or WAV."
+  - Corrupt file: "This file couldn't be read. It may be damaged or incomplete."
+  - Too long: "Tracks longer than 15 minutes aren't supported yet."
+- **Length limit:** 15 minutes per track. S2 measured two 10-minute 48 kHz stereo tracks at a peak of +1.0 GB (Chromium) and +0.7 GB (Firefox) over an idle browser. Two 15-minute tracks extrapolate to about +1.5 GB, which is fine on an 8 GB machine.
+- **Consequences:** the file's `ArrayBuffer` is hashed before decoding (decoding detaches it) and released afterwards. Firefox decodes about 2.7× slower than Chromium (25 s for two 10-minute tracks), so loading shows progress.
+- **Confidence:** High (formats and AIFF parser, measured on both engines), Medium (15-minute limit, memory extrapolated).
+- **Reconsider if:** pilot users bring ALAC or longer mixes; Safari fails a format Tier 1 supports.
 
 ### D-04 One authoritative timeline: the playback anchor on the AudioContext clock
 - **Context:** audio, controller, timeline, and explanations must agree at every moment, through pauses and seeks.
@@ -231,7 +243,7 @@ Decoded audio and file bytes live in memory only. After reload, the user re-sele
 | Session log (opt-in) | IndexedDB `log` |
 | Backup and sharing | Exported JSON (schema-versioned): corrections, plans, notes, log. Rendered WAV. |
 
-Outdated `analysisVersion` → recompute analysis, keep corrections. Different `decodedFrames` for the same fingerprint → warn that the grid may be offset (decoder difference). Request `navigator.storage.persist()` on first save; handle quota errors by telling the user and offering export. **Confidence:** High.
+Outdated `analysisVersion` → recompute analysis, keep corrections. Different `decodedFrames` for the same fingerprint on an **MP3** → warn that the grid may be offset (decoder difference). S2 showed MP3 priming shifts timing and shows in the frame count, while Vorbis and Opus decoders differ only in how they trim the end (frames differ, timing identical), so the check is limited to MP3. Request `navigator.storage.persist()` on first save; handle quota errors by telling the user and offering export. **Confidence:** High.
 
 ### D-25 Analysis pipeline
 Main thread downmixes to mono and decimates to 11,025 Hz in chunks (low-pass first), transfers the result to a Web Worker. Worker: own radix-2 FFT; onset strength; tempo by autocorrelation + whole-track regression for precision; downbeat from low-band energy; grid fit; per-bar band energy; loudness. No AGPL/GPL code. **Confidence:** Medium (accuracy in S6).
