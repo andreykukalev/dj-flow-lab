@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iPad compare and reflect</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.r{font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;color:#e8e9ed;-webkit-font-smoothing:antialiased}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-interp{background:#2b2645;color:#cbbcff}
+.l-choice{background:#e8e9ed;color:#111216}
+.l-action{background:#2c2f38;color:#e8e9ed}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:15px;font-weight:600;box-sizing:border-box}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.seg{display:flex;padding:3px;gap:2px;background:#23262e;border-radius:12px}
+.seg button{min-height:38px;padding:0 13px;border:0;border-radius:9px;background:transparent;color:#9a9ead;font:inherit;font-size:14px;font-weight:600}
+.seg button.on{background:#3a3e4a;color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.lanes{display:grid;grid-template-columns:64px minmax(0,1fr);column-gap:8px;row-gap:4px;align-items:center}
+.ln{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+</style>
+</helmet>
+<div class="r" style="width: 1194px; height: 834px; box-sizing: border-box; background: #111216; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 64px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 16px">
+<button class="btn" style="padding: 0 10px 0 6px; background: transparent; border-color: transparent; color: #4fb3ff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Pairs</button>
+<div style="display: flex; flex-direction: column; min-width: 0; flex: 1">
+<div style="font-size: 17px; font-weight: 700; white-space: nowrap"><span style="color: #4fb3ff">Deep Current</span> <span class="muted">→</span> <span style="color: #ff8a4f">Lantern Haze</span></div>
+<div class="muted" style="font-size: 13px">Two ways through the same moment</div>
+</div>
+<nav class="seg" aria-label="Learning loop"><button>Listen</button><button>Intend</button><button>Try</button><button class="on" aria-current="step">Compare</button><button>Reflect</button></nav>
+<div class="seg" aria-label="Mode"><button>Manual</button><button class="on">Assisted</button><button>Auto</button></div>
+</header>
+
+<div style="flex: 1; min-height: 0; display: flex; gap: 12px; padding: 0 12px 12px">
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; position: relative">
+
+<article class="card" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; border-color: #e8e9ed">
+<div style="display: flex; align-items: center; gap: 10px"><span style="font-size: 17px; font-weight: 700">1 · Long blend with bass swap</span><span class="chip l-choice">Hearing now</span><span style="flex: 1"></span><span class="muted mono" style="font-size: 13px">32-bar overlap</span></div>
+<div class="lanes">
+<div></div>
+<div style="position: relative; height: 22px; border-radius: 6px; background: #23262e"><div style="position: absolute; left: 25%; width: 50%; top: 0; bottom: 0; background: #e8e9ed22; border-left: 2px solid #e8e9ed"></div><div style="position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px dashed #cbbcff"></div><span class="mono muted" style="position: absolute; left: calc(25% + 6px); top: 3px; font-size: 11px">A 97 / B 1</span><span class="mono" style="position: absolute; left: calc(50% + 6px); top: 3px; font-size: 11px; color: #cbbcff">swap 113</span></div>
+<div class="ln" style="color: #4fb3ff">A low</div><svg width="100%" height="16" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H320V17H640" fill="none" stroke="#4fb3ff" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<div class="ln" style="color: #ff8a4f">B low</div><svg width="100%" height="16" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M160 17H320V3H640" fill="none" stroke="#ff8a4f" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<div class="ln" style="color: #ff8a4f">B fader</div><svg width="100%" height="16" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M160 17L240 3H640" fill="none" stroke="#ff8a4f" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<div class="ln" style="color: #4fb3ff">A fader</div><svg width="100%" height="16" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H400L480 17H640" fill="none" stroke="#4fb3ff" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+</div>
+</article>
+
+<article class="card" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 10px"><span style="font-size: 17px; font-weight: 700">2 · Phrase-boundary cut</span><span style="flex: 1"></span><span class="muted mono" style="font-size: 13px">1-bar change</span></div>
+<div class="lanes">
+<div></div>
+<div style="position: relative; height: 22px; border-radius: 6px; background: #23262e"><div style="position: absolute; left: 48.4%; width: 1.6%; top: 0; bottom: 0; background: #e8e9ed22; border-left: 2px solid #e8e9ed"></div><div style="position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px dashed #cbbcff"></div><span class="mono" style="position: absolute; left: calc(50% + 6px); top: 3px; font-size: 11px; color: #cbbcff">cut 113 / B 17</span></div>
+<div class="ln" style="color: #4fb3ff">A filter</div><svg width="100%" height="16" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10H310L320 3" fill="none" stroke="#4fb3ff" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<div class="ln" style="color: #4fb3ff">A fader</div><svg width="100%" height="16" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H320V17H640" fill="none" stroke="#4fb3ff" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<div class="ln" style="color: #ff8a4f">B fader</div><svg width="100%" height="16" viewBox="0 0 640 20" preserveAspectRatio="none" aria-hidden="true"><path d="M320 17V3H640" fill="none" stroke="#ff8a4f" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<div class="ln muted">Lows</div><div class="muted" style="font-size: 12px">Untouched: each track keeps its own bass</div>
+</div>
+</article>
+
+<div aria-hidden="true" style="position: absolute; left: calc(15px + 72px + (100% - 30px - 72px) * 0.46875); top: 44px; height: 280px; width: 2px; background: #ffffff; box-shadow: 0 0 0 3px #11121699"></div>
+
+<section class="card" aria-label="What is different" style="padding: 12px 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="chip l-action" style="align-self: flex-start">action</span><span style="font-size: 14px; font-weight: 600">Overlap</span><span class="muted" style="font-size: 13px; line-height: 1.4">32 bars of both tracks, against a single bar.</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="chip l-action" style="align-self: flex-start">action</span><span style="font-size: 14px; font-weight: 600">Bass</span><span class="muted" style="font-size: 13px; line-height: 1.4">Swapped on bar 113, against arriving with all of B on bar 113.</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span class="chip l-interp" style="align-self: flex-start">interpretation</span><span style="font-size: 14px; font-weight: 600">Feel</span><span class="muted" style="font-size: 13px; line-height: 1.4">A continuation, against an arrival.</span></div>
+</section>
+
+<div style="margin-top: auto; display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 16px; background: #1b1d23; border: 1px solid #2c2f38">
+<button class="btn btn-primary" aria-label="Pause" style="width: 52px; height: 52px; border-radius: 26px; padding: 0"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg></button>
+<div style="display: flex; padding: 4px; gap: 4px; background: #23262e; border-radius: 14px">
+<button class="btn" style="min-width: 120px; background: #e8e9ed; color: #111216; border-color: #e8e9ed">Hear 1</button>
+<button class="btn" style="min-width: 120px; background: transparent; border-color: transparent">Hear 2</button>
+</div>
+<span class="muted" style="font-size: 13px; line-height: 1.35; flex: 1">Switches at the same beat. <span class="mono" style="color: #e8e9ed">Bar 111.1</span></span>
+<label style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span>Blind test</span><span style="position: relative; width: 50px; height: 30px; border-radius: 15px; background: #3a3e4a"><input type="checkbox" aria-label="Blind test: hide which variant is playing" style="position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0"><span style="position: absolute; left: 2px; top: 2px; width: 26px; height: 26px; border-radius: 13px; background: #e8e9ed"></span></span></label>
+</div>
+</div>
+
+<aside class="card" aria-label="Reflect" style="width: 360px; flex: none; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+<div class="lbl">Reflect</div>
+<div style="padding: 10px 12px; border-radius: 10px; background: #23262e; display: flex; flex-direction: column; gap: 4px"><span class="muted" style="font-size: 12px">Your intention</span><span style="font-size: 14px; line-height: 1.4">"Keep the groove rolling, but let B's warmer chords take over slowly."</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 15px; font-weight: 700">Which one served it better?</span>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px"><button class="btn" style="background: #e8e9ed; color: #111216; border-color: #e8e9ed">1</button><button class="btn">2</button><button class="btn">Neither</button></div>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; flex: 1">
+<span style="font-size: 15px; font-weight: 700">What changed when you switched?</span>
+<span style="display: block; flex: 1; padding: 12px; border-radius: 12px; background: #15171c; border: 1px solid #3a3e4a; font-size: 15px; line-height: 1.5; color: #e8e9ed">The cut woke me up but broke the groove I wanted. With the blend, B's chords crept in under A and I only noticed the bass swap when I listened for it.</span>
+</label>
+<div class="muted" style="font-size: 13px; line-height: 1.4">Prompt for next time: where else could the basses swap?</div>
+<div style="display: flex; gap: 8px"><button class="btn" style="flex: 1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"></path></svg>Render both</button><button class="btn btn-primary" style="flex: 1">Save note</button></div>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iPad import and pairs</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.r{font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;color:#e8e9ed;-webkit-font-smoothing:antialiased}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-choice{background:#e8e9ed;color:#111216}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:15px;font-weight:600;box-sizing:border-box}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.nav{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:10px;color:#c9ccd5;font-size:15px;font-weight:600;text-decoration:none}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 72px 56px 210px;align-items:center;gap:12px;min-height:56px;padding:0 14px;border-top:1px solid #2c2f38}
+</style>
+</head>
+<body>
+<div class="r" style="width: 1194px; height: 834px; box-sizing: border-box; background: #111216; display: flex; overflow: hidden">
+
+<nav aria-label="Sections" style="width: 240px; flex: none; background: #16181d; border-right: 1px solid #2c2f38; padding: 20px 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 20px; font-weight: 800; padding: 0 12px 16px">DJ Flow Lab</div>
+<a class="nav" href="#" aria-current="page" style="background: #2c2f38; color: #e8e9ed"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h12M11 4l4 4-4 4M21 16H9M13 12l-4 4 4 4"></path></svg>Transitions</a>
+<a class="nav" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zM21 16a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Tracks</a>
+<a class="nav" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"></path></svg>Practice notes</a>
+<a class="nav" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>Settings</a>
+<div style="margin-top: auto; padding: 12px; border-radius: 12px; background: #1b1d23; display: flex; gap: 10px; align-items: flex-start"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9a9ead" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex: none; margin-top: 1px"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 018 0v3"></path></svg><span class="muted" style="font-size: 13px; line-height: 1.4">Your tracks stay on this iPad. Nothing is uploaded.</span></div>
+</nav>
+
+<main style="flex: 1; min-width: 0; padding: 20px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<h1 style="margin: 0; font-size: 28px; font-weight: 800">New transition</h1>
+<button class="btn btn-primary" disabled style="opacity: 0.45">Start listening</button>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 10px; border-color: #4fb3ff66">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="lbl" style="color: #4fb3ff">A · Outgoing</span><button class="btn" style="min-height: 32px; font-size: 13px; padding: 0 10px; background: transparent; border-color: transparent; color: #4fb3ff">Change</button></div>
+<div style="font-size: 20px; font-weight: 700">Deep Current</div>
+<svg width="100%" height="36" viewBox="0 0 640 80" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12v56M10 10v61M18 11v58M26 18v45M34 18v44M42 16v49M50 13v55M58 17v47M66 10v60M74 11v59M82 3v74M90 7v66M98 16v47M106 14v52M114 16v48M122 7v65M130 11v58M138 18v45M146 9v61M154 14v52M162 17v47M170 15v50M178 20v39M186 18v45M194 15v49M202 11v59M210 19v43M218 21v37M226 23v35M234 15v50M242 12v56M250 16v48M258 17v46M266 14v51M274 18v44M282 21v38M290 16v47M298 14v51M306 19v42M314 23v34M322 20v40M330 22v35M338 22v37M346 19v42M354 22v36M362 16v49M370 15v51M378 20v40M386 19v41M394 13v54M402 20v41M410 21v39M418 17v46M426 23v34M434 19v42M442 11v58M450 18v45M458 16v48M466 14v53M474 14v52M482 26v28M490 29v23M498 29v22M506 28v24M514 27v26M522 29v23M530 29v23M538 29v22M546 25v29M554 28v24M562 26v28M570 24v32M578 26v27M586 29v22M594 27v26M602 23v35M610 29v22M618 26v28M626 26v28M634 26v28" stroke="#4fb3ff" stroke-width="4" stroke-linecap="round" opacity="0.8"></path></svg>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="chip l-measured mono">124.00 BPM</span><span class="chip l-measured mono">6:48</span><span class="chip l-choice">Key 8A</span><span class="chip l-measured">Grid checked</span></div>
+</div>
+<div style="border: 2px dashed #3a3e4a; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; text-align: center">
+<span class="lbl" style="color: #ff8a4f">B · Incoming</span>
+<div style="font-size: 16px; font-weight: 600">Pick the track you want to bring in</div>
+<div style="display: flex; gap: 10px"><button class="btn">From your tracks</button><button class="btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path></svg>Import from Files</button></div>
+<div class="muted" style="font-size: 13px">Or drag audio here from Files in Split View</div>
+</div>
+</div>
+
+<div style="display: flex; gap: 14px; min-height: 0; flex: 1">
+<section class="card" aria-label="Your tracks" style="flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden">
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700; flex: 1">Your tracks</h2>
+<label style="display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #23262e; width: 200px; box-sizing: border-box"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9a9ead" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><span style="position: absolute; width: 1px; height: 1px; overflow: hidden">Search tracks</span><input placeholder="Search" style="border: 0; background: transparent; color: #e8e9ed; font: inherit; font-size: 15px; width: 100%; outline: none"></label>
+<button class="btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Import</button>
+</div>
+<div class="row lbl" style="min-height: 30px; border-top: 0; font-size: 10px"><span>Title</span><span>BPM</span><span>Key</span><span>Status</span></div>
+<div class="row"><div><div style="font-size: 15px; font-weight: 600">Lantern Haze</div><div class="muted" style="font-size: 12px">AIFF · 7:12 · On My iPad</div></div><span class="mono">122.50</span><span class="muted">—</span><span style="display: flex; gap: 6px; align-items: center"><span class="chip l-measured">Ready</span><span class="muted" style="font-size: 12px">grid not checked</span></span></div>
+<div class="row"><div><div style="font-size: 15px; font-weight: 600">Salt Flats</div><div class="muted" style="font-size: 12px">FLAC · 6:31 · iCloud Drive</div></div><span class="mono muted">…</span><span class="muted">—</span><span style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px">Analyzing beat grid · 62%</span><span style="height: 4px; border-radius: 2px; background: #2c2f38; position: relative; overflow: hidden"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: 62%; background: #e8e9ed"></span></span></span></div>
+<div class="row"><div><div style="font-size: 15px; font-weight: 600">Velvet Hour (Disco Re-edit)</div><div class="muted" style="font-size: 12px">MP3 · 5:58 · USB drive</div></div><span class="mono">118.94</span><span class="muted">—</span><span><span class="chip l-likely">Tempo drifts · check grid</span></span></div>
+<div class="row"><div><div style="font-size: 15px; font-weight: 600">Northern Line</div><div class="muted" style="font-size: 12px">WAV · 8:04 · iCloud Drive</div></div><span class="mono muted">…</span><span class="muted">—</span><span class="muted" style="font-size: 12px">Downloading from iCloud</span></div>
+<div class="row"><div><div style="font-size: 15px; font-weight: 600; color: #9a9ead">Glasshouse</div><div class="muted" style="font-size: 12px">Apple Music · streaming</div></div><span></span><span></span><span style="font-size: 12px; color: #ffb08a; line-height: 1.3">Can't open: protected by DRM. Use a file you own.</span></div>
+</section>
+
+<section aria-label="Recent transitions" style="width: 290px; flex: none; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 700">Recent transitions</h2>
+<a href="ipad-4-try.html" class="card" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: inherit"><div style="font-size: 15px; font-weight: 600"><span style="color: #4fb3ff">Deep Current</span> → <span style="color: #ff8a4f">Lantern Haze</span></div><div class="muted" style="font-size: 13px">2 variants · note: "the cut felt like an arrival"</div></a>
+<a href="#" class="card" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: inherit"><div style="font-size: 15px; font-weight: 600"><span style="color: #4fb3ff">Salt Flats</span> → <span style="color: #ff8a4f">Northern Line</span></div><div class="muted" style="font-size: 13px">1 variant · no note yet</div></a>
+<div class="muted" style="font-size: 12px; line-height: 1.45; padding: 4px 2px">Imports WAV, AIFF, FLAC, ALAC, MP3 and AAC. Files are opened where they live and reopen automatically next time.</div>
+</section>
+</div>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iPhone landscape full mixer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.r{font-family:-apple-system,"SF Pro Text",Inter,system-ui,sans-serif;color:#e8e9ed;-webkit-font-smoothing:antialiased}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-interp{background:#2b2645;color:#cbbcff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:15px;font-weight:600;box-sizing:border-box}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.knob{display:flex;flex-direction:column;align-items:center;gap:1px;font-size:10px;font-weight:700;letter-spacing:.06em;color:#9a9ead}
+.cap{font-size:10px;font-weight:600;letter-spacing:0;height:12px}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+</style>
+</helmet>
+<div class="r" style="width: 844px; height: 390px; box-sizing: border-box; background: #111216; padding: 10px 56px 21px; display: flex; flex-direction: column; gap: 8px; overflow: hidden">
+
+<div style="display: flex; align-items: center; gap: 10px; height: 44px">
+<a href="iPhone-Try.dc.html" class="btn" aria-label="Back to portrait view" style="text-decoration: none; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+<div style="flex: 1; position: relative; height: 36px; border-radius: 8px; background: #1b1d23; overflow: hidden">
+<svg width="100%" height="18" viewBox="0 0 640 80" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; top: 0; left: 0"><path d="M2 12v56M10 10v61M18 11v58M26 18v45M34 18v44M42 16v49M50 13v55M58 17v47M66 10v60M74 11v59M82 3v74M90 7v66M98 16v47M106 14v52M114 16v48M122 7v65M130 11v58M138 18v45M146 9v61M154 14v52M162 17v47M170 15v50M178 20v39M186 18v45M194 15v49M202 11v59M210 19v43M218 21v37M226 23v35M234 15v50M242 12v56M250 16v48M258 17v46M266 14v51M274 18v44M282 21v38M290 16v47M298 14v51M306 19v42M314 23v34M322 20v40M330 22v35M338 22v37M346 19v42M354 22v36M362 16v49M370 15v51M378 20v40M386 19v41M394 13v54M402 20v41M410 21v39M418 17v46M426 23v34M434 19v42M442 11v58M450 18v45M458 16v48M466 14v53M474 14v52M482 26v28M490 29v23M498 29v22M506 28v24M514 27v26M522 29v23M530 29v23M538 29v22M546 25v29M554 28v24M562 26v28M570 24v32M578 26v27M586 29v22M594 27v26M602 23v35M610 29v22M618 26v28M626 26v28M634 26v28" stroke="#4fb3ff" stroke-width="4" stroke-linecap="round" opacity="0.85"></path></svg>
+<svg width="100%" height="18" viewBox="0 0 640 80" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; top: 18px; left: 0"><path d="M162 26v27M170 24v31M178 27v26M186 29v22M194 26v27M202 29v23M210 30v21M218 26v28M226 24v32M234 26v28M242 28v23M250 27v26M258 29v22M266 30v20M274 27v25M282 26v28M290 27v26M298 27v25M306 24v32M314 25v30M322 19v43M330 21v39M338 16v48M346 15v50M354 14v52M362 22v36M370 14v51M378 14v53M386 23v34M394 16v49M402 21v38M410 14v52M418 22v35M426 22v35M434 15v49M442 16v48M450 22v37M458 22v36M466 22v35M474 21v37M482 3v74M490 13v53M498 15v51M506 6v68M514 16v48M522 13v55M530 7v66M538 14v53M546 16v47M554 14v51M562 10v59M570 4v71M578 10v61M586 15v50M594 5v70M602 12v56M610 7v65M618 15v50M626 6v69M634 12v56" stroke="#ff8a4f" stroke-width="4" stroke-linecap="round" opacity="0.85"></path></svg>
+<div aria-hidden="true" style="position: absolute; left: 25%; width: 50%; top: 0; bottom: 0; background: #e8e9ed10; border-left: 2px solid #e8e9ed"></div>
+<div aria-hidden="true" style="position: absolute; left: 50%; top: 0; bottom: 0; border-left: 2px dashed #cbbcff"></div>
+<div aria-hidden="true" style="position: absolute; left: 46.875%; top: 0; bottom: 0; width: 2px; background: #ffffff"></div>
+</div>
+<div class="mono" style="display: flex; flex-direction: column; align-items: flex-end; font-size: 13px; font-weight: 700; width: 92px"><span>Bar 15.1</span><span class="muted" style="font-size: 11px; font-weight: 500">of 32</span></div>
+<button class="btn btn-primary" aria-label="Pause" style="width: 44px; border-radius: 22px; padding: 0"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"></path></svg></button>
+</div>
+
+<div style="flex: 1; min-height: 0; display: flex; gap: 14px; align-items: stretch; padding: 8px 12px; border-radius: 16px; background: #1b1d23; border: 1px solid #2c2f38">
+
+<div style="flex: 1; display: flex; gap: 10px; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div class="lbl" style="color: #4fb3ff">Deck A</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px 6px">
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="A high EQ at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>HIGH<span class="cap"></span></div>
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="A mid EQ at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>MID<span class="cap"></span></div>
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="A low EQ at full, will be killed at bar 113"><circle cx="24" cy="24" r="22.5" fill="none" stroke="#4fb3ff" stroke-width="1.5" stroke-dasharray="3 3"></circle><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path><path d="M8.6 39.4l3.2-3.2" stroke="#4fb3ff" stroke-width="2.5" stroke-linecap="round"></path></svg>LOW<span class="cap" style="color: #8fd0ff">kill at 113</span></div>
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="A trim at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>TRIM<span class="cap"></span></div>
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="A filter off"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>FILTER<span class="cap"></span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin-left: auto">
+<div style="position: relative; width: 32px; height: 150px"><div style="position: absolute; left: 14px; top: 0; bottom: 0; width: 4px; border-radius: 2px; background: #2c2f38"></div><div style="position: absolute; left: 14px; bottom: 0; height: 100%; width: 4px; border-radius: 2px; background: #4fb3ff"></div><div style="position: absolute; left: 1px; top: -6px; width: 30px; height: 13px; border-radius: 4px; background: #d9dbe1"></div></div>
+<div class="knob">FADER</div>
+</div>
+</div>
+
+<div style="width: 140px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 8px; padding-bottom: 6px; border-left: 1px solid #2c2f38; border-right: 1px solid #2c2f38">
+<div style="position: relative; width: 120px; height: 28px"><div style="position: absolute; top: 12px; left: 0; right: 0; height: 4px; border-radius: 2px; background: #2c2f38"></div><div style="position: absolute; left: 47px; top: 2px; width: 26px; height: 24px; border-radius: 4px; background: #d9dbe1"></div></div>
+<div class="knob" style="flex-direction: row; gap: 34px"><span style="color: #4fb3ff">A</span>X-FADE<span style="color: #ff8a4f">B</span></div>
+</div>
+
+<div style="flex: 1; display: flex; gap: 10px; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div class="lbl" style="color: #ff8a4f">Deck B</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px 6px">
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="B high EQ at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>HIGH<span class="cap"></span></div>
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="B mid EQ at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>MID<span class="cap"></span></div>
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="B low EQ killed, returns to full at bar 113"><circle cx="24" cy="24" r="22.5" fill="none" stroke="#ff8a4f" stroke-width="1.5" stroke-dasharray="3 3"></circle><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 5A19 19 0 0 0 10.56 37.44" fill="none" stroke="#ff8a4f" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L15.51 32.49" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path><path d="M24 1.5v4" stroke="#ff8a4f" stroke-width="2.5" stroke-linecap="round"></path></svg>LOW<span class="cap" style="color: #ffb08a">full at 113</span></div>
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="B trim at centre"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>TRIM<span class="cap"></span></div>
+<div class="knob"><svg width="46" height="46" viewBox="0 0 48 48" role="img" aria-label="B filter off"><circle cx="24" cy="24" r="14" fill="#2a2d35"></circle><path d="M10.56 37.44A19 19 0 1 1 37.44 37.44" fill="none" stroke="#3a3e4a" stroke-width="4" stroke-linecap="round"></path><path d="M24 24L24 12" stroke="#e8e9ed" stroke-width="2.5" stroke-linecap="round"></path></svg>FILTER<span class="cap"></span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; margin-left: auto">
+<div style="position: relative; width: 32px; height: 150px"><div style="position: absolute; left: 14px; top: 0; bottom: 0; width: 4px; border-radius: 2px; background: #2c2f38"></div><div style="position: absolute; left: 14px; bottom: 0; height: 100%; width: 4px; border-radius: 2px; background: #ff8a4f"></div><div style="position: absolute; left: 1px; top: -6px; width: 30px; height: 13px; border-radius: 4px; background: #d9dbe1"></div></div>
+<div class="knob">FADER</div>
+</div>
+</div>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px; height: 32px">
+<span class="chip l-interp">interpretation</span>
+<span style="font-size: 14px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis"><strong>Bass swap on bar 113, in 2 bars.</strong> <span class="muted">A's bass goes out as B's comes in, on the phrase line.</span></span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":844,"height":390}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
