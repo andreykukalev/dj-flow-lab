@@ -27,8 +27,8 @@
 | Tests | Vitest (unit), Playwright (end-to-end) | The engine is pure TypeScript and runs in Node; Playwright drives a real browser for audio-graph and UI checks. |
 | Lint and format | oxlint, Prettier | oxlint is the Vite template default and is fast enough to run on every save. |
 | CI | GitHub Actions | Typecheck, lint, unit tests, build on every PR. |
-| Hosting | Static site (GitHub Pages, Cloudflare Pages, or Vercel) | No server needed for M0–M5. |
-| Later: Assisted mode | Claude API via a small serverless function | Keeps the API key off the client; the model returns structured choices that the engine validates. |
+| Hosting | Azure Static Web Apps | Static hosting with a preview environment per pull request, so each change can be tried in a browser before merging. No server code needed for M0–M5. |
+| Later: Assisted mode | Claude API via the Static Web App's managed API (Azure Functions) | Keeps the API key off the client; the model returns structured choices that the engine validates. |
 
 ## 3. Module layout
 
