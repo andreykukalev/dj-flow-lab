@@ -174,13 +174,14 @@ export class Transport {
     }
     this.sources = []
     if (!this.compiled) return
-    const beat = this.current.kind === 'playing' ? anchorBeatAt(this.current.anchor, at) : undefined
+    // Always set the value again after cancelling: Firefox records a `.value` assignment
+    // as an event at that time, so cancelling at the same time drops it and the
+    // parameter falls back to its default (found in S3: filters at 350 Hz for a block).
+    const beat = this.beatAt(at)
     for (const key of CONTROL_KEYS) {
       for (const { param, map } of this.mixer.targetsOf(key)) {
         param.cancelScheduledValues(at)
-        if (beat !== undefined) {
-          param.setValueAtTime(map(valueAt(this.compiled.controls[key], beat)), at)
-        }
+        param.setValueAtTime(map(valueAt(this.compiled.controls[key], beat)), at)
       }
     }
   }

@@ -2,12 +2,13 @@
 // the engine scenarios on `window.harness` for Playwright integration tests. Served by
 // the Vite dev server at /harness/ and never included in the production build.
 import * as decode from './decode'
+import * as dsp from './dsp'
 import * as engine from './engine'
 import * as measure from './measure'
 import { renderOffline, toBuffer } from './render'
 import * as signals from './signals'
 
-const harness = { signals, measure, renderOffline, toBuffer, engine, decode }
+const harness = { signals, measure, renderOffline, toBuffer, engine, decode, dsp }
 
 export type Harness = typeof harness
 

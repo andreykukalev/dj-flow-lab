@@ -140,12 +140,37 @@ S1, S3, and S5 together form the **proof of concept** below.
 
 ## S3 — Mixer DSP
 
-- **Question:** does the isolator EQ sum flat and kill cleanly; are filter sweeps clean; are the mapping curves usable; is −6 dB master headroom enough?
+- **Question:** does the isolator EQ sum flat and kill cleanly; are filter sweeps clean; are the mapping curves usable; is −6 dB master headroom enough? (It was not; see the result.)
 - **Minimal implementation:** the D-11 chain with D-12/D-13/D-14 mappings; a test page rendering white noise and sine sweeps offline; a listening page with two real tracks.
 - **Test procedure:** magnitude response at unity (FFT of rendered white noise, averaged); kill depth per band; filter sweep over 8 bars at several speeds (sample-jump check + listening); true-peak of two loud masters overlapping at full faders.
 - **Pass/fail:** unity response flat within ±0.5 dB 20 Hz–18 kHz; low kill ≥ 40 dB below 100 Hz; mid/high kill ≥ 30 dB in band centre; no audible zipper or instability in sweeps in either engine; summed peak ≤ 0 dBFS on 4 of 5 loud test pairs.
 - **Time-box:** 1.5 days.
 - **Decision:** isolator vs shelving (D-12); crossover frequencies; filter Q; fader taper; headroom value.
+
+- **Result (2026-10-24, #44):** headless Chromium 153 and Firefox (Playwright 1.63), 44.1 kHz, offline renders of the real mixer graph, scheduler and transport. Scenarios in [`harness/dsp.ts`](../harness/dsp.ts), assertions in [`tests/audio/dsp.spec.ts`](../tests/audio/dsp.spec.ts), both run in CI on both engines.
+
+  | Check | Criterion | Chromium | Firefox |
+  |---|---|---|---|
+  | Unity response, 20 Hz–18 kHz (impulse, single-bin DFT at 1/12 octave) | ±0.5 dB | +0.22 / −0.00 dB | +0.22 / −0.00 dB |
+  | Low kill, every Hz from 20 to 100 Hz | ≥ 40 dB | ≥ 40.5 dB (72 dB at 40 Hz) | ≥ 40.5 dB |
+  | Mid kill at band centre (1012 Hz) | ≥ 30 dB | 34.4 dB | 34.4 dB |
+  | High kill at band centre (8 kHz) | ≥ 30 dB | 35.4 dB | 35.4 dB |
+  | Filter sweeps (low-pass and high-pass, out and back over 8 bars, 1 bar, 1 beat): largest sample step / allowed | ≤ D-15 threshold | 0.159 / 0.172 | 0.159 / 0.172 |
+  | Same sweeps: energy above 8 kHz from tones below 3 kHz (zipper noise) | ≤ −60 dBFS (provisional) | ≤ −122 dBFS | ≤ −64 dBFS (fastest low-pass sweep) |
+  | Spectral centroid over an 8-bar sweep (third-octave multi-tone) | monotonic | yes, within 1% (the high-pass resonance dips it slightly at the start) | same |
+  | Two loud masters (−9 dBFS RMS), full faders, crossfader centred, beat-aligned, 8 bars: master true peak | ≤ 0 dBTP on 4 of 5 pairs | 5 of 5, −2.2 to −1.6 dBTP | 5 of 5, −2.5 to −2.0 dBTP |
+  | Long-blend plan with very loud masters (−5.5 dBFS RMS) | ≤ 0 dBTP | 5 of 5, ≤ −3.2 dBTP | 5 of 5, ≤ −3.0 dBTP |
+  | Very loud masters at full faders (recorded only) | none | −0.1 to +0.7 dBTP | −0.5 to +0.3 dBTP |
+  | Render cost, whole PoC plan (93 s, two decks) | | 72× real time | 83× real time |
+
+  - **The loud masters are synthetic** (kick on every beat, off-beat bass, hats, pad, soft-clipped to a −0.3 dBFS sample peak), generated in [`harness/dsp.ts`](../harness/dsp.ts). Real tracks are checked by ear and on the clip indicator in P9.
+  - **Headroom: −6 dB was not enough.** At −6 dB, two loud masters at full faders reached +0.9 to +1.6 dBTP, and very loud ones +2.9 to +3.9 dBTP. Two things add up: beat-aligned kicks peak together, and the isolator's phase shift raises the peaks of limited material by about 2 dB per deck, even at unity. The master is now −9 dB (D-11). The bass swap keeps one low band out at a time, which is why the long blend has 3 dB more room than the full-fader case.
+  - **Crossovers moved from 250 Hz / 2.5 kHz to 320 Hz / 3.2 kHz.** At 250 Hz the low kill was 32 dB at 100 Hz and reached 40 dB only up to 78 Hz. 300 Hz / 3 kHz gave 38 dB at 100 Hz. Mid and high kills stay above 34 dB either way (D-12).
+  - **Neither filter rests at its exact pass-through.** Firefox switches the low-pass to a pass-through at exactly Nyquist, and sweeps leaving or reaching Nyquist clicked (step 0.28 against 0.17 allowed). Chromium does the same for a high-pass at 0 Hz (−62 dBFS click). The rest positions are now 0.95 × Nyquist and 5 Hz. The old 10 Hz rest lifted 20 Hz by 0.6 dB with Q 0.9 (D-13).
+  - **Firefox drops a parameter's `.value` when automation is cancelled at the same time.** The transport cancelled automation at the start time, so on the first start Firefox's filters ran at their default 350 Hz for one render block and rang at up to 3× the signal. The transport now sets every parameter again after cancelling (D-15). The S1 tests did not catch this: their tones were levels after 1 beat, and the click check used signals the transient barely excited.
+  - **Firefox recomputes biquad coefficients less often during automation**, so sweeps leave more zipper energy than in Chromium (−64 against −122 dBFS at worst). Both are far below the music, and no sweep exceeds the sample-step threshold.
+  - **Not decided by measurement:** filter Q (0.9), fader taper (p²) and the EQ curve above unity. They are set by ear in the listening check (P9), with the PoC page.
+  - **Decisions:** D-11 (−9 dB master), D-12 (isolator confirmed, 320 Hz / 3.2 kHz), D-13 (rest positions), D-15 (re-set after cancelling) updated; R-09 updated.
 
 ## S5 — Visual sync and output latency
 

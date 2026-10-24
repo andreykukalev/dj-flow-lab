@@ -119,21 +119,25 @@ interface BeatGrid {
 ## Mixer DSP
 
 ### D-11 Signal chain and headroom
-Per deck: `AudioBufferSourceNode (playbackRate) → trim Gain → isolator EQ → LP Biquad → HP Biquad → fader Gain → crossfader Gain` → `master Gain (−6 dB) → AnalyserNode (meter) → destination`.
+Per deck: `AudioBufferSourceNode (playbackRate) → trim Gain → isolator EQ → LP Biquad → HP Biquad → fader Gain → crossfader Gain` → `master Gain (−9 dB) → AnalyserNode (meter) → destination`.
 - Rate change happens at the source (resampling), so EQ and filter frequencies are absolute, as on a real mixer.
-- Master −6 dB gives headroom for two full-level tracks; meter shows a clip indicator. No limiter (deferred: colours A/B comparisons; `DynamicsCompressorNode` is loosely specified).
-- **Confidence:** High (order), Medium (−6 dB, checked on real tracks in S3).
+- Master −9 dB gives headroom for two loud tracks at full level; meter shows a clip indicator. No limiter (deferred: colours A/B comparisons; `DynamicsCompressorNode` is loosely specified).
+- **Changed in S3 from −6 dB:** with synthetic loud masters (−9 dBFS RMS, −0.3 dBFS sample peak), two beat-aligned decks at full faders peaked at +0.9 to +1.6 dBTP at −6 dB, because the kicks coincide and the isolator's phase shift raises the peaks of limited material by about 2 dB. At −9 dB all five pairs stay below 0 dBTP, and the long blend stays below 0 dBTP even with very loud masters (−5.5 dBFS RMS).
+- **Confidence:** High (order), Medium (−9 dB: synthetic masters; confirm with real tracks and the clip indicator in the PoC listening check, P9).
 
 ### D-12 Isolator-style 3-band EQ, shelving fallback
 - **Context:** the bass swap needs a real low kill; shelving biquads cannot reach −∞ and attenuate only partly around their corner.
-- **Decision:** split into low/mid/high with Linkwitz–Riley 4th-order crossovers (two cascaded Butterworth biquads per slope) at 250 Hz and 2.5 kHz (provisional), with phase compensation so bands sum flat; one `GainNode` per band; sum.
+- **Decision:** split into low/mid/high with Linkwitz–Riley 4th-order crossovers (two cascaded Butterworth biquads per slope) at **320 Hz and 3.2 kHz** (set in S3; 250 Hz / 2.5 kHz killed only 32 dB at 100 Hz), with phase compensation so bands sum flat; one `GainNode` per band; sum.
 - **Alternatives:** shelving + peaking biquads with a −40 dB floor (3 nodes, simpler).
 - **Consequences:** ~10 biquads per deck; negligible CPU.
-- **Confidence:** Medium — S3 must show flat sum (±0.5 dB, provisional) and ≥ 40 dB kill. If not, use the shelving fallback.
+- **Confidence:** High for the measurements (S3, both engines: flat within 0.22 dB from 20 Hz to 18 kHz; low kill ≥ 40.5 dB up to 100 Hz; mid 34.4 dB and high 35.4 dB at band centre). Medium for how the bands sound, which the listening check (P9) confirms. The shelving fallback is not needed.
 - **Reconsider if:** S3 fails, or CPU on low-end laptops exceeds budget.
 
 ### D-13 Bipolar filter
-Low-pass and high-pass biquads are always in the chain (no graph changes during playback). Web Audio takes their `Q` in dB, so the linear Q values here are converted (found in S1). Centre: LP at Nyquist (identity), HP at 10 Hz. Dead zone |x| < 0.02. Negative x: LP cutoff from Nyquist down to 100 Hz, log-mapped. Positive x: HP cutoff from 10 Hz up to 8 kHz, log-mapped. Q = 0.9 (provisional, mild resonance). **Confidence:** Medium (S3 checks sweeps for zipper noise in each engine).
+Low-pass and high-pass biquads are always in the chain (no graph changes during playback). Web Audio takes their `Q` in dB, so the linear Q values here are converted (found in S1). Centre: LP at 0.95 × Nyquist, HP at 5 Hz. Dead zone |x| < 0.02. Negative x: LP cutoff from 0.95 × Nyquist down to 100 Hz, log-mapped. Positive x: HP cutoff from 5 Hz up to 8 kHz, log-mapped. Q = 0.9 (mild resonance).
+- **Changed in S3:** neither filter rests at its exact pass-through. Firefox switches the low-pass to a pass-through at exactly Nyquist, and a sweep leaving or reaching Nyquist clicked (sample jump 0.28 against an allowed 0.17, −34 dBFS of energy above 8 kHz); Chromium does the same for a high-pass at 0 Hz (−62 dBFS). A 10 Hz resting high-pass with this Q lifted 20 Hz by 0.6 dB; at 5 Hz the lift is 0.2 dB.
+- **Result:** sweeps over 8 bars, 1 bar and 1 beat, both ways, stay below the D-15 jump threshold in both engines. Firefox updates biquad coefficients less often than Chromium, which leaves −64 dBFS of zipper energy on the fastest low-pass sweep (Chromium: −122 dBFS); both are far below the music.
+- **Confidence:** High (measured, S3); the resonance is tuned by ear in P9.
 
 ### D-14 Control units, ranges, mappings, defaults
 Plans and UI use **normalized control positions**; mapping functions in `src/engine/mixer.ts` are the only conversion to audio units and are shared by scheduler and UI.
@@ -146,12 +150,13 @@ Plans and UI use **normalized control positions**; mapping functions in `src/eng
 | `fader` | 0…1 | A: 1, B: 0 | gain = p² (provisional taper) |
 | `crossfader` (mixer) | 0…1 (0 = A) | 0.5 | gA = min(1, 2(1−x)), gB = min(1, 2x) ("dipless": centre = both at unity) |
 
-Master gain is fixed at −6 dB and not plan-controlled in the MVP. **Confidence:** Medium (curves tuned by listening in S3).
+Master gain is fixed at −9 dB (D-11) and not plan-controlled in the MVP. **Confidence:** Medium (curves tuned by listening in the PoC check, P9; S3 measured the DSP only).
 
 ### D-15 Declicking
 - `step` events: 5 ms linear ramp in audio units starting at the event time.
 - Start/stop/seek: 10 ms fade on each deck's fader stage (separate from the plan's fader value; a dedicated "transport gate" gain).
 - Direct manipulation (outside plans): `setTargetAtTime`, τ = 10 ms.
+- Every transport action that cancels automation sets each parameter again at the same time. Firefox records a `.value` assignment as an automation event, so cancelling at that time drops it and the parameter falls back to its default; the filters then ran at 350 Hz for one render block and rang at up to 3× the signal on the first start (found in S3).
 - **Test:** no sample-to-sample difference above −40 dBFS beyond the signal's own maximum slope at event boundaries in offline renders (provisional).
 - **Confidence:** High.
 
