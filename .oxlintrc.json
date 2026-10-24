@@ -4,5 +4,40 @@
   "rules": {
     "react/rules-of-hooks": "error",
     "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/engine/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "../ui/*",
+                  "../audio/*",
+                  "../store/*",
+                  "../analysis/*",
+                  "react",
+                  "react-dom"
+                ],
+                "message": "src/engine is pure: it imports nothing from the browser or other src folders."
+              }
+            ]
+          }
+        ],
+        "no-restricted-globals": [
+          "error",
+          "window",
+          "document",
+          "navigator",
+          "AudioContext",
+          "OfflineAudioContext",
+          "requestAnimationFrame",
+          "performance"
+        ]
+      }
+    }
+  ]
 }
