@@ -1,11 +1,50 @@
 import { useState } from 'react'
-import { transitions } from '../../engine/set/spine'
+import { arcPoints, type ArcPoint } from '../../engine/set/arc'
+import { transitions, type SetPlan } from '../../engine/set/spine'
 import { trackFacts } from '../../engine/set/profile'
 import { Layer, Shape } from './Bits'
+import { HearIdea } from './Idea'
 import type { SetStore } from './store'
 
 // The set spine (#91): the tracks in order with a transition between each pair. Each
-// transition opens in the Lab, the Transition Builder, with the two real tracks.
+// transition opens in the Lab, the Transition Builder, with the two real tracks. Above
+// it, the reading's energy arc against what each track measures (#92).
+
+/** The arc as a line and each track's drive as a dot, both as order over the set. */
+function ArcChart({ plan, points }: { plan: SetPlan; points: ArcPoint[] }) {
+  const n = points.length
+  const w = 300
+  const x = (k: number) => (n === 1 ? w / 2 : 8 + (k * (w - 16)) / (n - 1))
+  const y = (v: number) => 82 - 74 * v
+  return (
+    <figure className="card set-arc">
+      <div className="set-card-head">
+        <strong>Energy arc</strong>
+        <Layer layer={plan.arcEdited ? 'yours' : 'interpretation'} />
+      </div>
+      <svg viewBox={`0 0 ${w} 90`} role="img" aria-label="The arc against each track's drive">
+        <polyline
+          className="set-arc-line"
+          points={points.map((p, k) => `${x(k)},${y(p.arc)}`).join(' ')}
+        />
+        {points.map((p, k) => (
+          <circle
+            key={p.trackId}
+            className={`set-arc-dot ${p.note ? 'set-arc-off' : ''}`}
+            cx={x(k)}
+            cy={y(p.measured)}
+            r={4}
+          />
+        ))}
+      </svg>
+      <figcaption className="muted">
+        The line is the arc{plan.arcEdited ? ' you set' : ' of the reading'}; the dots are each
+        track’s drive (its tempo and how much of it runs at full groove), both as order over the
+        set. Move a slot’s arc on its card.
+      </figcaption>
+    </figure>
+  )
+}
 
 export function SetSpine({ store }: { store: SetStore }) {
   const plan = store.plan
@@ -15,6 +54,8 @@ export function SetSpine({ store }: { store: SetStore }) {
   const steps = transitions(plan, profiles)
   const rest = profiles.filter((p) => !plan.order.includes(p.id))
   const opening = store.lab
+  const points = arcPoints(plan, profiles)
+  const pointOf = (id: string) => points.find((p) => p.trackId === id)
   return (
     <div className="set-screen">
       <header className="set-screen-head">
@@ -25,10 +66,14 @@ export function SetSpine({ store }: { store: SetStore }) {
           it stays with the slot when tracks move. Each transition is mixed by the DJ bringing the
           next track in.
         </p>
-        <button className="btn btn-small" onClick={() => store.go('concepts')}>
-          Change the concept
-        </button>
+        <div className="set-actions">
+          <button className="btn btn-small" onClick={() => store.go('concepts')}>
+            Change the concept
+          </button>
+          <HearIdea store={store} id="set" plan={plan} />
+        </div>
       </header>
+      {points.length > 1 && <ArcChart plan={plan} points={points} />}
       {store.labError && (
         <p className="poc-error" role="alert">
           The Lab could not open: {store.labError}
@@ -88,6 +133,27 @@ export function SetSpine({ store }: { store: SetStore }) {
                       {trackFacts(p)} <Layer layer={p.tempo === 'likely' ? 'likely' : 'yours'} />
                     </p>
                     <Shape profile={p} />
+                    <div className="set-row-fields">
+                      <label className="poc-field">
+                        Arc
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          value={plan.arc[k] ?? 0.5}
+                          aria-label={`Arc at slot ${k + 1}`}
+                          onChange={(e) => store.setArc(k, Number(e.target.value))}
+                        />
+                      </label>
+                      {pointOf(id)?.note && (
+                        <span className="set-arc-note" data-testid="arc-note">
+                          {pointOf(id)!.note === 'above'
+                            ? 'Sits clearly above the arc: it drives more than this slot asks for.'
+                            : 'Sits clearly below the arc: it drives less than this slot asks for.'}
+                        </span>
+                      )}
+                    </div>
                   </>
                 ) : (
                   <p className="muted">This track was removed from the collection.</p>

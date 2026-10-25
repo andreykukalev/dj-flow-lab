@@ -13,6 +13,9 @@ export interface SetPlan {
   order: string[]
   /** The function of each slot, or null for a slot the reading did not give one. */
   roles: (MusicalFunction | null)[]
+  /** How full each slot should be, 0..1: the reading's arc, or the DJs' once edited. */
+  arc: number[]
+  arcEdited: boolean
   /** Pairs someone has listened to in the Lab, by `pairKey`. */
   tried: Record<string, true>
 }
@@ -29,10 +32,17 @@ export interface SpineTransition {
 export const pairKey = (from: string, to: string) => `${from}→${to}`
 
 export function planFromReading(reading: Reading): SetPlan {
-  return { readingId: reading.id, order: [...reading.order], roles: [...reading.roles], tried: {} }
+  return {
+    readingId: reading.id,
+    order: [...reading.order],
+    roles: [...reading.roles],
+    arc: [...reading.arc],
+    arcEdited: false,
+    tried: {},
+  }
 }
 
-/** Moves the track at `index` by `delta` slots; the slots keep their functions. */
+/** Moves the track at `index` by `delta` slots; the slots keep their functions and arc. */
 export function moveTrack(plan: SetPlan, index: number, delta: number): SetPlan {
   const to = index + delta
   if (index < 0 || index >= plan.order.length || to < 0 || to >= plan.order.length) return plan
@@ -49,13 +59,27 @@ export function removeTrack(plan: SetPlan, index: number): SetPlan {
     ...plan,
     order: plan.order.filter((_, k) => k !== index),
     roles: plan.roles.filter((_, k) => k !== index),
+    arc: plan.arc.filter((_, k) => k !== index),
   }
 }
 
 /** Adds a track from the collection at the end, in a slot without a function. */
 export function addTrack(plan: SetPlan, id: string): SetPlan {
   if (plan.order.includes(id)) return plan
-  return { ...plan, order: [...plan.order, id], roles: [...plan.roles, null] }
+  return {
+    ...plan,
+    order: [...plan.order, id],
+    roles: [...plan.roles, null],
+    arc: [...plan.arc, plan.arc.at(-1) ?? 0.5],
+  }
+}
+
+/** The DJs' own arc at one slot, 0..1. */
+export function setArc(plan: SetPlan, index: number, value: number): SetPlan {
+  if (index < 0 || index >= plan.arc.length) return plan
+  const arc = [...plan.arc]
+  arc[index] = Math.max(0, Math.min(1, value))
+  return { ...plan, arc, arcEdited: true }
 }
 
 export function markTried(plan: SetPlan, from: string, to: string): SetPlan {

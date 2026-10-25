@@ -16,6 +16,7 @@ import {
   moveTrack,
   planFromReading,
   removeTrack,
+  setArc,
   type SetPlan,
 } from '../../engine/set/spine'
 import { barToBeat, beatToSec, secondsPerBar } from '../../engine/time'
@@ -49,7 +50,7 @@ export interface LabOpen {
 /** Bars that "Hear it" plays. */
 export const HEAR_BARS = 8
 /** Decoded tracks kept for listening; the rest are decoded again. */
-const KEEP_DECODED = 2
+const KEEP_DECODED = 3
 
 export class SetStore {
   djs: Record<DjId, Dj> = { dj1: { id: 'dj1', name: '' }, dj2: { id: 'dj2', name: '' } }
@@ -59,8 +60,10 @@ export class SetStore {
   screen: Screen = 'music'
   lab: LabOpen | null = null
   labError: string | null = null
-  /** The track and bar playing from "Hear it", if any. */
-  hearing: { trackId: string; bar: number } | null = null
+  /** What "Hear it" or "Hear the idea" is playing: the list, and the moment in it. */
+  hearing: { key: string; trackId: string; bar: number; index: number; total: number } | null = null
+  /** Observations the DJs said do not sound like that. */
+  dismissed: ReadonlySet<string> = new Set()
   version = 0
 
   private session: PocSession | null = null
@@ -69,6 +72,7 @@ export class SetStore {
   private readonly listeners = new Set<() => void>()
   private readonly decoded = new Map<string, AudioBuffer>()
   private hearSource: AudioBufferSourceNode | null = null
+  private hearToken: object | null = null
   private stopTried: (() => void) | null = null
   private cache: { version: number; observations: Observation[]; readings: Reading[] } | null = null
 
@@ -113,7 +117,7 @@ export class SetStore {
   get explored(): { observations: Observation[]; readings: Reading[] } {
     if (this.cache?.version !== this.version) {
       const profiles = this.profiles
-      const observations = observe(profiles, this.names)
+      const observations = observe(profiles, this.names).filter((o) => !this.dismissed.has(o.id))
       this.cache = {
         version: this.version,
         observations,
@@ -121,6 +125,24 @@ export class SetStore {
       }
     }
     return this.cache
+  }
+
+  /** "Doesn't sound like that": the observation is hidden, and readings resting on it go. */
+  dismiss(observationId: string): void {
+    this.dismissed = new Set([...this.dismissed, observationId])
+    this.notify()
+  }
+
+  restoreDismissed(): void {
+    this.dismissed = new Set()
+    this.notify()
+  }
+
+  /** The DJs' own arc at one slot of the set. */
+  setArc(index: number, value: number): void {
+    if (!this.plan) return
+    this.plan = setArc(this.plan, index, value)
+    this.notify()
   }
 
   /** Adds local files for one DJ; they are analysed one after another. */
@@ -270,18 +292,53 @@ export class SetStore {
   }
 
   /** Plays HEAR_BARS bars of a track from `bar`; again on the same bars stops it. */
-  async hear(trackId: string, bar: number): Promise<void> {
-    const same = this.hearing?.trackId === trackId && this.hearing.bar === bar
+  hear(trackId: string, bar: number): Promise<void> {
+    return this.hearAll(`${trackId}@${bar}`, [{ trackId, bar }])
+  }
+
+  /** "Hear the idea": one moment of each track of a reading, in its order. */
+  hearIdea(key: string, list: readonly { trackId: string; bar: number }[]): Promise<void> {
+    return this.hearAll(`idea:${key}`, list)
+  }
+
+  /** Whether `key` is what is playing. */
+  isHearing(key: string): boolean {
+    return this.hearing?.key === key
+  }
+
+  /**
+   * Plays a list of 8-bar moments one after another; asking again for the same list
+   * stops it. The next track is decoded while one plays.
+   */
+  private async hearAll(key: string, list: readonly { trackId: string; bar: number }[]) {
+    const same = this.hearing?.key === key
     this.stopHearing()
-    if (same) return
-    const profile = this.profile(trackId)
-    if (!profile) return
+    if (same || list.length === 0) return
     const { ctx } = this.audio
-    this.hearing = { trackId, bar }
-    this.notify()
+    const token = {}
+    this.hearToken = token
     if (ctx.state !== 'running') await ctx.resume()
-    const buffer = await this.buffer(trackId)
-    if (this.hearing?.trackId !== trackId || this.hearing.bar !== bar) return
+    for (let index = 0; index < list.length; index++) {
+      const { trackId, bar } = list[index]!
+      const profile = this.profile(trackId)
+      if (!profile) continue
+      this.hearing = { key, trackId, bar, index, total: list.length }
+      this.notify()
+      const buffer = await this.buffer(trackId)
+      if (this.hearToken !== token) return
+      const next = list[index + 1]
+      if (next) void this.buffer(next.trackId).catch(() => undefined)
+      await this.play(buffer, profile, bar)
+      if (this.hearToken !== token) return
+    }
+    this.hearToken = null
+    this.hearing = null
+    this.notify()
+  }
+
+  /** Plays HEAR_BARS bars and resolves when they end or are stopped. */
+  private play(buffer: AudioBuffer, profile: TrackProfile, bar: number): Promise<void> {
+    const { ctx } = this.audio
     const source = ctx.createBufferSource()
     source.buffer = buffer
     const gain = ctx.createGain()
@@ -289,19 +346,22 @@ export class SetStore {
     const from = Math.max(0, beatToSec(profile.grid, barToBeat(profile.grid, bar)))
     const length = HEAR_BARS * secondsPerBar(profile.grid)
     const now = ctx.currentTime
+    gain.gain.setValueAtTime(0, now)
+    gain.gain.linearRampToValueAtTime(1, now + 0.02)
     gain.gain.setValueAtTime(1, now + length - 0.05)
     gain.gain.linearRampToValueAtTime(0, now + length)
-    source.start(now, from, length)
-    source.onended = () => {
-      if (this.hearSource !== source) return
-      this.hearSource = null
-      this.hearing = null
-      this.notify()
-    }
     this.hearSource = source
+    return new Promise((resolve) => {
+      source.onended = () => {
+        if (this.hearSource === source) this.hearSource = null
+        resolve()
+      }
+      source.start(now, from, length)
+    })
   }
 
   stopHearing(): void {
+    this.hearToken = null
     const source = this.hearSource
     this.hearSource = null
     source?.stop()
