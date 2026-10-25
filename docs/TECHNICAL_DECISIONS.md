@@ -229,7 +229,15 @@ interface Annotation {
 The v0.2 criterion "drift under 5 ms over a 64-bar overlap" is withdrawn: engine drift is far smaller, and real-track drift is a grid-accuracy property.
 
 ### D-21 Visual state derived from the clock
-One `requestAnimationFrame` loop: heard context time = `getOutputTimestamp()` mapping (fallback: `currentTime − outputLatency`, fallback: `currentTime − baseLatency`) + user calibration offset; `beat = anchorBeat(heardTime)`; render `stateAt(beat)`. React is not on the per-frame path (components subscribe to an external store; mixer SVG attributes are written directly). When paused, the frame shows `stateAt(pausedBeat)`. After any pause, seek, interruption, or hidden tab, the next frame is correct by construction. **Confidence:** Medium (S5).
+One `requestAnimationFrame` loop: heard context time, then `beat = anchorBeat(heardTime)`, then render `stateAt(beat)`. Heard time (S5, [`src/audio/clock.ts`](../src/audio/clock.ts)):
+- **Source order:** the `getOutputTimestamp()` mapping carried forward to the frame time; then `currentTime − (outputLatency + baseLatency)`; then `currentTime − baseLatency`.
+- **Firefox correction:** Firefox's timestamp tracks the rendering clock, not the output. When the timestamp, carried forward to the moment of reading, lags `currentTime` by less than half the reported latency, the reported latency is subtracted.
+- **Smoothing:** a heard clock predicts each frame from the last and corrects 15 % of the difference. It follows a jump over 50 ms or a gap over 250 ms at once, so the first frame after a hidden tab or a suspend is as right as the raw estimate.
+- **Calibration:** one user offset in milliseconds (positive = heard later), checked with a flash on every heard beat against the kick.
+- **Rendering:** React is not on the per-frame path. The mixer is rendered once, and a renderer writes the changed SVG attributes directly.
+- **Positions:** while a start is still in the output, the frame shows the started beat. When paused, the frame shows `stateAt(pausedBeat)`.
+
+After any pause, seek, interruption or hidden tab, the next frame is correct by construction. **Confidence:** High for the automated checks (P7, P8 on both engines). Medium for the perceived offset on real outputs, which is checked by hand in the P9 session.
 
 ## Persistence and privacy
 

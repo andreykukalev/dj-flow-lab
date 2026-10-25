@@ -1,7 +1,7 @@
 # DJ Flow Lab — MVP Backlog
 
 - **Status:** Created as GitHub issues on 2026-10-24. The issues are the source of truth; this page is the overview.
-- **Based on:** [product brief v0.3](PRODUCT_BRIEF_v0.3.md), [technical decisions](TECHNICAL_DECISIONS.md) and [implementation plan](MVP_IMPLEMENTATION_PLAN.md). Issues #4, #7, #9–#13, #16–#19 and #29 were updated for v0.3 on 2026-10-24.
+- **Based on:** [product brief v0.3](PRODUCT_BRIEF_v0.3.md), [technical decisions](TECHNICAL_DECISIONS.md) and [implementation plan](MVP_IMPLEMENTATION_PLAN.md). Issues #4, #7, #9–#13, #16–#19 and #29 were updated for v0.3 on 2026-10-24. On 2026-10-25 the backlog was refined for the UX concept in [WEB_UX.md](WEB_UX.md): #55 and #56 were added, and #7, #8, #10, #12, #15, #19–#21, #24, #25, #36 and #45 now name the screen and mockup they build.
 
 Each milestone ends with something you can open in a browser and try. Each milestone is a tracking issue with the `milestone` label, and its work items are attached as sub-issues in build order.
 
@@ -32,7 +32,7 @@ Prove the highest-risk technical assumptions before building product UI on the e
 - #42 Two-deck engine: anchor, sync, seek, automation (S1)
 - #43 Decoding matrix, MP3 offsets, memory, AIFF fallback (S2)
 - #44 Mixer DSP: isolator EQ, filter sweeps, declicking, headroom (S3)
-- #45 Virtual controller locked to the audio clock (S5)
+- #45 Virtual controller locked to the audio clock (S5), built as the Try screen's mixer
 - #46 Proof-of-concept gate: two real tracks, one transition, two engines
 
 ## M1 — Two tracks, one grid (#6)
@@ -41,6 +41,7 @@ Load two of your own tracks, see their structure, and play them in sync.
 
 - #47 BPM and downbeat accuracy on real tracks (S6), before #9 · `mvp:must`
 - #48 Storage durability and track identity (S7), before #11 · `mvp:should`
+- #55 App shell, learning-loop navigation and design tokens · `mvp:must`
 - #7 Import a local track onto each deck · `mvp:must`
 - #8 Render deck waveforms · `mvp:must`
 - #9 Estimate BPM and the first downbeat · `mvp:must`
@@ -67,6 +68,7 @@ Hear two different ways of making the same transition and understand the differe
 
 - #23 Strategy: phrase-boundary cut · `mvp:must`
 - #24 Keep variants and switch between them while listening · `mvp:must`
+- #56 Intend: choose what the transition should do and pick approaches · `mvp:should`
 - #25 Compare two variants side by side · `mvp:must`
 - #26 Adjust transition duration and strategy parameters · `mvp:should`
 - #27 Edit a plan by hand on the timeline · `mvp:should`

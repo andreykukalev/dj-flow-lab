@@ -13,6 +13,7 @@ The first product is the **Transition Builder**: load two of your own tracks, ch
 - [MVP implementation plan](docs/MVP_IMPLEMENTATION_PLAN.md)
 - [Technical risks](docs/RISKS.md)
 - [MVP backlog](docs/backlog.md) and [architecture proposal](docs/architecture.md) (v0.2)
+- [UX concept](design/ios/README.md) (iOS mockups) and [web adaptation](docs/WEB_UX.md)
 
 ## Development
 
@@ -27,6 +28,8 @@ npm run typecheck
 npm run lint
 npm run format
 ```
+
+The proof-of-concept page is at `/poc/` (http://localhost:5173/poc/ in development, and on every deployment): a long blend on two generated demo tracks, or on two of your own files with their BPM and downbeat typed or nudged, with the Try screen's mixer following what you hear. Space plays and pauses, the arrow keys move by a bar (Shift: a phrase), R replays, and _Flash on beat_ with _Offset_ checks and calibrates the audio–visual sync.
 
 Code layout and design rules are described in [docs/architecture.md](docs/architecture.md). The short version: `src/engine` is pure TypeScript with no browser dependencies, and the audio, the virtual mixer, and the explanations all read from the same transition plan.
 
