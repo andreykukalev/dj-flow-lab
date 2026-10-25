@@ -36,26 +36,32 @@ const ZIPPER_LIMIT_DBFS = -60
 
 for (const to of [-1, 1] as const) {
   for (const beats of [32, 4, 1]) {
-    test(`P5: ${to < 0 ? 'low-pass' : 'high-pass'} sweep over ${beats} beats and back is clean`, async ({
-      page,
-    }, info) => {
-      const r = await page.evaluate(([t, b]) => window.harness.dsp.filterSweep(t, b), [
-        to,
-        beats,
-      ] as const)
-      record(info, r)
-      expect(r.finite).toBe(true)
-      expect(r.peak).toBeLessThanOrEqual(r.inputPeak * r.filterPeakGain * 1.05)
-      expect(r.maxJump).toBeLessThanOrEqual(r.jumpThreshold)
-      expect(r.zipperDbfs).toBeLessThanOrEqual(ZIPPER_LIMIT_DBFS)
-      // Over 8 bars the centroid moves monotonically. The high-pass's resonance first
-      // lifts the lows a little (a dip of ≤ 2%). Shorter sweeps have too few frames per
-      // block for a stable centroid, so they are recorded only.
-      if (beats === 32) {
-        expect(r.centroid.maxAgainstOutward).toBeLessThanOrEqual(0.03)
-        expect(r.centroid.maxAgainstInward).toBeLessThanOrEqual(0.03)
-      }
-    })
+    // The 8-bar sweeps are the slow ones: CI runs the short sweeps only (@slow).
+    const tag = beats === 32 ? ['@slow'] : []
+    test(
+      `P5: ${to < 0 ? 'low-pass' : 'high-pass'} sweep over ${beats} beats and back is clean`,
+      {
+        tag,
+      },
+      async ({ page }, info) => {
+        const r = await page.evaluate(([t, b]) => window.harness.dsp.filterSweep(t, b), [
+          to,
+          beats,
+        ] as const)
+        record(info, r)
+        expect(r.finite).toBe(true)
+        expect(r.peak).toBeLessThanOrEqual(r.inputPeak * r.filterPeakGain * 1.05)
+        expect(r.maxJump).toBeLessThanOrEqual(r.jumpThreshold)
+        expect(r.zipperDbfs).toBeLessThanOrEqual(ZIPPER_LIMIT_DBFS)
+        // Over 8 bars the centroid moves monotonically. The high-pass's resonance first
+        // lifts the lows a little (a dip of ≤ 2%). Shorter sweeps have too few frames per
+        // block for a stable centroid, so they are recorded only.
+        if (beats === 32) {
+          expect(r.centroid.maxAgainstOutward).toBeLessThanOrEqual(0.03)
+          expect(r.centroid.maxAgainstInward).toBeLessThanOrEqual(0.03)
+        }
+      },
+    )
   }
 }
 
@@ -73,29 +79,37 @@ test('two loud masters at full faders stay below 0 dBTP on 4 of 5 pairs', async 
   expect(r.filter((p) => p.masterTruePeakDbfs <= 0).length).toBeGreaterThanOrEqual(4)
 })
 
-test('the long blend stays below 0 dBTP with very loud masters', async ({ page }, info) => {
-  const r = await page.evaluate(async () => {
-    const out = []
-    for (const pair of [0, 1, 2, 3, 4]) {
-      out.push(await window.harness.dsp.headroom(pair, { drive: 3, mix: 'longBlend' }))
-    }
-    return out
-  })
-  record(info, r)
-  for (const p of r) expect(p.masterTruePeakDbfs).toBeLessThanOrEqual(0)
-})
+test(
+  'the long blend stays below 0 dBTP with very loud masters',
+  { tag: '@slow' },
+  async ({ page }, info) => {
+    const r = await page.evaluate(async () => {
+      const out = []
+      for (const pair of [0, 1, 2, 3, 4]) {
+        out.push(await window.harness.dsp.headroom(pair, { drive: 3, mix: 'longBlend' }))
+      }
+      return out
+    })
+    record(info, r)
+    for (const p of r) expect(p.masterTruePeakDbfs).toBeLessThanOrEqual(0)
+  },
+)
 
-test('very loud masters at full faders (recorded, no criterion)', async ({ page }, info) => {
-  const r = await page.evaluate(async () => {
-    const out = []
-    for (const pair of [0, 1, 2, 3, 4]) {
-      out.push(await window.harness.dsp.headroom(pair, { drive: 3, mix: 'full' }))
-    }
-    return out
-  })
-  record(info, r)
-  expect(r).toHaveLength(5)
-})
+test(
+  'very loud masters at full faders (recorded, no criterion)',
+  { tag: '@slow' },
+  async ({ page }, info) => {
+    const r = await page.evaluate(async () => {
+      const out = []
+      for (const pair of [0, 1, 2, 3, 4]) {
+        out.push(await window.harness.dsp.headroom(pair, { drive: 3, mix: 'full' }))
+      }
+      return out
+    })
+    record(info, r)
+    expect(r).toHaveLength(5)
+  },
+)
 
 test('the whole proof-of-concept plan renders far faster than real time', async ({
   page,

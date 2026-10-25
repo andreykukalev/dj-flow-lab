@@ -7,6 +7,9 @@ export default defineConfig({
   testMatch: ['e2e/**/*.spec.ts', 'tests/**/*.spec.ts'],
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  // GitHub's runners have 2 cores, where the default is 1 worker; 2 keep CI within its
+  // 5-minute limit. Real-time tests wait on the audio clock rather than the CPU.
+  workers: 2,
   use: {
     baseURL: 'http://localhost:4173',
   },
