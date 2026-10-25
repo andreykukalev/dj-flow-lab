@@ -16,6 +16,8 @@
   --deck-b: #ff8a4f;
   --deck-b-soft: #ffb08a;
   --explain: #cbbcff;
+  /* The blend start and the transition area around it (#75). */
+  --blend-mark: #f2c94c;
 
   /* Knowledge-layer chips (brief §10). */
   --layer-measured-border: #5b6070;

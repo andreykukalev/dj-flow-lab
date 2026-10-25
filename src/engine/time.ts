@@ -66,6 +66,16 @@ export function formatBarBeat(pos: BarBeat): string {
   return `${pos.bar}.${pos.beat}`
 }
 
+/** Parses `bar` or `bar.beat` (1-based) into a track beat; null when it is not one. */
+export function parseBarBeat(grid: BeatGrid, text: string): number | null {
+  const m = /^\s*(-?\d+)(?:\.(\d+))?\s*$/.exec(text)
+  if (!m) return null
+  const bar = Number(m[1])
+  const beat = m[2] === undefined ? 1 : Number(m[2])
+  if (beat < 1 || beat > grid.beatsPerBar) return null
+  return barToBeat(grid, bar) + beat - 1
+}
+
 /** Nearest bar line (1-based bar) to a file time. */
 export function snapSecToBar(grid: BeatGrid, sec: number): number {
   return Math.round(secToBeat(grid, sec) / grid.beatsPerBar) + 1
@@ -98,7 +108,7 @@ function deckGrid(timing: TransitionTiming, deck: DeckId): BeatGrid {
 
 function deckEntryBeat(timing: TransitionTiming, deck: DeckId): number {
   return deck === 'A'
-    ? barToBeat(timing.gridA, timing.exitBarA)
+    ? barToBeat(timing.gridA, timing.exitBarA) + (timing.exitBeatA ?? 1) - 1
     : barToBeat(timing.gridB, timing.entryBarB)
 }
 

@@ -14,10 +14,8 @@ import './poc.css'
 // "Why it moves" column: the ruler with both decks, the mixer, and the transport.
 // Any control can be grabbed while it plays; the moves become "Your take" (#68).
 
-const REPLAY_BEAT = -32 // 8 bars before A's exit
 const BAR = 4
 const PHRASE = 32
-const OVERLAP_BEATS = 128
 const HINT_MS = 3000
 
 const SOURCE_NAMES: Record<string, string> = {
@@ -36,10 +34,22 @@ function useTransportState(session: PocSession): TransportState {
   )
 }
 
-function transitionBar(beat: number): string {
-  const whole = Math.floor(beat)
+/** `bar.beat` counted from `from`, bar 1 beat 1 there. */
+function barFrom(beat: number, from: number): string {
+  const whole = Math.floor(beat - from)
   const bar = Math.floor(whole / BAR) + 1
   return `${bar}.${whole - (bar - 1) * BAR + 1}`
+}
+
+/** Where the cursor is relative to the transition area. */
+function positionText(session: PocSession, beat: number): string {
+  const { from, to } = session.areaBeats
+  if (beat < from) {
+    const bars = Math.ceil((from - beat) / BAR)
+    return `${bars} bar${bars === 1 ? '' : 's'} to the blend`
+  }
+  if (beat >= to) return 'After the blend'
+  return `Blend bar ${barFrom(beat, from)} of ${(to - from) / BAR}`
 }
 
 export function PocPage({ session }: { session: PocSession }) {
@@ -92,11 +102,7 @@ export function PocPage({ session }: { session: PocSession }) {
     let lastBeat = Number.NaN
     let lastOutput = 0
     return loop.onFrame(({ beat, heard, frameMs, transport: t }) => {
-      if (position.current)
-        position.current.textContent =
-          beat >= 0 && beat < OVERLAP_BEATS
-            ? `Bar ${transitionBar(beat)} of ${OVERLAP_BEATS / BAR}`
-            : `Bar ${transitionBar(beat)}`
+      if (position.current) position.current.textContent = positionText(session, beat)
       if (decks.current) {
         const a = deckPosition(session.timing, 'A', beat)
         const b = deckPosition(session.timing, 'B', beat)
@@ -129,17 +135,21 @@ export function PocPage({ session }: { session: PocSession }) {
   useEffect(() => loop.onFrame(({ beat }) => (shownBeat.current = beat)), [loop])
   const currentBeat = useCallback(() => shownBeat.current, [])
 
+  // Replay starts where the plan does: the pre-roll before the transition area.
+  const replay = useCallback(() => startAt(session.compiled.span.startBeat), [session, startAt])
+
   const playPause = useCallback(async () => {
     const s = transport.state
     if (s.kind === 'playing') transport.pause()
     else if (s.kind === 'paused') await startAt(s.beat)
-    else await startAt(REPLAY_BEAT)
-  }, [transport, startAt])
+    else await replay()
+  }, [transport, startAt, replay])
 
+  /** Moves the cursor anywhere in track A or the plan; it keeps playing if it was. */
   const seek = useCallback(
     (beat: number) => {
-      const { startBeat, endBeat } = session.compiled.span
-      const target = Math.max(startBeat, Math.min(endBeat - BAR, beat))
+      const { from, to } = session.seekRange
+      const target = Math.max(from, Math.min(to, beat))
       if (transport.state.kind === 'playing') void startAt(target)
       else transport.cue(target)
     },
@@ -171,13 +181,14 @@ export function PocPage({ session }: { session: PocSession }) {
       if (e.code === 'Space') void playPause()
       else if (e.code === 'ArrowRight') step(e.shiftKey ? PHRASE : BAR)
       else if (e.code === 'ArrowLeft') step(e.shiftKey ? -PHRASE : -BAR)
-      else if (e.code === 'KeyR') void startAt(REPLAY_BEAT)
+      else if (e.code === 'KeyR') void replay()
+      else if (e.code === 'KeyB') session.setBlendStartAtCursor()
       else return
       e.preventDefault()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [playPause, step, startAt, session])
+  }, [playPause, step, replay, session])
 
   const sign = (n: number) => (n >= 0 ? '+' : '−') + Math.abs(n).toFixed(2)
 
@@ -196,7 +207,7 @@ export function PocPage({ session }: { session: PocSession }) {
 
       <main className="poc-main">
         <Tracks session={session} />
-        <Overview session={session} />
+        <Overview session={session} onSeek={seek} />
         <Timeline key={version} session={session} onSeek={seek} />
         <TakesBar session={session} hint={hint} />
         <Mixer onRenderer={onRenderer} note="The crossfader stays in the middle in this plan." />
@@ -204,7 +215,7 @@ export function PocPage({ session }: { session: PocSession }) {
 
       <footer className="poc-transport" aria-label="Transport">
         <div className="poc-buttons">
-          <button className="btn" onClick={() => void startAt(REPLAY_BEAT)} aria-label="Replay">
+          <button className="btn" onClick={() => void replay()} aria-label="Replay">
             ⟲
           </button>
           <button className="btn" onClick={() => step(-PHRASE)} aria-label="Phrase back">

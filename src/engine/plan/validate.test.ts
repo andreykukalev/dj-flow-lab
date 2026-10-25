@@ -176,6 +176,14 @@ describe('validate: errors', () => {
     expect(errorCodes({ ...base(), points: { exitBarA: 65, entryBarB: 1.5 } })).toEqual([
       'point-outside-track',
     ])
+    // #75: a blend start on another beat of the bar is fine; a beat outside the bar is not.
+    expect(errorCodes({ ...base(), points: { exitBarA: 65, exitBeatA: 3, entryBarB: 1 } })).toEqual(
+      [],
+    )
+    for (const exitBeatA of [0, 5, 2.5])
+      expect(errorCodes({ ...base(), points: { exitBarA: 65, exitBeatA, entryBarB: 1 } })).toEqual([
+        'point-outside-track',
+      ])
     const exitSecA = transitionBeatToDeckSec(
       { gridA: decks.A.grid, gridB: decks.B.grid, ...points },
       'A',

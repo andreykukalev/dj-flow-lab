@@ -8,15 +8,24 @@ import {
 } from '../engine/analysis/structure'
 import { Transport } from '../audio/transport'
 import { type BeatGrid, type DeckId, type TransitionPoints } from '../engine/model'
+import {
+  DEFAULT_AREA,
+  fitArea,
+  MIN_AREA_BEATS,
+  type AreaRequest,
+  type FittedArea,
+} from '../engine/plan/area'
 import { compile, type CompiledPlan } from '../engine/plan/compile'
 import { longBlendPlan } from '../engine/plan/longBlend'
 import { applyTakes, TakeHistory, type Take } from '../engine/plan/take'
 import type { TransitionPlanV1 } from '../engine/plan/types'
 import { validate } from '../engine/plan/validate'
 import {
+  barToBeat,
   rateB,
   rateToSemitones,
   secondsPerBar,
+  secToBeat,
   toBarBeat,
   transitionBeatToDeckBeat,
   type BarBeat,
@@ -31,6 +40,10 @@ import { DEMO_TRACKS, renderDemoTrack } from './demoTracks'
 // corrected while playing (#46). The user can take over any control while it plays;
 // each take is kept in an undoable history and applied on top of the strategy's plan
 // (#68), so "Your take" and the original can be compared from the same beat.
+//
+// The blend start and the transition area around it (#75) are kept here once: the
+// cursor, timeline clicks and drags, phrase and section picks and the numeric fields
+// all change these, and the plan is generated for the area that fits both tracks.
 
 export interface DeckSource {
   name: string
@@ -38,7 +51,8 @@ export interface DeckSource {
   grid: BeatGrid
 }
 
-export const DEMO_POINTS: TransitionPoints = { exitBarA: 9, entryBarB: 1 }
+/** A's bar 25 with B's bar 17, ±16 bars: A bars 9–41 blended with B bars 1–33. */
+export const DEMO_POINTS: TransitionPoints = { exitBarA: 25, entryBarB: 17 }
 
 export function timingOf(plan: TransitionPlanV1): TransitionTiming {
   return { gridA: plan.decks.A.grid, gridB: plan.decks.B.grid, ...plan.points }
@@ -69,12 +83,24 @@ export async function decodeFile(ctx: BaseAudioContext, file: Blob): Promise<Aud
   }
 }
 
-/** The long blend needs 40 bars of A from 8 bars before its exit: the last such phrase line. */
-export function defaultExitBar(source: DeckSource): number {
-  const bars = Math.floor(
-    (source.buffer.duration - source.grid.anchorSec) / secondsPerBar(source.grid),
-  )
-  return Math.max(9, Math.floor((bars - 40) / 8) * 8 + 1)
+/** Bars of music from bar 1 to the end of the file. */
+export function barsOf(source: DeckSource): number {
+  return Math.floor((source.buffer.duration - source.grid.anchorSec) / secondsPerBar(source.grid))
+}
+
+/** The last phrase line with the area's bars after it, and room for its bars and a pre-roll before it. */
+export function defaultExitBar(source: DeckSource, area: AreaRequest = DEFAULT_AREA): number {
+  const last = Math.floor((barsOf(source) - area.afterBars) / 8) * 8 + 1
+  return Math.max(Math.ceil(area.beforeBars / 8) * 8 + 9, last)
+}
+
+/** A track beat as `bar.beat` points: the bar, and the beat when it is not the first. */
+export function pointsAt(
+  grid: BeatGrid,
+  trackBeat: number,
+): Pick<TransitionPoints, 'exitBarA' | 'exitBeatA'> {
+  const { bar, beat } = toBarBeat(grid, Math.round(trackBeat))
+  return beat === 1 ? { exitBarA: bar } : { exitBarA: bar, exitBeatA: beat }
 }
 
 function demoSource(deck: DeckId, sampleRate: number): DeckSource {
@@ -92,6 +118,10 @@ export class PocSession {
   readonly loop: ControllerLoop
   decks: Record<DeckId, DeckSource>
   points: TransitionPoints
+  /** The transition area the user asked for, around the blend start. */
+  area: AreaRequest = DEFAULT_AREA
+  /** The area that fits both tracks: what the plan blends. */
+  fitted!: FittedArea
   /** The plan the strategy made, before any take. */
   basePlan!: TransitionPlanV1
   /** The plan playing: the strategy's plan with the takes, or without them while comparing. */
@@ -158,7 +188,10 @@ export class PocSession {
   /** A new track on a deck, with a starting grid for the user to correct. */
   setDeck(deck: DeckId, source: DeckSource): void {
     const decks = { ...this.decks, [deck]: source }
-    const points = deck === 'A' ? { ...this.points, exitBarA: defaultExitBar(source) } : this.points
+    const points =
+      deck === 'A'
+        ? { exitBarA: defaultExitBar(source, this.area), entryBarB: this.points.entryBarB }
+        : this.points
     this.change(decks, points)
   }
 
@@ -166,8 +199,59 @@ export class PocSession {
     this.change({ ...this.decks, [deck]: { ...this.decks[deck], grid } }, this.points)
   }
 
+  /** New points; the cursor keeps its place in track A. */
   setPoints(points: TransitionPoints): void {
-    this.change(this.decks, points)
+    this.change(this.decks, points, this.area, true)
+  }
+
+  /** Track beat of A at the blend start. */
+  get blendStartBeat(): number {
+    return transitionBeatToDeckBeat(this.timing, 'A', 0)
+  }
+
+  /** Moves the blend start to a track beat of A, on the nearest beat. */
+  setBlendStart(trackBeatA: number): void {
+    const { entryBarB } = this.points
+    this.setPoints({ ...pointsAt(this.decks.A.grid, trackBeatA), entryBarB })
+  }
+
+  /** Moves the blend start to where the cursor is. */
+  setBlendStartAtCursor(): void {
+    this.setBlendStart(transitionBeatToDeckBeat(this.timing, 'A', this.transport.beatAt()))
+  }
+
+  setArea(area: AreaRequest): void {
+    this.change(this.decks, this.points, area)
+  }
+
+  /** A likely section of A as the area: the blend start on its middle bar, the area across it. */
+  useSection(fromBar: number, toBar: number): void {
+    const bars = toBar - fromBar + 1
+    const before = Math.floor(bars / 2)
+    const area = { beforeBars: before, afterBars: bars - before, linked: before === bars - before }
+    this.change(
+      this.decks,
+      { exitBarA: fromBar + before, entryBarB: this.points.entryBarB },
+      area,
+      true,
+    )
+  }
+
+  /** The fitted area in transition beats. */
+  get areaBeats(): { from: number; to: number } {
+    return { from: 0 - this.fitted.beforeBeats, to: this.fitted.afterBeats }
+  }
+
+  /** Where the cursor can go: all of track A, and the plan. */
+  get seekRange(): { from: number; to: number } {
+    const a = this.decks.A
+    const toTransition = (sec: number) =>
+      secToBeat(a.grid, sec) - transitionBeatToDeckBeat(this.timing, 'A', 0)
+    const { startBeat, endBeat } = this.compiled.span
+    return {
+      from: Math.min(startBeat, Math.ceil(toTransition(0))),
+      to: Math.max(endBeat, Math.floor(toTransition(a.buffer.duration))) - 4,
+    }
   }
 
   /**
@@ -249,26 +333,38 @@ export class PocSession {
 
   private barAt = (beat: number): number => deckPosition(this.timing, 'A', beat).bar
 
-  /** Builds and loads the plan; keeps playing from the same transition beat. */
-  private change(decks: Record<DeckId, DeckSource>, points: TransitionPoints): void {
+  /**
+   * Builds and loads the plan; keeps playing from the same transition beat, or with
+   * `keepTrackPosition`, from the same place in track A when the blend start moves.
+   */
+  private change(
+    decks: Record<DeckId, DeckSource>,
+    points: TransitionPoints,
+    area: AreaRequest = this.area,
+    keepTrackPosition = false,
+  ): void {
     const before = this.transport.state
-    const beat =
+    const startBefore = this.blendStartBeat
+    let beat =
       before.kind === 'playing'
         ? this.transport.beatAt()
         : before.kind === 'paused'
           ? before.beat
           : undefined
-    const previous = { decks: this.decks, points: this.points }
+    const previous = { decks: this.decks, points: this.points, area: this.area }
     this.decks = decks
     this.points = points
+    this.area = area
     if (!this.apply()) {
       this.decks = previous.decks
       this.points = previous.points
+      this.area = previous.area
     } else {
       this.loop.setPlan(this.compiled, this.barAt)
-      const { startBeat, endBeat } = this.compiled.span
       if (beat !== undefined) {
-        const at = Math.min(Math.max(beat, startBeat), endBeat - 4)
+        if (keepTrackPosition) beat += startBefore - this.blendStartBeat
+        const { from, to } = this.seekRange
+        const at = Math.min(Math.max(beat, from), to)
         if (before.kind === 'playing') this.transport.startAt(at)
         else this.transport.cue(at)
       }
@@ -276,20 +372,37 @@ export class PocSession {
     this.notify()
   }
 
-  /** Validates and loads the plan for the current decks and points. */
+  /** Validates and loads the plan for the current decks, points and area. */
   private apply(): boolean {
+    const { A, B } = this.decks
+    const timing: TransitionTiming = { gridA: A.grid, gridB: B.grid, ...this.points }
+    const beatsOf = (s: DeckSource) => secToBeat(s.grid, s.buffer.duration)
+    const fitted = fitArea(this.area, {
+      startBeatA: transitionBeatToDeckBeat(timing, 'A', 0),
+      entryBeatB: barToBeat(B.grid, this.points.entryBarB),
+      beatsA: beatsOf(A),
+      beatsB: beatsOf(B),
+    })
+    // A blend too short to play is still built, so the validator can say why.
+    const area = fitted.tooShort
+      ? { ...fitted, beforeBeats: 0, afterBeats: MIN_AREA_BEATS }
+      : fitted
     const plan = longBlendPlan(
       {
-        A: { trackFingerprint: this.decks.A.name, grid: this.decks.A.grid },
-        B: { trackFingerprint: this.decks.B.name, grid: this.decks.B.grid },
+        A: { trackFingerprint: A.name, grid: A.grid },
+        B: { trackFingerprint: B.name, grid: B.grid },
       },
       this.points,
+      area,
     )
-    const buffers = { A: this.decks.A.buffer, B: this.decks.B.buffer }
+    const buffers = { A: A.buffer, B: B.buffer }
     const durationSec = { A: buffers.A.duration, B: buffers.B.duration }
     const { errors } = validate(plan, { durationSec })
     this.errors = errors.map((e) => e.message)
-    if (errors.length > 0) return false
+    if (errors.length === 0 && fitted.tooShort) {
+      this.errors = ['There is less than a bar of music in both tracks around this blend start']
+    }
+    if (this.errors.length > 0) return false
     // Takes are in transition beats, so they carry over to a corrected grid or point.
     let playing = this.effectivePlan(plan)
     if (validate(playing, { durationSec }).errors.length > 0) playing = plan
@@ -299,6 +412,7 @@ export class PocSession {
     this.compiled = compile(playing)
     this.compared = this.compileCompared()
     this.timing = timingOf(plan)
+    this.fitted = fitted
     return true
   }
 }

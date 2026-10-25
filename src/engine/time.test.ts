@@ -10,6 +10,7 @@ import {
   elapsedSecToTransitionBeat,
   firstDownbeatSec,
   formatBarBeat,
+  parseBarBeat,
   rateB,
   rateToSemitones,
   secToBeat,
@@ -129,6 +130,15 @@ describe('transition timeline', () => {
     expect(transitionBeatToDeckSec(timing, 'B', 0)).toBeCloseTo(0.6)
   })
 
+  it('starts the timeline on a beat inside the exit bar when one is given (#75)', () => {
+    const offBeat = { ...timing, exitBeatA: 3 }
+    expect(transitionBeatToDeckBeat(offBeat, 'A', 0)).toBe(386)
+    expect(transitionBeatToDeckBeat(offBeat, 'B', 0)).toBe(0)
+    expect(
+      deckSecToTransitionBeat(offBeat, 'A', transitionBeatToDeckSec(offBeat, 'A', 5)),
+    ).toBeCloseTo(5, 10)
+  })
+
   it('keeps both decks on the same beat as the transition advances', () => {
     for (const t of [-32, 0, 1, 31, 64, 160]) {
       const secA = transitionBeatToDeckSec(timing, 'A', t)
@@ -167,5 +177,23 @@ describe('playback anchor', () => {
       const beat = (rnd() - 0.5) * 400
       expect(anchorBeatAt(anchor, anchorTimeOf(anchor, beat))).toBeCloseTo(beat, 9)
     }
+  })
+})
+
+describe('parseBarBeat', () => {
+  const g = grid(124, 0.1)
+
+  it('reads a bar or a bar.beat as a track beat', () => {
+    expect(parseBarBeat(g, '25')).toBe(96)
+    expect(parseBarBeat(g, '25.1')).toBe(96)
+    expect(parseBarBeat(g, ' 25.3 ')).toBe(98)
+    expect(formatBarBeat(toBarBeat(g, parseBarBeat(g, '41.4')!))).toBe('41.4')
+  })
+
+  it('refuses what is not a position', () => {
+    expect(parseBarBeat(g, '25.5')).toBeNull()
+    expect(parseBarBeat(g, '25.0')).toBeNull()
+    expect(parseBarBeat(g, 'bar 3')).toBeNull()
+    expect(parseBarBeat(g, '')).toBeNull()
   })
 })

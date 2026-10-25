@@ -97,7 +97,7 @@ function checkFrames(page: Page, fromFrameMs = 0) {
 }
 
 test('P7: the mixer shows stateAt(beat(heardTime)) on every frame', async ({ page }, info) => {
-  await playFrom(page, 56) // the bass swap at beat 64 and A's fade-out start fall in the log
+  await playFrom(page, -8) // the bass swap, on the blend start at beat 0, falls in the log
   await page.waitForTimeout(5000)
   const clock = await page.evaluate(() => {
     const ctx = window.poc!.ctx
@@ -126,7 +126,7 @@ test('P7: the mixer shows stateAt(beat(heardTime)) on every frame', async ({ pag
 })
 
 test('P8: a suspended context pauses the transport at the right beat', async ({ page }, info) => {
-  await playFrom(page, 60)
+  await playFrom(page, -4)
   await page.waitForTimeout(1500)
   const suspended = await page.evaluate(async () => {
     const { ctx, transport } = window.poc!
@@ -168,7 +168,7 @@ test('P8: a suspended context pauses the transport at the right beat', async ({ 
 test('P8: after frames stop (hidden tab), the next frame matches the sound', async ({
   page,
 }, info) => {
-  await playFrom(page, 40)
+  await playFrom(page, -24)
   await page.waitForTimeout(1000)
   // A hidden tab gets no animation frames while the audio plays on. Stop the loop for
   // 3 s to get the same gap here; the 30 s check with a real hidden tab is manual.
@@ -196,7 +196,7 @@ test('P8: after frames stop (hidden tab), the next frame matches the sound', asy
 })
 
 test('the mixer marks a control about to move', async ({ page }) => {
-  await page.evaluate(() => window.poc!.transport.cue(58))
+  await page.evaluate(() => window.poc!.transport.cue(-6))
   const low = page.locator('[data-control="A.eqLow"]')
   await expect(low).toHaveAttribute('data-upcoming', 'true')
   await expect(low.locator('[data-part="caption"]')).toHaveText('kill at 25')

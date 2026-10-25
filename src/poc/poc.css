@@ -598,16 +598,6 @@
   fill: var(--text);
 }
 
-.ov-blend {
-  position: absolute;
-  top: 22px;
-  height: 60px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--deck) 14%, transparent);
-  outline: 1px solid color-mix(in srgb, var(--deck) 50%, transparent);
-  pointer-events: none;
-}
-
 .ov-phrase {
   position: absolute;
   top: 22px;
@@ -673,4 +663,157 @@
   padding: 0;
   list-style: none;
   font-size: 12px;
+}
+
+/* #75: the transition area, the blend start and the playback cursor. The cursor is a
+   solid white line; the blend start is a dashed line in its own colour with a flag in
+   the lane under track A, so the two read apart wherever they are. */
+
+.timeline-blendstart {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 2px dashed var(--blend-mark);
+}
+
+.ov-area {
+  position: absolute;
+  top: 20px;
+  height: 64px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--blend-mark) 14%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--blend-mark) 55%, transparent);
+  pointer-events: none;
+}
+
+.ov-mark {
+  position: absolute;
+  top: 18px;
+  bottom: 10px;
+  border-left: 2px dashed var(--blend-mark);
+  margin-left: -1px;
+  pointer-events: none;
+}
+
+.ov-track[data-testid='overview-track-A'] {
+  cursor: text;
+}
+
+.ov-pick {
+  cursor: pointer;
+  background: var(--surface);
+  text-align: left;
+  font-family: inherit;
+}
+
+.ov-pick:hover {
+  border-color: var(--blend-mark);
+  color: var(--text);
+}
+
+.ov-phrase-pick {
+  position: absolute;
+  bottom: 0;
+  left: 1px;
+  padding: 0 2px;
+  border: none;
+  border-radius: 3px;
+  background: none;
+  font: inherit;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.ov-phrase-pick:hover {
+  background: var(--surface-selected);
+  color: var(--text);
+}
+
+.ov-lane {
+  position: relative;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--surface-raised);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.ov-lane-area {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--blend-mark) 30%, transparent);
+}
+
+.ov-handle {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 8px;
+  border-radius: 3px;
+  background: var(--blend-mark);
+  cursor: ew-resize;
+}
+
+.ov-handle[data-edge='before'] {
+  left: -4px;
+}
+
+.ov-handle[data-edge='after'] {
+  right: -4px;
+}
+
+.ov-flag {
+  position: absolute;
+  top: 2px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  transform: translateX(-50%);
+  background: var(--blend-mark);
+  color: var(--text-on-light);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ov-how {
+  font-size: 12px;
+}
+
+.ov-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 2px;
+  vertical-align: -1px;
+}
+
+.ov-key-cursor {
+  width: 2px;
+  background: var(--text);
+}
+
+.ov-key-mark {
+  width: 0;
+  border-left: 2px dashed var(--blend-mark);
+}
+
+.ov-key-area {
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--blend-mark) 30%, transparent);
+}
+
+.poc-blend-summary {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.poc-trimmed {
+  color: var(--text);
 }
