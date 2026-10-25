@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Prepare to perform</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#111216}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-interp{background:#2b2645;color:#cbbcff}
+.l-choice{background:#e8e9ed;color:#111216}
+.l-action{background:#2c2f38;color:#e8e9ed}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:14px;font-weight:600;box-sizing:border-box;text-decoration:none}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.tabs{display:flex;flex-wrap:wrap;padding:3px;gap:2px;background:#1b1d23;border-radius:12px;border:1px solid #2c2f38}
+.tabs a{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:9px;color:#9a9ead;font-size:14px;font-weight:600;text-decoration:none}
+.tabs a.on{background:#3a3e4a;color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.av{width:24px;height:24px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:none;box-sizing:border-box}
+.av-a{background:#15382a;color:#86e3b6;border:1px solid #2f7a57}
+.av-l{background:#3b1d31;color:#f6a8d3;border:1px solid #8a4472}
+.key{display:inline-flex;align-items:center;height:22px;padding:0 7px;border-radius:6px;border:1px solid #5b6070;font-size:11px;font-weight:800;letter-spacing:.04em;color:#e8e9ed;white-space:nowrap}
+.step{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:baseline;font-size:13px;line-height:1.5;padding:6px 0;border-top:1px solid #23262e}
+</style>
+</helmet>
+<div style="min-height: 1060px; background: #111216; color: #e8e9ed; font-family: Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding-bottom: 32px; box-sizing: border-box">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 24px; border-bottom: 1px solid #2c2f38">
+<div style="display: flex; flex-direction: column; min-width: 220px; flex: 1">
+<div class="muted" style="font-size: 12px; font-weight: 600">DJ Flow Lab · Rooftop B2B · Hidden Euphoria</div>
+<div style="font-size: 20px; font-weight: 800">Prepare to perform</div>
+</div>
+<nav class="tabs" aria-label="Steps">
+<a href="Library.dc.html">1 Discover</a><a href="Concepts.dc.html">2 Imagine</a><a href="Main.dc.html">3 Explore</a><a class="on" href="Perform.dc.html" aria-current="page">Perform</a>
+</nav>
+<span class="chip l-measured" style="height: 28px; font-size: 12px">Pioneer DDJ-400 · rekordbox</span>
+</header>
+
+<main style="max-width: 1440px; margin: 0 auto; padding: 16px 24px 0; display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; box-sizing: border-box">
+
+<div style="flex: 999 1 680px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<section class="card" aria-label="Who plays when" style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center"><span class="lbl">Who plays when</span><span class="muted" style="font-size: 12px">One track each, alternating decks. The DJ who brings the next track in plays that handoff.</span></div>
+<div style="display: flex; gap: 4px; overflow-x: auto; font-size: 12px; font-weight: 700">
+<span style="flex: 1 0 96px; padding: 8px; border-radius: 8px; background: #3b1d31; color: #f6a8d3">1 · Lena<br><span style="font-weight: 500">Deck 1</span></span>
+<span style="flex: 1 0 96px; padding: 8px; border-radius: 8px; background: #15382a; color: #86e3b6">2 · Andrei<br><span style="font-weight: 500">Deck 2</span></span>
+<span style="flex: 1 0 96px; padding: 8px; border-radius: 8px; background: #3b1d31; color: #f6a8d3">3 · Lena<br><span style="font-weight: 500">Deck 1</span></span>
+<span style="flex: 1 0 96px; padding: 8px; border-radius: 8px; background: #15382a; color: #86e3b6; outline: 2px solid #e8e9ed">4 · Andrei<br><span style="font-weight: 500">Deck 2</span></span>
+<span style="flex: 1 0 96px; padding: 8px; border-radius: 8px; background: #3b1d31; color: #f6a8d3">5 · Lena<br><span style="font-weight: 500">Deck 1</span></span>
+<span style="flex: 1 0 96px; padding: 8px; border-radius: 8px; background: #15382a; color: #86e3b6">6 · Andrei<br><span style="font-weight: 500">Deck 2</span></span>
+<span style="flex: 1 0 96px; padding: 8px; border-radius: 8px; border: 2px dashed #3a3e4a; color: #9a9ead; box-sizing: border-box">7 · open<br><span style="font-weight: 500">Deck 1</span></span>
+<span style="flex: 1 0 96px; padding: 8px; border-radius: 8px; background: #3b1d31; color: #f6a8d3">8 · Lena<br><span style="font-weight: 500">Deck 2</span></span>
+</div>
+</section>
+
+<section class="card" aria-label="Transition 3 to 4" style="padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; border-color: #5b6070">
+<div style="display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center">
+<span class="mono muted" style="font-size: 13px; font-weight: 700">3 → 4</span>
+<h2 style="margin: 0; font-size: 18px; flex: 1 1 280px"><span style="color: #4fb3ff">Night Ferry</span> <span class="muted">→</span> <span style="color: #ff8a4f">Glass Orchard</span></h2>
+<span style="display: flex; gap: 6px; align-items: center; font-size: 13px"><span class="av av-a">A</span>Andrei brings it in</span>
+<span class="chip l-choice">agreed · version 2, loop-in</span>
+</div>
+<div class="muted" style="font-size: 13px; line-height: 1.5">Why: the pads arrive alone over A's looped drums, the turn in the story. The vocal waits for Lantern Haze.</div>
+
+<div class="step"><span class="mono muted">Before</span><span>Load Glass Orchard on <span class="key">DECK 2</span>. Hot cue <span class="key">PAD 1</span> = bar 1. <span class="key">LOW</span> fully left, channel fader down.</span></div>
+<div class="step"><span class="mono" style="font-weight: 700">A 161</span><span>Night Ferry reaches hot cue <span class="key">PAD 3</span> (memory cue "exit"). Press <span class="key">PLAY</span> on Deck 2 on the 1.</span></div>
+<div class="step"><span class="mono" style="font-weight: 700">161–169</span><span>Raise the Deck 2 fader to the top over 8 bars. You hear B's drums join.</span></div>
+<div class="step"><span class="mono" style="font-weight: 700">A 177</span><span>Bass swap on the 1: Deck 1 <span class="key">LOW</span> left, Deck 2 <span class="key">LOW</span> to 12 o'clock. B's pads arrive here.</span></div>
+<div class="step"><span class="mono" style="font-weight: 700">A 185</span><span>Deck 1 <span class="key">LOOP IN</span> at 185, <span class="key">LOOP OUT</span> at 193: 8 bars of A's drums keep repeating.</span></div>
+<div class="step"><span class="mono" style="font-weight: 700">189–193</span><span>Deck 1 fader down over 4 bars. Glass Orchard is alone by B bar 33.</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; padding-top: 6px">
+<a class="btn" href="Decide.dc.html">Hear the agreed version</a>
+<button class="btn" type="button">Practise it: the app plays A, you bring in B</button>
+</div>
+</section>
+
+<section class="card" aria-label="Other transitions" style="padding: 8px 18px; display: flex; flex-direction: column">
+<div style="display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #23262e; font-size: 14px"><span class="mono muted" style="font-weight: 700; width: 44px">1 → 2</span><strong style="flex: 1 1 240px">Saltwater Hymn → Deep Current</strong><span class="av av-a">A</span><span class="muted" style="font-size: 13px">long blend, 32 bars, swap at 17</span><span class="chip l-choice">agreed</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #23262e; font-size: 14px"><span class="mono muted" style="font-weight: 700; width: 44px">2 → 3</span><strong style="flex: 1 1 240px">Deep Current → Night Ferry</strong><span class="av av-l">L</span><span class="muted" style="font-size: 13px">phrase cut at A 129</span><span class="chip l-choice">agreed</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid #23262e; font-size: 14px"><span class="mono muted" style="font-weight: 700; width: 44px">4 → 5</span><strong style="flex: 1 1 240px">Glass Orchard → Lantern Haze</strong><span class="av av-l">L</span><span class="muted" style="font-size: 13px">one version, not agreed yet</span><span class="chip l-likely">open</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 10px 0; font-size: 14px"><span class="mono muted" style="font-weight: 700; width: 44px">5 → 8</span><strong style="flex: 1 1 240px">3 more transitions</strong><span class="muted" style="font-size: 13px">1 not tried, slot 7 empty</span><span class="chip l-likely">open</span></div>
+</section>
+
+</div>
+
+<aside style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 16px">
+
+<section class="card" aria-label="Take it to rekordbox" style="padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">Take it to rekordbox</h2>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 1.45">
+<label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">Playlist "Rooftop B2B" in set order</label>
+<label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">Hot cues used by the plan, pads 1 to 3</label>
+<label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">A memory cue at every exit point</label>
+<label style="display: flex; gap: 10px; align-items: center; min-height: 32px"><input type="checkbox" checked style="width: 18px; height: 18px">Transition notes in each track's comment</label>
+</div>
+<button class="btn btn-primary" type="button">Download for rekordbox</button>
+<div class="muted" style="font-size: 12px; line-height: 1.45">A rekordbox XML file. Each of you imports it on your own computer, so cues land on your own copies of the tracks. Cues you already set are kept.</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><button class="btn" type="button">Print set sheet</button><button class="btn" type="button">Open on phone</button></div>
+</section>
+
+<section class="card" aria-label="Phone view for the night" style="padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<span class="lbl">On the night, on a phone</span>
+<div style="align-self: center; width: 230px; border-radius: 28px; border: 2px solid #3a3e4a; padding: 16px 14px; display: flex; flex-direction: column; gap: 10px; background: #0b0c0f">
+<div class="muted" style="font-size: 11px; font-weight: 700">NOW · LENA · DECK 1</div>
+<div style="font-size: 17px; font-weight: 800; color: #4fb3ff">Night Ferry</div>
+<div class="mono" style="font-size: 34px; font-weight: 800">bar 157</div>
+<div style="height: 1px; background: #2c2f38"></div>
+<div class="muted" style="font-size: 11px; font-weight: 700">NEXT · ANDREI · IN 4 BARS</div>
+<div style="font-size: 14px; font-weight: 700; line-height: 1.4">At 161: play Glass Orchard on Deck 2, fader up over 8 bars</div>
+<div class="muted" style="font-size: 12px">then swap LOW at 177</div>
+</div>
+<div class="muted" style="font-size: 12px; line-height: 1.45">Bar count follows the plan from when you tap Start; it does not listen to the controller.</div>
+</section>
+
+<section class="card" aria-label="After the set" style="padding: 14px 16px; display: flex; gap: 10px; align-items: center; border-style: dashed">
+<span style="flex: 1; font-size: 13px; line-height: 1.45"><strong>After the set</strong><br><span class="muted">Bring the recording back to hear where you followed the plan and where you left it.</span></span>
+<span class="chip l-likely">later</span>
+</section>
+
+</aside>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

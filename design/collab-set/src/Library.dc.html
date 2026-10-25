@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Your music</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#111216}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-interp{background:#2b2645;color:#cbbcff}
+.l-choice{background:#e8e9ed;color:#111216}
+.l-action{background:#2c2f38;color:#e8e9ed}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:14px;font-weight:600;box-sizing:border-box;text-decoration:none}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.tabs{display:flex;flex-wrap:wrap;padding:3px;gap:2px;background:#1b1d23;border-radius:12px;border:1px solid #2c2f38}
+.tabs a{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:9px;color:#9a9ead;font-size:14px;font-weight:600;text-decoration:none}
+.tabs a.on{background:#3a3e4a;color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.av{width:24px;height:24px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:none;box-sizing:border-box}
+.av-a{background:#15382a;color:#86e3b6;border:1px solid #2f7a57}
+.av-l{background:#3b1d31;color:#f6a8d3;border:1px solid #8a4472}
+.el{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:6px;font-size:11px;font-weight:600;background:#23262e;color:#c9ccd5}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9a9ead;padding:8px 10px;border-bottom:1px solid #2c2f38;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid #23262e;vertical-align:middle;white-space:nowrap}
+.play{width:32px;height:32px;min-height:32px;min-width:32px;padding:0;border-radius:16px}
+</style>
+</helmet>
+<div style="min-height: 1060px; background: #111216; color: #e8e9ed; font-family: Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding-bottom: 32px; box-sizing: border-box">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 24px; border-bottom: 1px solid #2c2f38">
+<div style="display: flex; flex-direction: column; min-width: 220px; flex: 1">
+<div class="muted" style="font-size: 12px; font-weight: 600">DJ Flow Lab · Rooftop B2B</div>
+<div style="font-size: 20px; font-weight: 800">Your music</div>
+</div>
+<nav class="tabs" aria-label="Steps">
+<a class="on" href="Library.dc.html" aria-current="page">1 Discover</a><a href="Concepts.dc.html">2 Imagine</a><a href="Main.dc.html">3 Explore</a><a href="Perform.dc.html">Perform</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 8px"><span class="av av-a" title="Andrei">A</span><span class="av av-l" title="Lena">L</span></div>
+<button class="btn" type="button">Add tracks</button>
+</header>
+
+<main style="max-width: 1440px; margin: 0 auto; padding: 16px 24px 0; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box">
+
+<section aria-label="What we noticed" style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px">
+<h2 style="margin: 0; font-size: 22px; font-weight: 800">What we noticed in your 15 tracks</h2>
+<span class="muted" style="font-size: 13px">8 from Andrei, 7 from Lena. Every observation comes with the moments to check it by ear.</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px">
+
+<article class="card" style="padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; gap: 6px; align-items: center"><span class="lbl">Shared groove</span><span class="chip l-likely">likely</span></div>
+<p style="margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4">Six tracks hold a restrained, rolling groove between 120 and 123 BPM for long stretches.</p>
+<div style="display: flex; gap: 4px; align-items: center"><span class="av av-a">A</span><span class="av av-a">A</span><span class="av av-l">L</span><span class="av av-l">L</span><span class="av av-l">L</span><span class="av av-a">A</span></div>
+<button class="btn" type="button" style="align-self: flex-start; min-height: 36px"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Hear 8 bars of each</button>
+</article>
+
+<article class="card" style="padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; gap: 6px; align-items: center"><span class="lbl">Late melodies</span><span class="chip l-likely">likely</span></div>
+<p style="margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4">In three tracks the melody only arrives after bar 64, over a groove that does not change.</p>
+<div style="display: flex; gap: 4px; align-items: center"><span class="av av-l">L</span><span class="av av-a">A</span><span class="av av-l">L</span></div>
+<button class="btn" type="button" style="align-self: flex-start; min-height: 36px"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Hear where each melody enters</button>
+</article>
+
+<article class="card" style="padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; gap: 6px; align-items: center"><span class="lbl">Few voices</span><span class="chip l-likely">likely</span></div>
+<p style="margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4">Only two tracks carry a vocal, both Lena's. A vocal would stand out wherever it lands.</p>
+<div style="display: flex; gap: 4px; align-items: center"><span class="av av-l">L</span><span class="av av-l">L</span></div>
+<button class="btn" type="button" style="align-self: flex-start; min-height: 36px"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Hear both vocals</button>
+</article>
+
+<article class="card" style="padding: 14px; display: flex; flex-direction: column; gap: 8px; border-color: #5b6070">
+<div style="display: flex; gap: 6px; align-items: center"><span class="lbl">Unexpected pair</span><span class="chip l-likely">likely</span></div>
+<p style="margin: 0; font-size: 15px; font-weight: 600; line-height: 1.4">Lena's Night Ferry and Andrei's Northern Room share the same off-beat bass pattern, in neighbouring keys.</p>
+<div style="display: flex; gap: 4px; align-items: center"><span class="av av-l">L</span><span class="av av-a">A</span></div>
+<button class="btn" type="button" style="align-self: flex-start; min-height: 36px"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Hear them one after the other</button>
+</article>
+
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+
+<section class="card" aria-label="Tracks" style="flex: 999 1 640px; min-width: 0; padding: 8px 0">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 6px 12px 8px">
+<h2 style="margin: 0; font-size: 16px; flex: 1">All 15 tracks</h2>
+<span class="muted" style="font-size: 12px">Key and cues from Rekordbox where you have them</span>
+</div>
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th scope="col"><span class="muted">Who</span></th><th scope="col">Track</th><th scope="col">BPM</th><th scope="col">Key</th><th scope="col">Shape</th><th scope="col">What is in it <span class="chip l-likely" style="text-transform: none; letter-spacing: 0; height: 18px">likely</span></th><th scope="col"><span class="muted">Hear</span></th></tr></thead>
+<tbody>
+<tr><td><span class="av av-l">L</span></td><td><div style="font-weight: 700">Saltwater Hymn</div><div class="muted" style="font-size: 12px">Oda Lind · 7:40</div></td><td class="mono">120</td><td class="mono">8A</td><td><svg width="84" height="22" viewBox="0 0 84 22" aria-hidden="true"><path d="M0 18 L12 16 L24 12 L36 10 L48 14 L60 8 L72 9 L84 17" fill="none" stroke="#9a9ead" stroke-width="2"></path></svg></td><td><span class="el">bass</span> <span class="el">atmosphere</span></td><td><button class="btn play" type="button" aria-label="Hear Saltwater Hymn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button></td></tr>
+<tr><td><span class="av av-a">A</span></td><td><div style="font-weight: 700">Deep Current</div><div class="muted" style="font-size: 12px">Marlo Vey · 6:58</div></td><td class="mono">122</td><td class="mono">8A</td><td><svg width="84" height="22" viewBox="0 0 84 22" aria-hidden="true"><path d="M0 16 L12 9 L24 8 L36 8 L48 15 L60 6 L72 7 L84 16" fill="none" stroke="#9a9ead" stroke-width="2"></path></svg></td><td><span class="el">bass</span> <span class="el">atmosphere</span></td><td><button class="btn play" type="button" aria-label="Hear Deep Current"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button></td></tr>
+<tr style="background: #23262e"><td><span class="av av-l">L</span></td><td><div style="font-weight: 700">Night Ferry</div><div class="muted" style="font-size: 12px">Kaito Rowe · 7:12</div></td><td class="mono">123</td><td class="mono">9A</td><td><svg width="84" height="22" viewBox="0 0 84 22" aria-hidden="true"><path d="M0 17 L12 12 L24 10 L36 15 L48 9 L60 5 L72 6 L84 14" fill="none" stroke="#e8e9ed" stroke-width="2"></path></svg></td><td><span class="el">bass</span> <span class="el">melody, late</span></td><td><button class="btn play" type="button" aria-label="Hear Night Ferry"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button></td></tr>
+<tr><td><span class="av av-a">A</span></td><td><div style="font-weight: 700">Glass Orchard</div><div class="muted" style="font-size: 12px">Irena Moss · 8:05</div></td><td class="mono">124</td><td class="mono">9A</td><td><svg width="84" height="22" viewBox="0 0 84 22" aria-hidden="true"><path d="M0 18 L12 14 L24 9 L36 9 L48 8 L60 12 L72 9 L84 16" fill="none" stroke="#9a9ead" stroke-width="2"></path></svg></td><td><span class="el">bass</span> <span class="el">melody</span> <span class="el">atmosphere</span></td><td><button class="btn play" type="button" aria-label="Hear Glass Orchard"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button></td></tr>
+<tr><td><span class="av av-l">L</span></td><td><div style="font-weight: 700">Copper Sun</div><div class="muted" style="font-size: 12px">Ada Quell · 6:44</div></td><td class="mono">124</td><td class="mono">4A</td><td><svg width="84" height="22" viewBox="0 0 84 22" aria-hidden="true"><path d="M0 15 L12 8 L24 6 L36 12 L48 5 L60 4 L72 8 L84 15" fill="none" stroke="#9a9ead" stroke-width="2"></path></svg></td><td><span class="el">vocal</span> <span class="el">bass</span> <span class="el">melody</span></td><td><button class="btn play" type="button" aria-label="Hear Copper Sun"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button></td></tr>
+<tr><td><span class="av av-a">A</span></td><td><div style="font-weight: 700">Northern Room</div><div class="muted" style="font-size: 12px">Vesna Kade · 7:31</div></td><td class="mono">123</td><td class="mono">9B</td><td><svg width="84" height="22" viewBox="0 0 84 22" aria-hidden="true"><path d="M0 17 L12 13 L24 11 L36 11 L48 10 L60 10 L72 11 L84 17" fill="none" stroke="#9a9ead" stroke-width="2"></path></svg></td><td><span class="el">bass</span> <span class="el">atmosphere</span></td><td><button class="btn play" type="button" aria-label="Hear Northern Room"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button></td></tr>
+<tr><td><span class="av av-l">L</span></td><td><div style="font-weight: 700">Lantern Haze</div><div class="muted" style="font-size: 12px">Sable &amp; Finch · 7:02</div></td><td class="mono">125</td><td class="mono">10A</td><td><svg width="84" height="22" viewBox="0 0 84 22" aria-hidden="true"><path d="M0 16 L12 10 L24 12 L36 4 L48 3 L60 4 L72 6 L84 15" fill="none" stroke="#9a9ead" stroke-width="2"></path></svg></td><td><span class="el">vocal</span> <span class="el">melody, late</span></td><td><button class="btn play" type="button" aria-label="Hear Lantern Haze"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button></td></tr>
+<tr><td><span class="av av-a">A</span></td><td><div style="font-weight: 700">Quiet Engine</div><div class="muted" style="font-size: 12px">Rook Ansel · 8:12</div></td><td class="mono">121</td><td><button type="button" class="btn" style="min-height: 28px; font-size: 12px; padding: 0 8px">Add key</button></td><td><svg width="84" height="22" viewBox="0 0 84 22" aria-hidden="true"><path d="M0 17 L12 14 L24 13 L36 12 L48 13 L60 12 L72 14 L84 18" fill="none" stroke="#9a9ead" stroke-width="2"></path></svg></td><td><span class="el">bass</span></td><td><button class="btn play" type="button" aria-label="Hear Quiet Engine"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button></td></tr>
+<tr><td colspan="7" class="muted" style="font-size: 12px; text-align: center">7 more · Afterglow Lines, Low Tide Club, Harbor Lights and 4 others</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<aside class="card" aria-label="Night Ferry" style="flex: 1 1 360px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+<div><h2 style="margin: 0; font-size: 18px">Night Ferry</h2><div class="muted" style="font-size: 13px">Kaito Rowe · Lena's track</div></div>
+<span class="av av-l">L</span>
+</div>
+<div style="display: flex; gap: 2px; height: 30px; font-size: 10px; font-weight: 700" aria-label="Night Ferry sections">
+<span style="flex: 2; background: #2c2f38; border-radius: 4px; padding: 4px; box-sizing: border-box">INTRO</span>
+<span style="flex: 4; background: #2c2f38; border-radius: 4px; padding: 4px; box-sizing: border-box">GROOVE</span>
+<span style="flex: 2; background: #2c2f38; border-radius: 4px; padding: 4px; box-sizing: border-box">BREAK</span>
+<span style="flex: 3; background: #3a3e4a; border-radius: 4px; padding: 4px; box-sizing: border-box">DROP</span>
+<span style="flex: 2; background: #2c2f38; border-radius: 4px; padding: 4px; box-sizing: border-box">OUTRO</span>
+</div>
+<div class="lbl">Distinctive moments</div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.4">
+<div style="display: flex; gap: 10px; align-items: center"><button class="btn play" type="button" aria-label="Hear bar 65"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button><span><strong class="mono">Bar 65</strong> · the melody enters over an unchanged groove <span class="chip l-likely">likely</span></span></div>
+<div style="display: flex; gap: 10px; align-items: center"><button class="btn play" type="button" aria-label="Hear bar 129"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button><span><strong class="mono">Bar 129</strong> · bass returns after the break <span class="chip l-likely">likely</span></span></div>
+<div style="display: flex; gap: 10px; align-items: center"><button class="btn play" type="button" aria-label="Hear bar 161"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button><span><strong class="mono">Bar 161</strong> · drums only for 32 bars, room for the next track</span></div>
+</div>
+<div style="padding: 10px 12px; border-radius: 10px; background: #23262e; font-size: 13px; line-height: 1.45"><span class="muted">Lena's note:</span> "the melody at 65 is the whole reason I play this one."</div>
+<div class="muted" style="font-size: 12px">More on demand: energy per bar, phrase grid, cues from Rekordbox.</div>
+</aside>
+
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: flex-end; padding: 4px 0">
+<span class="muted" style="font-size: 13px">Next: a few stories this music could tell</span>
+<a class="btn btn-primary" href="Concepts.dc.html" style="min-height: 48px; padding: 0 20px; font-size: 15px">Explore my tracks</a>
+</div>
+
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
