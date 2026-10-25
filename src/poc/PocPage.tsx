@@ -3,6 +3,7 @@ import type { TransportState } from '../audio/transport'
 import { TakeOver } from '../ui/controller/takeover'
 import type { MixerRenderer } from '../ui/mixer/renderer'
 import { Mixer } from '../ui/mixer/Mixer'
+import { Overview } from './Overview'
 import { deckPosition, type PocSession } from './session'
 import { TakesBar } from './TakesBar'
 import { Timeline } from './Timeline'
@@ -195,6 +196,7 @@ export function PocPage({ session }: { session: PocSession }) {
 
       <main className="poc-main">
         <Tracks session={session} />
+        <Overview session={session} />
         <Timeline key={version} session={session} onSeek={seek} />
         <TakesBar session={session} hint={hint} />
         <Mixer onRenderer={onRenderer} note="The crossfader stays in the middle in this plan." />

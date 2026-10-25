@@ -1,5 +1,11 @@
 import { decodeAiff, isAiff } from '../audio/aiff'
 import { MixerGraph } from '../audio/mixerGraph'
+import {
+  analyseStructure,
+  frameFeatures,
+  type FrameFeatures,
+  type TrackStructure,
+} from '../engine/analysis/structure'
 import { Transport } from '../audio/transport'
 import { type BeatGrid, type DeckId, type TransitionPoints } from '../engine/model'
 import { compile, type CompiledPlan } from '../engine/plan/compile'
@@ -100,6 +106,8 @@ export class PocSession {
   /** Changes on every accepted or refused change, for React. */
   version = 0
   private readonly listeners = new Set<() => void>()
+  private readonly features = new WeakMap<AudioBuffer, FrameFeatures>()
+  private readonly structures = new Map<DeckId, { source: DeckSource; structure: TrackStructure }>()
 
   constructor(options: { logFrames?: number } = {}) {
     this.ctx = new AudioContext({ latencyHint: 'interactive' })
@@ -120,6 +128,24 @@ export class PocSession {
   get tempoChange(): { percent: number; semitones: number } {
     const rate = rateB(this.timing)
     return { percent: (rate - 1) * 100, semitones: rateToSemitones(rate) }
+  }
+
+  /** The whole track's likely structure on its current grid (#29), computed once per track and grid. */
+  structure(deck: DeckId): TrackStructure {
+    const source = this.decks[deck]
+    const cached = this.structures.get(deck)
+    if (cached?.source === source) return cached.structure
+    let frames = this.features.get(source.buffer)
+    if (!frames) {
+      const channels = Array.from({ length: source.buffer.numberOfChannels }, (_, c) =>
+        source.buffer.getChannelData(c),
+      )
+      frames = frameFeatures(channels, source.buffer.sampleRate)
+      this.features.set(source.buffer, frames)
+    }
+    const structure = analyseStructure(frames, source.grid)
+    this.structures.set(deck, { source, structure })
+    return structure
   }
 
   subscribe = (listener: () => void): (() => void) => {
