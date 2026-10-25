@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { arcPoints, type ArcPoint } from '../../engine/set/arc'
-import { transitions, type SetPlan } from '../../engine/set/spine'
+import { MAX_ALTERNATIVES, transitions, unused, type SetPlan } from '../../engine/set/spine'
 import { trackFacts } from '../../engine/set/profile'
 import { Layer, Shape } from './Bits'
 import { HearIdea } from './Idea'
@@ -46,13 +46,80 @@ function ArcChart({ plan, points }: { plan: SetPlan; points: ArcPoint[] }) {
   )
 }
 
+/** Candidates waiting beside a slot's track, to swap in with one action (#93). */
+function Alternatives({
+  store,
+  plan,
+  index,
+  free,
+}: {
+  store: SetStore
+  plan: SetPlan
+  index: number
+  free: string[]
+}) {
+  const [adding, setAdding] = useState('')
+  const alts = plan.alternatives[index] ?? []
+  const nameOf = (id: string) => store.profile(id)?.name ?? id
+  return (
+    <div className="set-alternatives" data-testid="alternatives">
+      {alts.length > 0 && <span className="muted">Waiting beside it:</span>}
+      {alts.map((id) => (
+        <span key={id} className="set-alternative">
+          <strong>{nameOf(id)}</strong>{' '}
+          <button className="btn btn-small" onClick={() => store.swapIn(index, id)}>
+            Swap in
+          </button>
+          <button
+            className="btn btn-small set-icon"
+            aria-label={`Stop considering ${nameOf(id)} for slot ${index + 1}`}
+            onClick={() => store.removeAlternative(index, id)}
+          >
+            ✕
+          </button>
+        </span>
+      ))}
+      {alts.length < MAX_ALTERNATIVES && free.length > 0 && (
+        <>
+          <select
+            value={adding}
+            aria-label={`Alternative for slot ${index + 1}`}
+            onChange={(e) => setAdding(e.target.value)}
+          >
+            <option value="">An alternative…</option>
+            {free.map((id) => (
+              <option key={id} value={id}>
+                {nameOf(id)}
+              </option>
+            ))}
+          </select>
+          <button
+            className="btn btn-small"
+            disabled={!adding}
+            onClick={() => {
+              store.addAlternative(index, adding)
+              setAdding('')
+            }}
+          >
+            Put beside it
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
+
 export function SetSpine({ store }: { store: SetStore }) {
   const plan = store.plan
   const [adding, setAdding] = useState('')
   if (!plan) return null
   const profiles = store.profiles
   const steps = transitions(plan, profiles)
-  const rest = profiles.filter((p) => !plan.order.includes(p.id))
+  const free = unused(
+    plan,
+    profiles.map((p) => p.id),
+  )
+  const rest = profiles.filter((p) => free.includes(p.id))
   const opening = store.lab
   const points = arcPoints(plan, profiles)
   const pointOf = (id: string) => points.find((p) => p.trackId === id)
@@ -158,6 +225,7 @@ export function SetSpine({ store }: { store: SetStore }) {
                 ) : (
                   <p className="muted">This track was removed from the collection.</p>
                 )}
+                <Alternatives store={store} plan={plan} index={k} free={rest.map((r) => r.id)} />
               </article>
               {step && (
                 <div className="set-transition" data-testid="transition" data-status={step.status}>

@@ -46,6 +46,7 @@ import {
   type TransitionTiming,
 } from '../engine/time'
 import { ControllerLoop } from '../ui/controller/loop'
+import type { LabState } from '../engine/set/versions'
 import { DEMO_TRACKS, renderDemoTrack } from './demoTracks'
 
 // One proof-of-concept session: an AudioContext, the mixer graph, the transport with
@@ -434,6 +435,33 @@ export class PocSession {
   redo(): void {
     this.history.redo()
     this.refreshTakes()
+  }
+
+  /** What plays now, to save as a version of the transition (#93). */
+  snapshot(): LabState {
+    return {
+      points: { ...this.points },
+      area: { ...this.area },
+      loop: this.loopRequest ? { ...this.loopRequest } : null,
+      takes: [...this.history.takes],
+      grids: { A: this.decks.A.grid, B: this.decks.B.grid },
+    }
+  }
+
+  /**
+   * Puts a saved version in place on the same two tracks. Playing goes on at the same
+   * transition beat, so two versions can be compared bar for bar (#94); the takes it
+   * replaces come back with undo.
+   */
+  restore(state: LabState): void {
+    this.auto = null
+    this.history.load(state.takes)
+    this.listening = 'take'
+    const decks = {
+      A: { ...this.decks.A, grid: state.grids.A },
+      B: { ...this.decks.B, grid: state.grids.B },
+    }
+    this.change(decks, { ...state.points }, { ...state.area }, false, state.loop)
   }
 
   /** Back to the strategy's plan. Undo brings the takes back. */

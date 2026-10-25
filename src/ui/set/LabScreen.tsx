@@ -1,4 +1,5 @@
 import { PocPage } from '../../poc/PocPage'
+import { LabWork } from './LabWork'
 import type { SetStore } from './store'
 
 // The Lab (#91): the Transition Builder from the proof of concept, with the two tracks
@@ -23,6 +24,7 @@ export function LabScreen({ store }: { store: SetStore }) {
           Auto’s suggested blend start is in place. A grid you correct here goes back to the track.
         </span>
       </div>
+      <LabWork store={store} />
       <PocPage session={store.audio} />
     </div>
   )
