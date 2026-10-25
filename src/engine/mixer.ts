@@ -59,8 +59,8 @@ export function gainToDb(gain: number): number {
   return 20 * Math.log10(gain)
 }
 
-/** Fixed master gain, headroom for two full-level tracks (D-11). */
-export const MASTER_GAIN_DB = -6
+/** Fixed master gain, headroom for two loud tracks at full level (D-11, set in S3). */
+export const MASTER_GAIN_DB = -9
 
 /** Trim −1…+1 → −12…+12 dB. */
 export function trimGain(p: number): number {
@@ -86,29 +86,41 @@ export const FILTER_DEAD_ZONE = 0.02
 /** Filter resonance as a linear Q (D-13, provisional). */
 export const FILTER_Q = 0.9
 export const FILTER_LP_MIN_HZ = 100
-export const FILTER_HP_MIN_HZ = 10
+/**
+ * Highest low-pass cutoff, used at rest, as a fraction of Nyquist. Firefox switches to
+ * a pass-through at exactly Nyquist, and sweeping away from or back to it clicked
+ * (S3); at 0.95 the response is within 0.2 dB up to 18 kHz.
+ */
+export const FILTER_LP_MAX_NYQUIST = 0.95
+/** Lowest high-pass cutoff, used at rest (S3: 10 Hz lifted 20 Hz by 0.6 dB at this Q). */
+export const FILTER_HP_MIN_HZ = 5
 export const FILTER_HP_MAX_HZ = 8000
 
 /**
  * Bipolar filter (D-13). Both biquads stay in the chain; in the centre the low-pass
- * sits at Nyquist and the high-pass at 10 Hz. Negative positions lower the low-pass
- * cutoff towards 100 Hz, positive positions raise the high-pass cutoff towards 8 kHz,
- * both log-mapped.
+ * sits at 0.95 × Nyquist and the high-pass at 5 Hz, which together keep the response
+ * within 0.25 dB from 20 Hz to 18 kHz. Negative positions lower the low-pass cutoff
+ * towards 100 Hz, positive positions raise the high-pass cutoff towards 8 kHz, both
+ * log-mapped.
+ *
+ * Neither rests at its exact pass-through (0 Hz, Nyquist): engines switch coefficient
+ * forms there, and a sweep leaving or reaching it clicked (Chromium at 0 Hz, Firefox
+ * at Nyquist).
  */
 export function filterCutoffs(
   x: number,
   sampleRate: number,
 ): { lowpassHz: number; highpassHz: number } {
-  const nyquist = sampleRate / 2
+  const maxHz = (FILTER_LP_MAX_NYQUIST * sampleRate) / 2
   const u = Math.max(0, (Math.abs(x) - FILTER_DEAD_ZONE) / (1 - FILTER_DEAD_ZONE))
   if (x < 0) {
     return {
-      lowpassHz: nyquist * (FILTER_LP_MIN_HZ / nyquist) ** u,
+      lowpassHz: maxHz * (FILTER_LP_MIN_HZ / maxHz) ** u,
       highpassHz: FILTER_HP_MIN_HZ,
     }
   }
   return {
-    lowpassHz: nyquist,
+    lowpassHz: maxHz,
     highpassHz: FILTER_HP_MIN_HZ * (FILTER_HP_MAX_HZ / FILTER_HP_MIN_HZ) ** u,
   }
 }

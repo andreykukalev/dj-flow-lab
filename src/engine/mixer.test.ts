@@ -70,8 +70,8 @@ describe('mappings', () => {
   it('leaves the filter open in the centre and in the dead zone', () => {
     for (const x of [0, 0.01, -0.019, 0.02, -0.02]) {
       const c = filterCutoffs(x, 48000)
-      expect(c.lowpassHz).toBeCloseTo(24000, 6)
-      expect(c.highpassHz).toBeCloseTo(10, 9)
+      expect(c.lowpassHz).toBeCloseTo(22800, 6)
+      expect(c.highpassHz).toBeCloseTo(5, 9)
     }
   })
 
@@ -80,8 +80,8 @@ describe('mappings', () => {
     expect(filterCutoffs(1, 48000).highpassHz).toBeCloseTo(8000, 6)
     // Half way (in the mapped range) is the geometric mean.
     const mid = 0.02 + 0.98 / 2
-    expect(filterCutoffs(mid, 48000).highpassHz).toBeCloseTo(Math.sqrt(10 * 8000), 6)
-    expect(filterCutoffs(-mid, 44100).lowpassHz).toBeCloseTo(Math.sqrt(100 * 22050), 6)
+    expect(filterCutoffs(mid, 48000).highpassHz).toBeCloseTo(Math.sqrt(5 * 8000), 6)
+    expect(filterCutoffs(-mid, 44100).lowpassHz).toBeCloseTo(Math.sqrt(100 * 0.95 * 22050), 6)
   })
 
   it('moves the cutoff monotonically', () => {

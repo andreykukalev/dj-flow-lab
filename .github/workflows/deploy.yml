@@ -18,9 +18,12 @@ permissions:
 
 jobs:
   deploy:
+    # A merged pull request's closed event has github.ref set to the base branch, so the
+    # event name must be checked too, or the deploy re-creates the preview that
+    # close-preview just removed.
     if: >-
       (github.event_name == 'pull_request' && github.event.action != 'closed') ||
-      github.ref == 'refs/heads/main'
+      (github.event_name != 'pull_request' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     env:
       SWA_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}

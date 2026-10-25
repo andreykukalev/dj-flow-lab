@@ -17,16 +17,21 @@ import { DECK_IDS, type DeckId } from '../engine/model'
 // The D-11 signal chain built from native Web Audio nodes (D-02):
 //
 //   source → trim → isolator EQ → low-pass → high-pass → fader → gate → crossfader ─┐
-//                                                                                    ├→ master (−6 dB) → meter → out
+//                                                                                    ├→ master (−9 dB) → meter → out
 //   (deck B, same chain) ───────────────────────────────────────────────────────────┘
 //
 // The gate is the transport's own fade for starts, stops and seeks (D-15); plans
 // never touch it.
 
-/** Isolator crossover frequencies (D-12, provisional). */
-export const CROSSOVER_LOW_HZ = 250
-export const CROSSOVER_HIGH_HZ = 2500
+/** Isolator crossover frequencies (D-12): set in S3 so the low kill reaches 40 dB up to 100 Hz. */
+export const CROSSOVER_LOW_HZ = 320
+export const CROSSOVER_HIGH_HZ = 3200
 const BUTTERWORTH_Q = Math.SQRT1_2
+
+export interface MixerGraphOptions {
+  /** Isolator crossovers, low and high, in Hz. Tests compare alternatives with this. */
+  crossoverHz: readonly [number, number]
+}
 
 export interface DeckChain {
   /** Sources connect here. */
@@ -55,10 +60,16 @@ export class MixerGraph {
   readonly master: GainNode
   readonly meter: AnalyserNode
   readonly ctx: BaseAudioContext
+  readonly options: MixerGraphOptions
   private readonly targets: Record<ControlKey, ParamTarget[]>
 
-  constructor(ctx: BaseAudioContext, destination: AudioNode = ctx.destination) {
+  constructor(
+    ctx: BaseAudioContext,
+    destination: AudioNode = ctx.destination,
+    options: Partial<MixerGraphOptions> = {},
+  ) {
     this.ctx = ctx
+    this.options = { crossoverHz: [CROSSOVER_LOW_HZ, CROSSOVER_HIGH_HZ], ...options }
     this.master = new GainNode(ctx, { gain: dbToGain(MASTER_GAIN_DB) })
     this.meter = new AnalyserNode(ctx, { fftSize: 2048 })
     this.master.connect(this.meter).connect(destination)
@@ -125,14 +136,15 @@ export class MixerGraph {
     const trim = gain()
     input.connect(trim)
 
-    // Isolator: low = LP250 · AP2500, mid = HP250 · LP2500, high = HP250 · HP2500.
+    // Isolator: low = LP320 · AP3200, mid = HP320 · LP3200, high = HP320 · HP3200.
     // The all-pass gives the low band the same phase as the 2.5 kHz crossover, so the
     // three bands sum to an all-pass (flat magnitude) at unity.
-    const [lowIn, lowOut] = lr4('lowpass', CROSSOVER_LOW_HZ)
-    const lowAllpass = biquad('allpass', CROSSOVER_HIGH_HZ)
-    const [restIn, restOut] = lr4('highpass', CROSSOVER_LOW_HZ)
-    const [midIn, midOut] = lr4('lowpass', CROSSOVER_HIGH_HZ)
-    const [highIn, highOut] = lr4('highpass', CROSSOVER_HIGH_HZ)
+    const [lowHz, highHz] = this.options.crossoverHz
+    const [lowIn, lowOut] = lr4('lowpass', lowHz)
+    const lowAllpass = biquad('allpass', highHz)
+    const [restIn, restOut] = lr4('highpass', lowHz)
+    const [midIn, midOut] = lr4('lowpass', highHz)
+    const [highIn, highOut] = lr4('highpass', highHz)
     const low = gain()
     const mid = gain()
     const high = gain()
@@ -145,8 +157,7 @@ export class MixerGraph {
     midOut.connect(mid).connect(sum)
     highOut.connect(high).connect(sum)
 
-    const nyquist = ctx.sampleRate / 2
-    const lowpass = biquad('lowpass', nyquist, FILTER_Q)
+    const lowpass = biquad('lowpass', filterCutoffs(0, ctx.sampleRate).lowpassHz, FILTER_Q)
     const highpass = biquad('highpass', FILTER_HP_MIN_HZ, FILTER_Q)
     const fader = gain()
     const gateNode = gain(0)
