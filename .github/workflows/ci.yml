@@ -1,13 +1,22 @@
 name: CI
 
+# Every job must finish within 5 minutes (timeout-minutes). Pull requests and main run
+# the browser tests without the @slow measurements; a manual run includes them.
+
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,6 +32,7 @@ jobs:
 
   browser-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     strategy:
       fail-fast: false
       matrix:
@@ -45,10 +55,11 @@ jobs:
           pulseaudio -D --exit-idle-time=-1
           pactl load-module module-null-sink sink_name=ci
           pactl set-default-sink ci
-      - run: npx playwright test --project=${{ matrix.browser }}
+      - run: npx playwright test --project=${{ matrix.browser }} ${{ github.event_name != 'workflow_dispatch' && '--grep-invert @slow' || '' }}
 
   infra:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Build and lint Bicep

@@ -39,24 +39,30 @@ test('P1: decks stay aligned over 64 bars at 124 vs 120 BPM', async ({ page }, i
   }
 })
 
+// CI runs the first seed; the others are @slow.
 for (const seed of [1, 2, 3]) {
-  test(`P2: 100 random seeks leave timing and mixer state as in a play-through (seed ${seed})`, async ({
-    page,
-  }, info) => {
-    const r = await page.evaluate((s) => window.harness.engine.seekDeterminism(s), seed)
-    record(info, r)
-    for (const deck of ['A', 'B'] as const) {
-      const o = r.onsets[deck]
-      expect(o.compared, `onsets compared on deck ${deck}`).toBeGreaterThanOrEqual(16)
-      expect(o.maxCorrectedSamples).toBeLessThanOrEqual(SAMPLE)
-      if (!isFirefox(info)) expect(o.maxSamples).toBeLessThanOrEqual(SAMPLE)
-      // Levels of 0.5-amplitude tones: within 2.5e-4 (−66 dB). Biquad filters keep the
-      // history of a frequency sweep, so levels differ slightly where a filter moves;
-      // the parameters themselves match stateAt within 1e-4 (probes, below).
-      expect(r.maxLevelError[deck].max).toBeLessThanOrEqual(2.5e-4)
-    }
-    if (r.probesSupported) expect(r.maxControlError).toBeLessThanOrEqual(1e-4)
-  })
+  const tag = seed > 1 ? ['@slow'] : []
+  test(
+    `P2: 100 random seeks leave timing and mixer state as in a play-through (seed ${seed})`,
+    {
+      tag,
+    },
+    async ({ page }, info) => {
+      const r = await page.evaluate((s) => window.harness.engine.seekDeterminism(s), seed)
+      record(info, r)
+      for (const deck of ['A', 'B'] as const) {
+        const o = r.onsets[deck]
+        expect(o.compared, `onsets compared on deck ${deck}`).toBeGreaterThanOrEqual(16)
+        expect(o.maxCorrectedSamples).toBeLessThanOrEqual(SAMPLE)
+        if (!isFirefox(info)) expect(o.maxSamples).toBeLessThanOrEqual(SAMPLE)
+        // Levels of 0.5-amplitude tones: within 2.5e-4 (−66 dB). Biquad filters keep the
+        // history of a frequency sweep, so levels differ slightly where a filter moves;
+        // the parameters themselves match stateAt within 1e-4 (probes, below).
+        expect(r.maxLevelError[deck].max).toBeLessThanOrEqual(2.5e-4)
+      }
+      if (r.probesSupported) expect(r.maxControlError).toBeLessThanOrEqual(1e-4)
+    },
+  )
 }
 
 test('P3: 50 pause/resume cycles add no offset', async ({ page }, info) => {

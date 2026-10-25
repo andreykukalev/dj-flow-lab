@@ -25,6 +25,7 @@ npm install
 npm run dev        # start the app at http://localhost:5173
 npm test           # unit tests (Vitest)
 npm run test:e2e   # browser tests on Chromium and Firefox (run `npx playwright install chromium firefox` once)
+# CI skips the slow measurement tests: add `--grep-invert @slow` to do the same
 npm run typecheck
 npm run lint
 npm run format
