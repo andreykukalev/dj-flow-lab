@@ -219,9 +219,12 @@
   margin: 0;
 }
 
+.set-reading > .btn {
+  align-self: flex-start;
+}
+
 .set-reading .btn-primary {
   margin-top: auto;
-  align-self: flex-start;
 }
 
 .set-words {
@@ -324,4 +327,71 @@
   gap: 12px;
   padding: 8px 0;
   font-size: 14px;
+}
+
+.set-idea {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.set-idea details {
+  font-size: 13px;
+}
+
+.set-moments,
+.set-checks {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+.set-moments li[aria-current='step'] {
+  color: var(--blend-mark);
+}
+
+.set-checks {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.set-checks li {
+  padding: 8px;
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+}
+
+.set-arc {
+  margin: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.set-arc svg {
+  width: 100%;
+  max-height: 180px;
+}
+
+.set-arc-line {
+  fill: none;
+  stroke: var(--explain);
+  stroke-width: 2;
+}
+
+.set-arc-dot {
+  fill: var(--text-muted);
+}
+
+.set-arc-off {
+  fill: var(--blend-mark);
+}
+
+.set-arc-note {
+  font-size: 13px;
+  color: var(--blend-mark);
 }

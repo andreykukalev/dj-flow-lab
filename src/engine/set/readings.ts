@@ -25,6 +25,8 @@ export interface Reading {
   order: string[]
   /** The function the reading gives each slot of the order. */
   roles: MusicalFunction[]
+  /** How full the reading wants each slot, 0..1: its energy arc. */
+  arc: number[]
   uses: Record<DjId, number>
   /** How the order was made, in words. */
   orderedBy: string
@@ -44,8 +46,8 @@ interface Authored {
   /** Every one of these must be observed; each gives a reason. */
   needs: { kind: ObservationKind; why: string }[]
   /** How full each slot should be, by position 0..1 in the set. */
-  curve?: (x: number) => number
-  /** Alternates the two DJs instead of following a curve. */
+  curve: (x: number) => number
+  /** Alternates the two DJs instead of ordering by the curve. */
   alternate?: boolean
 }
 
@@ -90,6 +92,7 @@ const AUTHORED: Authored[] = [
     functions: ['OPEN', 'HANDOFF', 'TRANSFORM', 'HANDOFF', 'RESOLVE'],
     question: 'Where do the two collections sound most alike, and should that be the meeting?',
     needs: [{ kind: 'pair-across', why: 'A pair across the two collections can be the meeting.' }],
+    curve: (x) => 0.3 + 0.6 * x,
     alternate: true,
   },
   {
@@ -142,6 +145,13 @@ export function rolesFor(functions: readonly MusicalFunction[], slots: number): 
   return Array.from(
     { length: slots },
     (_, i) => functions[Math.round((i * (functions.length - 1)) / (slots - 1))]!,
+  )
+}
+
+/** A curve sampled at each slot, kept within 0..1. */
+export function arcFor(curve: (x: number) => number, slots: number): number[] {
+  return Array.from({ length: slots }, (_, i) =>
+    Math.max(0, Math.min(1, curve(slots === 1 ? 0 : i / (slots - 1)))),
   )
 }
 
@@ -202,7 +212,7 @@ function build(
   drives: Map<string, number>,
 ): Reading {
   const used = pick(tracks, evidence, a.alternate ?? false)
-  const order = a.alternate ? alternating(used) : byCurve(used, a.curve!, drives)
+  const order = a.alternate ? alternating(used) : byCurve(used, a.curve, drives)
   const owners = new Map(tracks.map((t) => [t.id, t.owner]))
   const uses: Record<DjId, number> = { dj1: 0, dj2: 0 }
   for (const id of order) uses[owners.get(id)!]++
@@ -219,6 +229,7 @@ function build(
     question: a.question,
     order,
     roles: rolesFor(a.functions, order.length),
+    arc: arcFor(a.curve, order.length),
     uses,
     orderedBy: a.alternate
       ? 'the two DJs in turns, each in tempo order'

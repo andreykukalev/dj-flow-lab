@@ -1,6 +1,8 @@
 import type { Observation } from '../../engine/set/observations'
 import type { Reading } from '../../engine/set/readings'
+import { useState } from 'react'
 import { Layer, NotMeasured, TrackLine } from './Bits'
+import { HearIdea } from './Idea'
 import { HEAR_BARS, type SetStore } from './store'
 
 // The Concept Explorer (#89, #90): what the analysis noticed in the collection, each
@@ -25,7 +27,7 @@ function ObservationCard({ store, o }: { store: SetStore; o: Observation }) {
       </p>
       <div className="set-hear">
         {o.hear.map((h) => {
-          const playing = store.hearing?.trackId === h.trackId && store.hearing.bar === h.bar
+          const playing = store.isHearing(`${h.trackId}@${h.bar}`)
           return (
             <button
               key={`${h.trackId}-${h.bar}`}
@@ -52,7 +54,9 @@ function ReadingCard({
   r: Reading
   observations: Observation[]
 }) {
-  const title = (id: string) => observations.find((o) => o.id === id)?.title ?? id
+  const [checking, setChecking] = useState(false)
+  const find = (id: string) => observations.find((o) => o.id === id)
+  const title = (id: string) => find(id)?.title ?? id
   return (
     <li className="card set-reading" data-testid="reading" aria-label={r.name}>
       <div className="set-card-head">
@@ -79,10 +83,49 @@ function ReadingCard({
               </li>
             ))}
           </ul>
+          <button
+            className="btn btn-small"
+            aria-expanded={checking}
+            onClick={() => setChecking(!checking)}
+          >
+            Check it by ear
+          </button>
+          {checking && (
+            <ul className="set-checks" aria-label={`Claims of ${r.name}`}>
+              {r.why.map((w) => {
+                const o = find(w.observationId)
+                if (!o) return null
+                return (
+                  <li key={w.observationId} data-testid="claim">
+                    <p>{w.text}</p>
+                    <div className="set-hear">
+                      {o.hear.map((h) => {
+                        const playing = store.isHearing(`${h.trackId}@${h.bar}`)
+                        return (
+                          <button
+                            key={`${h.trackId}-${h.bar}`}
+                            className="btn btn-small"
+                            aria-pressed={playing}
+                            onClick={() => void store.hear(h.trackId, h.bar)}
+                          >
+                            {playing ? '■ Stop' : '▶ Hear it'}: {h.label}
+                          </button>
+                        )
+                      })}
+                      <button className="btn btn-small" onClick={() => store.dismiss(o.id)}>
+                        Doesn’t sound like that
+                      </button>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </>
       ) : (
         <p className="muted">Offered for any collection: it rests only on tempo and fullness.</p>
       )}
+      <HearIdea store={store} id={r.id} plan={r} />
       <p className="set-label">To explore</p>
       <p>{r.question}</p>
       <p className="muted">
@@ -110,6 +153,14 @@ export function ConceptExplorer({ store }: { store: SetStore }) {
       </header>
       <section aria-label="Observations">
         <h3>What we noticed in your {count} tracks</h3>
+        {store.dismissed.size > 0 && (
+          <p className="muted">
+            {store.dismissed.size} hidden because you said they don’t sound like that.{' '}
+            <button className="btn btn-small" onClick={() => store.restoreDismissed()}>
+              Show them again
+            </button>
+          </p>
+        )}
         <ul className="set-observations">
           {observations.map((o) => (
             <ObservationCard key={o.id} store={store} o={o} />

@@ -131,7 +131,26 @@ test('two DJs explore their tracks and open a transition in the Lab', async ({ p
   await hear.click()
   await expect(hear).toHaveAttribute('aria-pressed', 'false')
 
+  // Check a reading by ear: a claim that does not sound right takes its readings away.
+  const unknown = page.getByRole('listitem', { name: 'Into the Unknown' })
+  await unknown.getByRole('button', { name: 'Check it by ear' }).click()
+  const claims = unknown.getByTestId('claim')
+  await expect(claims).toHaveCount(2)
+  await claims
+    .filter({ hasText: 'steady grooves' })
+    .getByRole('button', { name: 'Doesn’t sound like that' })
+    .click()
+  await expect(page.getByRole('listitem', { name: 'Into the Unknown' })).toHaveCount(0)
+  await expect(page.getByTestId('observation').filter({ hasText: 'steady grooves' })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Show them again' }).click()
+  await expect(page.getByRole('listitem', { name: 'Into the Unknown' })).toBeVisible()
+
   const climb = page.getByRole('listitem', { name: 'A Steady Climb' })
+  const idea = climb.getByRole('button', { name: /Hear the idea/ })
+  await idea.click()
+  await expect(climb.getByRole('button', { name: /Stop the idea \(1 of 4\)/ })).toBeVisible()
+  await climb.getByRole('button', { name: /Stop the idea/ }).click()
+  await expect(idea).toHaveAttribute('aria-pressed', 'false')
   await expect(climb).toContainText('Uses 2 of Andrei’s and 2 of Lena’s tracks')
   await expect(page.getByRole('listitem', { name: 'Two Rooms, One Night' })).toBeVisible()
   await climb.getByRole('button', { name: 'Explore the concept' }).click()
@@ -143,6 +162,17 @@ test('two DJs explore their tracks and open a transition in the Lab', async ({ p
   await expect(transitions).toHaveCount(3)
   await expect(transitions.first()).toHaveAttribute('data-status', 'not tried')
   await expect(page.getByTestId('set-track').last()).toContainText('key 8A')
+
+  // The arc: the reading's, until the DJs move it; a track set against it gets a note.
+  const arc = page.getByRole('figure')
+  await expect(arc.locator('.set-layer')).toHaveText('interpretation')
+  await expect(page.getByTestId('arc-note')).toHaveCount(0)
+  await page.getByLabel('Arc at slot 1').fill('1')
+  await page.getByLabel('Arc at slot 4').fill('0')
+  await expect(arc.locator('.set-layer')).toHaveText('your choice')
+  await expect(page.getByTestId('set-track').first().getByTestId('arc-note')).toContainText(
+    'below the arc',
+  )
 
   // Open the first transition in the Transition Builder and play it.
   const names = await page.getByTestId('set-track').locator('strong').allTextContents()
