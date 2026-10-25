@@ -1,6 +1,6 @@
 # Technical decisions
 
-- **Status:** v0.3, 2026-10-24. Supersedes the technical choices in [architecture.md](architecture.md) where they conflict.
+- **Status:** v0.3, 2026-10-24; proof-of-concept gate outcome added 2026-10-25 (D-07, D-01, D-19). Supersedes the technical choices in [architecture.md](architecture.md) where they conflict.
 - **Evidence:** [TECHNICAL_AUDIT_v0.2.md](TECHNICAL_AUDIT_v0.2.md). Spikes referenced as S1–S8 are in [TECHNICAL_SPIKES.md](TECHNICAL_SPIKES.md).
 - **Confidence:** _High_ = validated or standard behaviour; _Medium_ = sound reasoning, needs a test; _Low_ = placeholder until a spike reports.
 
@@ -15,6 +15,7 @@
 - **Consequences:** analysis quality and memory are bounded by the client; browser differences must be tested.
 - **Confidence:** High.
 - **Reconsider if:** S6 shows client-side BPM/downbeat accuracy is unusable even with manual correction, or S2 shows memory limits make 10-minute tracks unreliable.
+- **Planned change (brief v0.4):** the AI explainer needs one small server-side function, an API proxy that holds the key (Azure Static Web Apps managed functions). Audio processing stays in the browser; only a pairing's outcome facts are sent, and only when the user asks for an explanation. D-28 changes with it.
 
 ### D-02 Native Web Audio nodes only; no audio library; no AudioWorklet
 - **Context:** the mixer needs gain, EQ, filters, and sample-accurate automation.
@@ -72,7 +73,8 @@
 - **Alternatives:** time-stretch (deferred); ramping B back to its own tempo after the transition.
 - **Consequences:** source position is linear in context time, so offsets are exact. B stays pitch-shifted after the handoff, as on a controller without key lock.
 - **Engine finding (S1):** Firefox rounds a resampled source's output rate to whole hertz, so deck B drifts by up to ~12 ppm there (≤ 0.8 ms over a 32-bar overlap, ≤ 1.5 ms over 64 bars). The drift restarts from zero at every start, seek or resume. Chromium plays the exact rate. Alternative if this matters: resample deck B in a worker and play it at rate 1 (exact everywhere, costs a second copy of B and a few seconds per tempo change).
-- **Confidence:** High (Chromium), Medium (Firefox: within 1.5 ms over 64 bars, above P1's 1 ms; decision at the PoC gate).
+- **Confidence:** High (Chromium), Medium (Firefox: within 1.5 ms over 64 bars, above P1's 1 ms).
+- **PoC gate (2026-10-25, #46):** the Firefox drift is accepted and documented as an engine tolerance (R-22). It restarts at every start, seek and jump, stays well under the grid errors that dominate real pairs (R-01), and was not heard in the listening check. The worker resampling alternative stays the fallback.
 - **Reconsider if:** users find pitch shifts above ~1 semitone common in their pairs; Safari drifts more than Firefox; testers hear the Firefox drift on long blends.
 
 ## Musical timing
@@ -212,6 +214,7 @@ interface Annotation {
 - **Errors:** unsupported `schemaVersion`; unknown control; non-finite numbers; `to` outside the control's range; ramp without `untilBeat` or with `untilBeat ≤ atBeat`; event outside `span`; two events on the same control whose intervals overlap (a `set` at exactly a ramp's end is allowed); two `set`s on the same control at the same beat; exit/entry points outside either track; deck B's audio ending before `span.endBeat`; annotation references that do not resolve.
 - **Warnings:** events not on a 1/4-beat grid; strategy version older than current; pitch change ≥ 0.5 semitone; both decks' `eqLow` above 0.4 at the same time for more than one beat (bass clash; musical advisory); grid fit poor on either deck (D-10); grid differs from snapshot.
 - Events are normalized by sorting on `(atBeat, control, id)` so equal plans compile identically.
+- _(brief v0.4)_ **Errors are only what the engine cannot play.** Musical problems (points off the phrase lines, a downbeat moved by a beat jump, a bass clash) are never errors, so the user can hear them; they are reported as outcome facts. A musical advisory stays a warning at most.
 - **Confidence:** High.
 
 ## Synchronization tolerances
