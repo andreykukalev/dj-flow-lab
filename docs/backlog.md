@@ -1,7 +1,7 @@
 # DJ Flow Lab — MVP Backlog
 
 - **Status:** Created as GitHub issues on 2026-10-24, re-cut for brief v0.4 on 2026-10-25. The issues are the source of truth; this page is the overview.
-- **Based on:** [product brief v0.4](PRODUCT_BRIEF_v0.4.md), [technical decisions](TECHNICAL_DECISIONS.md) and [implementation plan](MVP_IMPLEMENTATION_PLAN.md). Issues #4, #7, #9–#13, #16–#19 and #29 were updated for v0.3 on 2026-10-24. On 2026-10-25 the backlog was refined for the UX concept in [WEB_UX.md](WEB_UX.md): #55 and #56 were added, and #7, #8, #10, #12, #15, #19–#21, #24, #25, #36 and #45 now name the screen and mockup they build. On 2026-10-25, after the proof of concept, the backlog was re-cut for [brief v0.4](PRODUCT_BRIEF_v0.4.md): choosing the moment is the centre of the product. M2 became "Find the moment" with hot cues (#59), jumps (#60) and pairings (#61); M3 gained the outcome of a pairing (#62, #63); the AI explainer became M5 (#58: #64, #65, #66) and the pilot moved to M6. #10, #15, #16, #27, #34 and #55 carry a "v0.4 refinement" section. Andrei then decided that the app performs and the user can take over, with their moves recorded as an editable script (#68).
+- **Based on:** [product brief v0.4](PRODUCT_BRIEF_v0.4.md), [technical decisions](TECHNICAL_DECISIONS.md) and [implementation plan](MVP_IMPLEMENTATION_PLAN.md). Issues #4, #7, #9–#13, #16–#19 and #29 were updated for v0.3 on 2026-10-24. On 2026-10-25 the backlog was refined for the UX concept in [WEB_UX.md](WEB_UX.md): #55 and #56 were added, and #7, #8, #10, #12, #15, #19–#21, #24, #25, #36 and #45 now name the screen and mockup they build. On 2026-10-25, after the proof of concept, the backlog was re-cut for [brief v0.4](PRODUCT_BRIEF_v0.4.md): choosing the moment is the centre of the product. M2 became "Find the moment" with hot cues (#59), jumps (#60) and pairings (#61); M3 gained the outcome of a pairing (#62, #63); the AI explainer became M5 (#58: #64, #65, #66) and the pilot moved to M6. #10, #15, #16, #27, #34 and #55 carry a "v0.4 refinement" section. Andrei then decided that the app performs and the user can take over, with their moves recorded as an editable script (#68). Andrei's [musical language](MUSICAL_LANGUAGE.md) (functions and structure terms) was added, and #29 moved into M2 so the whole-track structure is in view when choosing moments.
 
 Each milestone ends with something you can open in a browser and try. Each milestone is a tracking issue with the `milestone` label, and its work items are attached as sub-issues in build order.
 
@@ -54,6 +54,7 @@ Load two of your own tracks, see their structure, and play them in sync.
 
 The space of possibilities: mark moments in both tracks, pair any moment of A with any moment of B, move them with jumps, and hear each pairing at once with the mixer performing it. Pairings that do not line up play rather than being refused.
 
+- #29 Detect likely section changes (whole-track structure, moved from M4) · `mvp:must`
 - #59 Hot cues on each track · `mvp:must`
 - #60 Jumps by beat, bar and phrase · `mvp:must`
 - #15 Select exit and entry points · `mvp:must`
@@ -83,7 +84,6 @@ Understand what each pairing did and why, and hear two ways of making the same t
 
 The app points at musically promising moments, labeled as hypotheses you can accept, move, or ignore. Detected sections also make the outcome facts richer (#62).
 
-- #29 Detect likely section changes · `mvp:should`
 - #30 Suggest exit and entry points with reasons · `mvp:should`
 - #31 Label every piece of information by knowledge layer · `mvp:should`
 - #32 Enter a track's key and show harmonic compatibility · `mvp:should`
