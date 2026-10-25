@@ -116,6 +116,13 @@ export function validate(
       error('point-outside-track', `The ${label} must be a whole bar from 1, got ${fmt(bar)}`)
     }
   }
+  const exitBeat = plan.points.exitBeatA ?? 1
+  if (!Number.isInteger(exitBeat) || exitBeat < 1 || exitBeat > plan.decks.A.grid.beatsPerBar) {
+    error(
+      'point-outside-track',
+      `The exit beat of A must be a whole beat from 1 to ${plan.decks.A.grid.beatsPerBar}, got ${fmt(exitBeat)}`,
+    )
+  }
 
   // Initial state
   for (const [key, value] of Object.entries(plan.initial)) {
@@ -188,9 +195,13 @@ export function validate(
     const startA = transitionBeatToDeckSec(timing, 'A', 0)
     const startB = transitionBeatToDeckSec(timing, 'B', 0)
     if (durations.A !== undefined && startA >= durations.A) {
-      error('point-outside-track', `Exit bar ${plan.points.exitBarA} is after the end of track A`, {
-        deck: 'A',
-      })
+      error(
+        'point-outside-track',
+        `Blend start ${plan.points.exitBarA}.${exitBeat} is after the end of track A`,
+        {
+          deck: 'A',
+        },
+      )
     }
     if (durations.B !== undefined && startB >= durations.B) {
       error(

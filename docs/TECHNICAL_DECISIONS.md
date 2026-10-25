@@ -87,7 +87,7 @@ Five domains, never mixed implicitly; conversions live only in `src/engine/time.
 | File time | seconds | position in the decoded audio of one deck |
 | Track beat | beats (float) | position on one deck's grid; bar 1 beat 1 = beat 0 |
 | Bar:beat | display | 1-based `bar.beat` (+ fraction) shown to users |
-| Transition beat | beats (float) | the shared timeline; 0 = first beat of A's exit bar; advances at A's tempo |
+| Transition beat | beats (float) | the shared timeline; 0 = the blend start, beat `exitBeatA` (default 1) of A's exit bar (#75); advances at A's tempo |
 | Context time | seconds | `AudioContext.currentTime`; related to transition beats only through the anchor (D-04) |
 
 Display time (`requestAnimationFrame` timestamps) is converted to context time only through `getOutputTimestamp()`/`outputLatency` (D-21). Plans are written in transition beats. **Confidence:** High.

@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { nudgeBpm, nudgeGrid, setBpm, setDownbeatAt, twoPointGrid } from '../engine/grid'
-import type { DeckId } from '../engine/model'
+import type { BeatGrid, DeckId } from '../engine/model'
+import { barToBeat, formatBarBeat, parseBarBeat, toBarBeat } from '../engine/time'
 import { decodeFile, type PocSession } from './session'
 
 // Track and grid controls of the proof of concept (#46): load a local file on each
 // deck, then type or nudge its BPM and "the 1" (±1 ms, ±0.01 BPM, two-point BPM), and
-// choose A's exit bar and B's entry bar. Changes apply while playing.
+// choose the blend start in A, the bar of B lined up with it and the transition area
+// around it (#75). Changes apply while playing. The same blend start and area are set
+// from the whole-track view; these fields always show the session's values.
 
 function NumberField({
   label,
@@ -37,6 +40,41 @@ function NumberField({
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => e.key === 'Enter' && commit()}
+      />
+    </label>
+  )
+}
+
+/** A `bar.beat` position, typed exactly. */
+function PositionField({
+  label,
+  grid,
+  beat,
+  onCommit,
+}: {
+  label: string
+  grid: BeatGrid
+  beat: number
+  onCommit: (trackBeat: number) => void
+}) {
+  const [draft, setDraft] = useState<string | null>(null)
+  const commit = () => {
+    if (draft === null) return
+    const value = parseBarBeat(grid, draft)
+    setDraft(null)
+    if (value !== null) onCommit(value)
+  }
+  return (
+    <label className="poc-field">
+      {label}
+      <input
+        className="poc-input"
+        inputMode="decimal"
+        value={draft ?? formatBarBeat(toBarBeat(grid, beat))}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === 'Enter' && commit()}
+        title="Bar, or bar.beat for a beat inside the bar"
       />
     </label>
   )
@@ -142,31 +180,124 @@ function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
   )
 }
 
-export function Tracks({ session }: { session: PocSession }) {
-  const { points } = session
+/** "16 bars", "1 bar 2 beats", for the area that fits. */
+function beatsText(beats: number): string {
+  const bars = Math.floor(beats / 4)
+  const rest = beats - bars * 4
+  const parts = [
+    bars > 0 || rest === 0 ? `${bars} bar${bars === 1 ? '' : 's'}` : '',
+    rest > 0 ? `${rest} beat${rest === 1 ? '' : 's'}` : '',
+  ]
+  return parts.filter(Boolean).join(' ')
+}
+
+function BlendControls({ session }: { session: PocSession }) {
+  const { points, area, fitted, decks, timing } = session
+  const gridA = decks.A.grid
+  const bars = (deck: DeckId, beat: number) =>
+    toBarBeat(deck === 'A' ? timing.gridA : timing.gridB, beat).bar
+  const startA = session.blendStartBeat
+  const entryB = barToBeat(timing.gridB, points.entryBarB)
+  const fromA = formatBarBeat(toBarBeat(gridA, startA - fitted.beforeBeats))
+  const toA = formatBarBeat(toBarBeat(gridA, startA + fitted.afterBeats))
+  const handoff = session.plan.annotations.find((a) => a.id === 'bass-swap')?.atBeat ?? 0
+  const swapA = formatBarBeat(toBarBeat(gridA, startA + handoff))
+  const fromB = bars('B', entryB - fitted.beforeBeats)
+  const toB = bars('B', entryB + fitted.afterBeats)
+  const setBars = (edge: 'before' | 'after' | 'both', v: number) => {
+    const value = Math.max(0, Math.round(v))
+    session.setArea(
+      edge === 'both'
+        ? { ...area, beforeBars: value, afterBars: value }
+        : { ...area, [edge === 'before' ? 'beforeBars' : 'afterBars']: value },
+    )
+  }
   return (
-    <section className="card poc-tracks" aria-label="Tracks and grids">
-      <DeckPanel session={session} deck="A" />
-      <DeckPanel session={session} deck="B" />
-      <div className="poc-deck-row">
-        <NumberField
-          label="Blend starts at A bar"
-          value={points.exitBarA}
-          step={1}
-          digits={0}
-          onCommit={(v) => session.setPoints({ ...points, exitBarA: Math.round(v) })}
+    <>
+      <div className="poc-deck-row" data-testid="blend-controls">
+        <PositionField
+          label="Blend start at A"
+          grid={gridA}
+          beat={startA}
+          onCommit={(beat) => session.setBlendStart(beat)}
         />
+        <button
+          className="btn btn-small"
+          onClick={() => session.setBlendStartAtCursor()}
+          title="Put the blend start where the playback cursor is (B)"
+        >
+          Blend start at cursor
+        </button>
         <NumberField
-          label="with B from bar"
+          label="lined up with B bar"
           value={points.entryBarB}
           step={1}
           digits={0}
           onCommit={(v) => session.setPoints({ ...points, entryBarB: Math.round(v) })}
         />
-        <span className="muted">
-          B fades in over 8 bars, the bass swaps 16 bars in, and A is gone after 32.
-        </span>
       </div>
+      <div className="poc-deck-row">
+        <span className="muted">Transition area</span>
+        {area.linked ? (
+          <NumberField
+            label="±"
+            value={area.beforeBars}
+            step={1}
+            digits={0}
+            onCommit={(v) => setBars('both', v)}
+          />
+        ) : (
+          <>
+            <NumberField
+              label="before"
+              value={area.beforeBars}
+              step={1}
+              digits={0}
+              onCommit={(v) => setBars('before', v)}
+            />
+            <NumberField
+              label="after"
+              value={area.afterBars}
+              step={1}
+              digits={0}
+              onCommit={(v) => setBars('after', v)}
+            />
+          </>
+        )}
+        <span className="muted">bars</span>
+        <label className="poc-field">
+          <input
+            type="checkbox"
+            checked={area.linked}
+            onChange={(e) =>
+              session.setArea({
+                ...area,
+                linked: e.target.checked,
+                afterBars: e.target.checked ? area.beforeBars : area.afterBars,
+              })
+            }
+          />
+          Same before and after
+        </label>
+      </div>
+      <p className="poc-blend-summary" data-testid="blend-summary">
+        From A {fromA} to A {toA}, A blends with B bars {fromB}–{toB - 1}. B comes in over{' '}
+        {beatsText(handoff + fitted.beforeBeats)}, the bass swaps at A {swapA}
+        {handoff === 0 ? ' (the blend start)' : ''}, and A is gone at A {toA}.
+        {fitted.trimmed.length > 0 && (
+          <span className="poc-trimmed"> {fitted.trimmed.join(' ')}</span>
+        )}
+      </p>
+    </>
+  )
+}
+
+export function Tracks({ session }: { session: PocSession }) {
+  return (
+    <section className="card poc-tracks" aria-label="Tracks and grids">
+      <DeckPanel session={session} deck="A" />
+      <DeckPanel session={session} deck="B" />
+      <BlendControls session={session} />
       {session.errors.length > 0 && (
         <p className="poc-error" role="alert">
           Not applied: {session.errors.join('; ')}

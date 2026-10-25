@@ -5,8 +5,8 @@
  * - Track beats are 0-based floats: bar 1 beat 1 of a deck is track beat 0.
  * - Bars are 1-based everywhere a bar number is stored or shown, like DJ software.
  *   Bar 1 is the first full bar at or after file time 0.
- * - Transition beats are the shared timeline of a transition: 0 is the first beat
- *   of deck A's exit bar, and they advance at deck A's tempo.
+ * - Transition beats are the shared timeline of a transition: 0 is the blend start,
+ *   beat `exitBeatA` of deck A's exit bar, and they advance at deck A's tempo.
  */
 
 /** The knowledge layers from the product brief §10. */
@@ -31,10 +31,12 @@ export interface BeatGrid {
   confidence?: number
 }
 
-/** Where a transition starts in each track, as 1-based bars. */
+/** Where the two tracks line up: the blend start in A, and the bar of B played there. */
 export interface TransitionPoints {
   /** Bar of deck A at which the transition timeline starts (transition beat 0). */
   exitBarA: number
-  /** Bar of deck B that lines up with `exitBarA`. */
+  /** 1-based beat of `exitBarA` at which the timeline starts, for a blend start off the downbeat. Default 1. */
+  exitBeatA?: number
+  /** Bar of deck B whose first beat lines up with the blend start in A. */
   entryBarB: number
 }

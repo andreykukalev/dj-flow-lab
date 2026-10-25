@@ -14,6 +14,7 @@ import {
   sameCurve,
   type Move,
 } from './lanes'
+import { transitionBeatToDeckBeat } from '../engine/time'
 import type { PocSession } from './session'
 import { deckPosition } from './session'
 
@@ -23,9 +24,9 @@ import { deckPosition } from './session'
 // compiled plan the audio plays, each move is shaded while it happens and labelled with
 // its direction and the value it reaches, and a control that never moves is shown flat
 // and dimmed. While there is a take, the version not playing is drawn dashed on every
-// lane where it differs. The overlap is shaded, the handoff dashed, and the playhead and
-// the readouts next to each lane are moved by the controller loop. #20 builds the full
-// timeline.
+// lane where it differs. The transition area is shaded (#75), the blend start is marked
+// and the handoff dashed, and the playhead and the readouts next to each lane are moved
+// by the controller loop. #20 builds the full timeline.
 
 const MARKERS: { id: string; label: string }[] = [
   { id: 'bring-in', label: 'B in, no bass' },
@@ -33,9 +34,6 @@ const MARKERS: { id: string; label: string }[] = [
   { id: 'bass-swap', label: 'Bass swap' },
   { id: 'fade-out', label: 'A fades' },
 ]
-
-const HANDOFF_BEAT = 64
-const OVERLAP = [0, 128] as const
 
 const LANES: { control: DeckControl; label: string; name: string; always: boolean }[] = [
   { control: 'eqHigh', label: 'High', name: 'high EQ', always: true },
@@ -296,8 +294,14 @@ export function Timeline({
 
   const crossfader = laneInfo('mixer.crossfader', compiled, compared)
 
-  const beats = Array.from({ length: span }, (_, i) => startBeat + i)
-  const phrases = beats.filter((b) => b % 32 === 0)
+  // A's phrase lines, in transition beats: they stay on A's bars when the blend start is
+  // off a phrase line or off the downbeat.
+  const startA = transitionBeatToDeckBeat(timing, 'A', 0)
+  const lineOffset = timing.gridA.phraseOffsetBars * 4 - startA - startBeat
+  const phrases: number[] = []
+  for (let b = startBeat + (((lineOffset % 32) + 32) % 32); b < endBeat; b += 32) phrases.push(b)
+  const area = session.areaBeats
+  const handoff = plan.annotations.find((a) => a.id === 'bass-swap')?.atBeat
 
   const seek = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -325,7 +329,8 @@ export function Timeline({
         <div className="timeline-track">
           <div
             className="timeline-overlap"
-            style={{ left: pct(OVERLAP[0]), width: `${((OVERLAP[1] - OVERLAP[0]) / span) * 100}%` }}
+            style={{ left: pct(area.from), width: `${((area.to - area.from) / span) * 100}%` }}
+            data-testid="timeline-area"
           />
           {phrases.map((b) => (
             <div key={b} className="timeline-phrase-line" style={{ left: pct(b) }} />
@@ -348,7 +353,10 @@ export function Timeline({
             controlLane('mixer.crossfader', 'X-fader', 'Crossfader', 'x')}
           {controlLanes('B')}
           {faderLane('B')}
-          <div className="timeline-handoff" style={{ left: pct(HANDOFF_BEAT) }} />
+          {handoff !== undefined && (
+            <div className="timeline-handoff" style={{ left: pct(handoff) }} />
+          )}
+          <div className="timeline-blendstart" style={{ left: pct(0) }} title="Blend start" />
           <div className="timeline-playhead" ref={playhead} />
         </div>
         <div className="timeline-ruler">
