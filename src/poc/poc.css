@@ -817,3 +817,43 @@
 .poc-trimmed {
   color: var(--text);
 }
+
+/* Auto (#77): the button, folded preferences, and the suggestion with its reasons. */
+.poc-auto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.poc-auto-prefs > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.poc-auto-prefs[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-basis: 100%;
+}
+
+.poc-auto-result p {
+  margin: 0;
+}
+
+.poc-auto-why,
+.poc-auto-cautions {
+  margin: 4px 0;
+  padding-left: 20px;
+}
+
+.poc-auto-cautions {
+  color: var(--deck-b-soft);
+}
+
+.poc-auto-note {
+  margin: 0;
+  font-size: 13px;
+}

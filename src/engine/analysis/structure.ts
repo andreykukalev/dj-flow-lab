@@ -221,22 +221,23 @@ interface Stretch {
 }
 
 /** Likely sections, one decision per 8-bar phrase of the grid, merged where they agree. */
+/** The main part of a track: level, low end and highs that 90 % of its bars stay under. */
+export function mainLevels(bars: readonly BarFeatures[]): {
+  energy: number
+  low: number
+  high: number
+} {
+  const at = (key: 'energyDb' | 'lowDb' | 'highDb') =>
+    percentile(
+      bars.map((b) => b[key]),
+      0.9,
+    )
+  return { energy: at('energyDb'), low: at('lowDb'), high: at('highDb') }
+}
+
 export function likelySections(bars: readonly BarFeatures[], grid: BeatGrid): LikelySection[] {
   if (bars.length === 0) return []
-  const main = {
-    energy: percentile(
-      bars.map((b) => b.energyDb),
-      0.9,
-    ),
-    low: percentile(
-      bars.map((b) => b.lowDb),
-      0.9,
-    ),
-    high: percentile(
-      bars.map((b) => b.highDb),
-      0.9,
-    ),
-  }
+  const main = mainLevels(bars)
 
   const measure = (bs: readonly BarFeatures[]): Stretch => {
     const edge = Math.min(2, Math.floor(bs.length / 2))
