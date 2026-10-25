@@ -903,9 +903,40 @@
   pointer-events: none;
 }
 
+/* Folded, but a visible control: a bordered line with what it does, not a muted hint. */
 .poc-loop > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  width: fit-content;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: 14px;
+  list-style: none;
   cursor: pointer;
+}
+
+.poc-loop > summary::before {
+  content: '▸';
   color: var(--text-muted);
+}
+
+.poc-loop[open] > summary::before {
+  content: '▾';
+}
+
+.poc-loop > summary::-webkit-details-marker {
+  display: none;
+}
+
+.poc-loop > summary:focus-visible {
+  outline: 2px solid var(--deck-a);
+  outline-offset: 2px;
 }
 
 .poc-loop[open] {
