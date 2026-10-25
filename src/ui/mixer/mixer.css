@@ -238,3 +238,24 @@
 .deck-b {
   color: var(--deck-b);
 }
+
+/* Taking over a control (#68): the controls can be grabbed while the plan plays. */
+.mixer[data-takeover='true'] :is(.knob svg, .fader-track, .crossfader-track) {
+  cursor: grab;
+  touch-action: none;
+}
+
+.mixer[data-takeover='true'] [data-held='true'] :is(svg, .fader-track, .crossfader-track) {
+  cursor: grabbing;
+}
+
+.knob[data-held='true'] .knob-body {
+  stroke: var(--deck, var(--text));
+  stroke-width: 2;
+}
+
+.fader[data-held='true'] .fader-cap,
+.crossfader[data-held='true'] .crossfader-cap {
+  outline: 2px solid var(--deck, var(--text));
+  outline-offset: 1px;
+}

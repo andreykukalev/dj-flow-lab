@@ -28,8 +28,11 @@ export class MixerRenderer {
   private readonly controls = new Map<ControlKey, ControlElements>()
   /** Last strings written, per element and attribute, so unchanged values cost nothing. */
   private readonly written = new Map<string, string>()
+  /** The mixer's element, for gestures on its controls. */
+  readonly root: HTMLElement
 
   constructor(root: HTMLElement) {
+    this.root = root
     for (const key of CONTROL_KEYS) {
       const el = root.querySelector<HTMLElement>(`[data-control="${key}"]`)
       if (!el) throw new Error(`Mixer has no element for ${key}`)

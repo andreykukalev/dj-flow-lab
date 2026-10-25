@@ -1,6 +1,6 @@
 import { HeardClock, readClock, type HeardTime } from '../../audio/clock'
 import type { Transport, TransportState } from '../../audio/transport'
-import { CONTROL_KEYS, type ControlState } from '../../engine/mixer'
+import { CONTROL_KEYS, type ControlKey, type ControlState } from '../../engine/mixer'
 import type { CompiledPlan } from '../../engine/plan/compile'
 import { anchorBeatAt } from '../../engine/time'
 import type { MixerRenderer, UpcomingMarks } from '../mixer/renderer'
@@ -57,6 +57,8 @@ export class ControllerLoop {
   private readonly clock = new HeardClock()
   private renderer: MixerRenderer | null = null
   private readonly listeners = new Set<(frame: FrameInfo) => void>()
+  /** Controls the user is holding (#68): shown where the hand puts them, not where the plan does. */
+  private readonly overrides = new Map<ControlKey, number>()
   readonly options: ControllerLoopOptions
   readonly log: FrameRecord[] = []
   readonly transport: Transport
@@ -84,6 +86,12 @@ export class ControllerLoop {
 
   setCalibration(ms: number): void {
     this.options.calibrationMs = ms
+  }
+
+  /** Shows a held control at `value`, or follows the plan again with `undefined`. */
+  setOverride(key: ControlKey, value: number | undefined): void {
+    if (value === undefined) this.overrides.delete(key)
+    else this.overrides.set(key, value)
   }
 
   setRenderer(renderer: MixerRenderer | null): void {
@@ -121,8 +129,10 @@ export class ControllerLoop {
     const transport = this.transport.state
     const beat = heardBeat(transport, heard.time, this.compiled.span.startBeat)
     const state = this.transport.stateAt(beat)
+    for (const [key, value] of this.overrides) state[key] = value
     const upcoming: UpcomingMarks = {}
     for (const key of CONTROL_KEYS) {
+      if (this.overrides.has(key)) continue
       const change = upcomingChange(this.compiled.controls[key], beat)
       if (change) {
         upcoming[key] = {

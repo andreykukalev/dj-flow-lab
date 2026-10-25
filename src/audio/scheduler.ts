@@ -1,5 +1,5 @@
 import { segmentValue, valueAt, type CompiledPlan } from '../engine/plan/compile'
-import { CONTROL_KEYS } from '../engine/mixer'
+import { CONTROL_KEYS, type ControlKey } from '../engine/mixer'
 import { anchorTimeOf, type PlaybackAnchor } from '../engine/time'
 import type { MixerGraph, ParamTarget } from './mixerGraph'
 
@@ -16,17 +16,18 @@ export interface ScheduleOptions {
 export const DEFAULT_SCHEDULE: ScheduleOptions = { stepBeats: 1 / 32, declickSec: 0.005 }
 
 /**
- * Schedules every control of the plan from `anchor.beat` onward. The caller has
- * already cancelled earlier automation; the first scheduled value of each parameter
- * is `stateAt(anchor.beat)`, at `anchor.ctxTime`.
+ * Schedules the controls of the plan (every control unless `keys` says otherwise) from
+ * `anchor.beat` onward. The caller has already cancelled earlier automation; the first
+ * scheduled value of each parameter is `stateAt(anchor.beat)`, at `anchor.ctxTime`.
  */
 export function schedulePlan(
   compiled: CompiledPlan,
   mixer: MixerGraph,
   anchor: PlaybackAnchor,
   options: ScheduleOptions = DEFAULT_SCHEDULE,
+  keys: readonly ControlKey[] = CONTROL_KEYS,
 ): void {
-  for (const key of CONTROL_KEYS) {
+  for (const key of keys) {
     for (const target of mixer.targetsOf(key)) {
       scheduleControl(compiled.controls[key], target, anchor, options)
     }

@@ -4,6 +4,7 @@ import { Transport } from '../audio/transport'
 import { type BeatGrid, type DeckId, type TransitionPoints } from '../engine/model'
 import { compile, type CompiledPlan } from '../engine/plan/compile'
 import { longBlendPlan } from '../engine/plan/longBlend'
+import { applyTakes, TakeHistory, type Take } from '../engine/plan/take'
 import type { TransitionPlanV1 } from '../engine/plan/types'
 import { validate } from '../engine/plan/validate'
 import {
@@ -21,7 +22,9 @@ import { DEMO_TRACKS, renderDemoTrack } from './demoTracks'
 // One proof-of-concept session: an AudioContext, the mixer graph, the transport with
 // the long-blend plan on two tracks, and the controller loop that shows it. The tracks
 // are the generated demo tracks until the user loads files; grids and points can be
-// corrected while playing (#46).
+// corrected while playing (#46). The user can take over any control while it plays;
+// each take is kept in an undoable history and applied on top of the strategy's plan
+// (#68), so "Your take" and the original can be compared from the same beat.
 
 export interface DeckSource {
   name: string
@@ -83,7 +86,13 @@ export class PocSession {
   readonly loop: ControllerLoop
   decks: Record<DeckId, DeckSource>
   points: TransitionPoints
+  /** The plan the strategy made, before any take. */
+  basePlan!: TransitionPlanV1
+  /** The plan playing: the strategy's plan with the takes, or without them while comparing. */
   plan!: TransitionPlanV1
+  readonly history = new TakeHistory()
+  /** Which version plays: the user's take or the strategy's original. */
+  listening: 'take' | 'original' = 'take'
   compiled!: CompiledPlan
   timing!: TransitionTiming
   /** Errors of the last change that was refused; the previous plan stays loaded. */
@@ -133,6 +142,64 @@ export class PocSession {
     this.change(this.decks, points)
   }
 
+  /**
+   * A control the user took over while playing; listening switches to the take. With
+   * null (let go without moving), the control just follows the plan again.
+   */
+  addTake(take: Take | null): void {
+    if (take) {
+      this.history.add(take)
+      this.listening = 'take'
+    }
+    this.refreshTakes()
+  }
+
+  undo(): void {
+    this.history.undo()
+    this.refreshTakes()
+  }
+
+  redo(): void {
+    this.history.redo()
+    this.refreshTakes()
+  }
+
+  /** Back to the strategy's plan. Undo brings the takes back. */
+  reset(): void {
+    this.history.reset()
+    this.refreshTakes()
+  }
+
+  listenTo(version: 'take' | 'original'): void {
+    this.listening = version
+    this.refreshTakes()
+  }
+
+  /** The plan to play for the current takes and listening choice. */
+  private effectivePlan(base: TransitionPlanV1): TransitionPlanV1 {
+    return this.listening === 'take' ? applyTakes(base, this.history.takes) : base
+  }
+
+  /** Loads the plan with the current takes without interrupting playback. */
+  private refreshTakes(): void {
+    const plan = this.effectivePlan(this.basePlan)
+    try {
+      this.transport.replacePlan(plan)
+      this.plan = plan
+      this.compiled = compile(plan)
+      this.errors = []
+    } catch (e) {
+      this.errors = [e instanceof Error ? e.message : String(e)]
+    }
+    this.loop.setPlan(this.compiled, this.barAt)
+    this.notify()
+  }
+
+  private notify(): void {
+    this.version++
+    for (const listener of this.listeners) listener()
+  }
+
   async close(): Promise<void> {
     this.loop.stop()
     this.transport.stop()
@@ -165,8 +232,7 @@ export class PocSession {
         else this.transport.cue(at)
       }
     }
-    this.version++
-    for (const listener of this.listeners) listener()
+    this.notify()
   }
 
   /** Validates and loads the plan for the current decks and points. */
@@ -183,9 +249,13 @@ export class PocSession {
     const { errors } = validate(plan, { durationSec })
     this.errors = errors.map((e) => e.message)
     if (errors.length > 0) return false
-    this.transport.load(plan, buffers)
-    this.plan = plan
-    this.compiled = compile(plan)
+    // Takes are in transition beats, so they carry over to a corrected grid or point.
+    let playing = this.effectivePlan(plan)
+    if (validate(playing, { durationSec }).errors.length > 0) playing = plan
+    this.transport.load(playing, buffers)
+    this.basePlan = plan
+    this.plan = playing
+    this.compiled = compile(playing)
     this.timing = timingOf(plan)
     return true
   }

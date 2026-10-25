@@ -91,3 +91,89 @@ test('refuses points outside the tracks and keeps the plan', async ({ page }) =>
   expect(await page.evaluate(() => window.poc!.points.entryBarB)).toBe(1)
   expect(await page.evaluate(() => window.poc!.plan.points.entryBarB)).toBe(1)
 })
+
+// #68: grabbing a control while it plays records a take; Original and Your take can
+// be compared, and Undo, Redo and Reset change nothing that cannot be brought back.
+
+const trimShown = (page: import('@playwright/test').Page) =>
+  page
+    .locator('[data-control="A.trim"]')
+    .evaluate((el) => Number((el as HTMLElement).dataset.value))
+
+test('a take on a knob plays back, and undo, redo and reset bring everything back', async ({
+  page,
+}) => {
+  const knob = page.getByRole('img', { name: 'Deck A trim' })
+  const summary = page.getByTestId('takes-summary')
+
+  // Grabbing while nothing plays only explains what to do.
+  await knob.hover()
+  await page.mouse.down()
+  await page.mouse.up()
+  await expect(summary).toContainText('Press play')
+  expect(await page.evaluate(() => window.poc!.history.takes.length)).toBe(0)
+
+  await page.getByTestId('play').click()
+  await expect(page.getByTestId('transport-state')).toHaveText('playing')
+  await page.waitForTimeout(300)
+  const box = (await knob.boundingBox())!
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await expect(page.locator('[data-control="A.trim"]')).toHaveAttribute('data-held', 'true')
+  // 40 px up turns the trim a quarter of its range: from 0 to +0.5.
+  await page.mouse.move(x, y - 40, { steps: 8 })
+  await page.waitForTimeout(400)
+  await page.mouse.up()
+
+  const take = await page.evaluate(() => {
+    const p = window.poc!
+    return {
+      takes: p.history.takes.map((t) => ({ control: t.control, last: t.points.at(-1)!.value })),
+      userEvents: p.plan.events.filter((e) => e.source === 'user').length,
+      listening: p.listening,
+    }
+  })
+  expect(take.takes).toEqual([{ control: 'A.trim', last: expect.closeTo(0.5, 2) }])
+  expect(take.userEvents).toBeGreaterThan(0)
+  expect(take.listening).toBe('take')
+  await expect(summary).toContainText('1 move on A trim')
+
+  // Replayed from just before the grab, the audio follows the take.
+  const replayed = await page.evaluate(async () => {
+    const p = window.poc!
+    const points = p.history.takes[0]!.points
+    p.transport.startAt(points[0]!.beat - 0.5)
+    const end = points.at(-1)!.beat + 0.5
+    while (p.transport.beatAt() < end) await new Promise((r) => setTimeout(r, 50))
+    return p.mixer.targetsOf('A.trim')[0]!.param.value
+  })
+  expect(replayed).toBeCloseTo(10 ** (6 / 20), 1) // +0.5 → +6 dB
+
+  // After the release the trim holds the user's value.
+  await page.getByTestId('play').click()
+  await expect(page.getByTestId('transport-state')).toHaveText('paused')
+  await expect.poll(() => trimShown(page)).toBeCloseTo(0.5, 2)
+
+  // Original is the app's plan, untouched; Your take comes back unchanged.
+  await page.getByRole('button', { name: 'Original' }).click()
+  await expect.poll(() => trimShown(page)).toBe(0)
+  expect(await page.evaluate(() => window.poc!.plan.events.some((e) => e.source === 'user'))).toBe(
+    false,
+  )
+  await page.getByRole('button', { name: 'Your take' }).click()
+  await expect.poll(() => trimShown(page)).toBeCloseTo(0.5, 2)
+
+  // Reset can be undone; keys undo and redo too.
+  await page.getByRole('button', { name: 'Reset' }).click()
+  await expect.poll(() => trimShown(page)).toBe(0)
+  expect(await page.evaluate(() => window.poc!.history.takes.length)).toBe(0)
+  await page.getByRole('button', { name: 'Undo' }).click()
+  expect(await page.evaluate(() => window.poc!.history.takes.length)).toBe(1)
+  await expect.poll(() => trimShown(page)).toBeCloseTo(0.5, 2)
+  await page.locator('body').press('ControlOrMeta+z')
+  expect(await page.evaluate(() => window.poc!.history.takes.length)).toBe(0)
+  await page.locator('body').press('ControlOrMeta+Shift+z')
+  expect(await page.evaluate(() => window.poc!.history.takes.length)).toBe(1)
+})
