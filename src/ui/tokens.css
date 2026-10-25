@@ -1,0 +1,37 @@
+/* Design tokens from the UX concept (design/ios/README.md, mockups). Dark theme only
+   in the MVP; a light theme redefines these. #55 completes the set for the app shell. */
+:root {
+  --bg: #111216;
+  --surface: #1b1d23;
+  --surface-raised: #23262e;
+  --surface-selected: #3a3e4a;
+  --border: #2c2f38;
+  --text: #e8e9ed;
+  --text-muted: #9a9ead;
+  --text-on-light: #111216;
+
+  /* Decks differ in lightness as well as hue, and are always labelled A or B. */
+  --deck-a: #4fb3ff;
+  --deck-a-soft: #8fd0ff;
+  --deck-b: #ff8a4f;
+  --deck-b-soft: #ffb08a;
+  --explain: #cbbcff;
+
+  /* Knowledge-layer chips (brief §10). */
+  --layer-measured-border: #5b6070;
+  --layer-likely-border: #9a9ead;
+  --layer-interpretation-bg: #2b2645;
+  --layer-interpretation-text: #cbbcff;
+
+  --knob-body: #2a2d35;
+  --knob-track: #3a3e4a;
+  --control-cap: #d9dbe1;
+
+  --radius-card: 14px;
+  --radius-control: 12px;
+  --radius-chip: 10px;
+
+  --font-ui: -apple-system, 'SF Pro Text', Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  color-scheme: dark;
+}

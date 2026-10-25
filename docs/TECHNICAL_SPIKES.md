@@ -181,6 +181,26 @@ S1, S3, and S5 together form the **proof of concept** below.
 - **Time-box:** 1 day.
 - **Decision:** latency source order and calibration UI (D-21).
 
+- **Result (2026-10-25, #45):** headless Chromium and Firefox (Playwright 1.63) on a running AudioContext: Chromium with its fake audio output, Firefox on a PulseAudio null sink, 44.1 kHz. The proof-of-concept page ([`/poc/`](../poc/index.html), [`src/poc`](../src/poc)) plays the long-blend plan on two generated demo tracks (124 and 122.5 BPM) with the Try screen's mixer ([`src/ui/mixer`](../src/ui/mixer)) driven by the controller loop ([`src/ui/controller/loop.ts`](../src/ui/controller/loop.ts)). Assertions in [`tests/controller/controller.spec.ts`](../tests/controller/controller.spec.ts), run in CI on both engines.
+
+  | Check | Criterion | Chromium | Firefox |
+  |---|---|---|---|
+  | P7: frames where the mixer's DOM differs from `stateAt(beat(heardTime))`, 5 s across the bass swap | 0 | 0 of 310 | 0 of 314 |
+  | P7: frame-to-frame jitter of the heard beat against the frame clock | ≤ one frame (16.7 ms) | ≤ 0.1 ms typical, ≤ 6.7 ms in 12 runs | ≤ 3.9 ms |
+  | Latency source; reported base + output latency; heard time behind `currentTime` | | output timestamp; 10 + 32 ms; 34–38 ms | output timestamp + reported latency; 0 + 31–36 ms; 30–39 ms |
+  | P8: context suspended mid-transition | Paused at the right beat | paused at exactly the beat rendered at suspension; resumed from it; 0 mismatching frames after | same |
+  | P8: no frames for 3 s (as in a hidden tab), then the next frame | matches the sound | 6.2 beats further on (3 s at 124 BPM), 0 mismatching frames | same |
+  | Ring and caption on a control two bars before it moves | | shown ("kill at 25", "full at 25") | same |
+
+  - **Chromium's output timestamp includes the output latency.** Its `contextTime` is `currentTime` minus about 40 ms (base 10 + output 32 ms), and its `performanceTime` is within one audio callback of `performance.now()`. Carried forward to the frame time, it moves smoothly. Chromium's `currentTime` moves in steps of 8.7 and 20.3 ms, which is why it is not the first source.
+  - **Firefox's output timestamp does not.** It returns `currentTime − outputLatency` together with `performance.now() − outputLatency`, both taken at the call. Carried forward, it lands on `currentTime`, so the mixer ran 31 ms early, and it moves in the steps of the audio callback: one frame in ten moved 0 or 21 ms, a jitter of 18 ms. Two fixes, both engine-neutral. When the timestamp, carried forward to the moment of reading, lags `currentTime` by less than half the reported latency, the reported latency is subtracted from it. And a heard clock smooths frame to frame: it predicts each frame from the last, corrects 15 % of the difference, and follows a jump over 50 ms or a gap over 250 ms at once ([`src/audio/clock.ts`](../src/audio/clock.ts)).
+  - **One Chromium run showed a single 55 ms jump** in about 15 runs, and it did not come back in 12 later runs. The controller follows the audio clock by design, so the test allows a jump over one frame only where `currentTime` itself jumped or stalled, and records it.
+  - **React is not on the per-frame path.** React renders the mixer once; a renderer writes only the SVG attributes and styles that changed, and every control carries the value it shows in `data-value`, which the frame log reads back.
+  - **Not covered by the automated checks:**
+    - The perceived offset on real outputs. A headless engine reports a latency, but there is no speaker to measure it against. The ±40 ms criteria (wired without calibration, Bluetooth after one calibration step) are checked by hand on the PoC page: turn on *Flash on beat*, compare the flash with the kick, and adjust *Offset* until they agree. To do with the P9 listening session (#46).
+    - A real hidden tab for 30 s. The test stops the frame loop for 3 s, which is the same gap a hidden tab makes, because headless browsers do not throttle background tabs reliably. The 30 s check is manual.
+  - **Decision (D-21):** source order output timestamp (with the correction above), then `currentTime − (outputLatency + baseLatency)`, then `currentTime − baseLatency`, smoothed by the heard clock. Calibration is one offset in milliseconds (positive = heard later), checked with *Flash on beat*. The PoC page has both; #19 moves the offset to Settings.
+
 ## S6 — BPM and downbeat accuracy
 
 - **Question:** how accurate is the in-house analysis on the target genres, and how much correction does a user need?

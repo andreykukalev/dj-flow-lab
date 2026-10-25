@@ -1,19 +1,7 @@
-:root {
-  --bg: #111216;
-  --surface: #1b1d23;
-  --border: #2c2f38;
-  --text: #e8e9ed;
-  --text-muted: #9a9ead;
-  --deck-a: #4fb3ff;
-  --deck-b: #ff8a4f;
+@import './ui/tokens.css';
 
-  color-scheme: dark;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+:root {
+  font-family: var(--font-ui);
   color: var(--text);
   background: var(--bg);
 }

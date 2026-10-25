@@ -151,6 +151,13 @@ export class Transport {
     return this.startAt(this.current.beat, at)
   }
 
+  /** Moves to a transition beat without playing: the transport is paused there. */
+  cue(beat: number, at: number = this.ctx.currentTime): void {
+    this.loaded()
+    this.silence(at)
+    this.set({ kind: 'paused', beat })
+  }
+
   stop(at: number = this.ctx.currentTime): void {
     this.silence(at)
     this.set({ kind: 'stopped' })
