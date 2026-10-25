@@ -52,6 +52,19 @@ az deployment sub what-if --location westeurope \
   --template-file infra/main.bicep --parameters infra/main.bicepparam
 ```
 
+## Remove stale preview environments
+
+If a pull request's deploy fails with "maximum number of staging environments", list the previews and delete the ones whose pull request is closed (the name is the pull request number):
+
+```sh
+az staticwebapp environment list --name dj-flow-lab --resource-group rg-dj-flow-lab \
+  --query "[?name!='default'].{name:name, hostname:hostname, status:status}" -o table
+az staticwebapp environment delete --name dj-flow-lab --resource-group rg-dj-flow-lab \
+  --environment-name <number> --yes
+```
+
+The portal has the same list under the Static Web App's **Environments** page.
+
 ## Rotate the deployment token
 
 ```sh
