@@ -37,6 +37,8 @@ export interface TransitionPoints {
   exitBarA: number
   /** 1-based beat of `exitBarA` at which the timeline starts, for a blend start off the downbeat. Default 1. */
   exitBeatA?: number
-  /** Bar of deck B whose first beat lines up with the blend start in A. */
+  /** Bar of deck B that lines up with the blend start in A. */
   entryBarB: number
+  /** 1-based beat of `entryBarB` that lines up with the blend start. Default 1. */
+  entryBeatB?: number
 }

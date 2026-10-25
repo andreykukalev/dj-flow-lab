@@ -84,7 +84,7 @@ test('a grid change while playing keeps playing from the same beat', async ({ pa
 })
 
 test('refuses points outside the tracks and keeps the plan', async ({ page }) => {
-  const field = page.getByLabel('lined up with B bar')
+  const field = page.getByLabel('lined up with B at')
   await field.fill('999')
   await field.press('Enter')
   await expect(page.getByRole('alert')).toContainText('after the end of track B')
@@ -346,10 +346,16 @@ const poc = (page: import('@playwright/test').Page) =>
     }
   })
 
-/** Client x of a track beat of deck A on its whole-track view. */
-async function xOfBeat(page: import('@playwright/test').Page, testId: string, trackBeat: number) {
+/** Client x of a track beat of a deck on its whole-track view. */
+async function xOfBeat(
+  page: import('@playwright/test').Page,
+  testId: string,
+  trackBeat: number,
+  deck: 'A' | 'B' = 'A',
+) {
+  await page.getByTestId(testId).scrollIntoViewIfNeeded()
   const box = (await page.getByTestId(testId).boundingBox())!
-  const bars = await page.evaluate(() => window.poc!.structure('A').bars.length)
+  const bars = await page.evaluate((d) => window.poc!.structure(d).bars.length, deck)
   return { x: box.x + (trackBeat / (bars * 4)) * box.width, y: box.y + box.height / 2 }
 }
 
@@ -362,7 +368,7 @@ test('the blend start comes from the cursor, and the cursor keeps its place', as
     blendStart: 96,
   })
   await expect(page.getByTestId('blend-summary')).toContainText(
-    'From A 9.1 to A 41.1, A blends with B bars 1–32',
+    'From A 9.1 to A 41.1, A blends with B from 1.1 to 33.1',
   )
 
   // A click on track A moves only the cursor, to the beat under it.
@@ -401,7 +407,7 @@ test('the blend lane sets the blend start and sizes the area', async ({ page }) 
   await expect(page.getByLabel('Blend start at A')).toHaveValue('29.2')
 
   // Dragging the flag moves it; the area and the plan move with it.
-  const flag = page.locator('.ov-flag')
+  const flag = page.getByTestId('blend-lane').locator('.ov-flag')
   const box = (await flag.boundingBox())!
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
   await page.mouse.down()
@@ -411,7 +417,7 @@ test('the blend lane sets the blend start and sizes the area', async ({ page }) 
   expect(await poc(page)).toMatchObject({ points: { exitBarA: 25 }, blendStart: 96 })
 
   // Dragging an edge of a linked area resizes both sides.
-  const edge = page.locator('.ov-handle[data-edge="after"]')
+  const edge = page.getByTestId('blend-lane').locator('.ov-handle[data-edge="after"]')
   const e = (await edge.boundingBox())!
   await page.mouse.move(e.x + e.width / 2, e.y + e.height / 2)
   await page.mouse.down()
@@ -427,7 +433,10 @@ test('the blend lane sets the blend start and sizes the area', async ({ page }) 
 
   // Unlinked, one edge moves on its own.
   await page.getByLabel('Same before and after').uncheck()
-  const b = (await page.locator('.ov-handle[data-edge="before"]').boundingBox())!
+  const b = (await page
+    .getByTestId('blend-lane')
+    .locator('.ov-handle[data-edge="before"]')
+    .boundingBox())!
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2)
   await page.mouse.down()
   at = await xOfBeat(page, lane, 96 - 16) // 4 bars before
@@ -454,7 +463,7 @@ test('typed values set any position and the plan blends exactly the area', async
     span: { startBeat: -48, endBeat: 48 },
   })
   await expect(page.getByTestId('blend-summary')).toContainText(
-    'From A 26.3 to A 34.3, A blends with B bars 13–20',
+    'From A 26.3 to A 34.3, A blends with B from 13.1 to 21.1',
   )
 
   // B is silent before the area and full by its middle; A is gone at its end.
@@ -474,8 +483,8 @@ test('typed values set any position and the plan blends exactly the area', async
   }
 
   // An area near the start of B is trimmed, and says so.
-  await page.getByLabel('lined up with B bar').fill('3')
-  await page.getByLabel('lined up with B bar').press('Enter')
+  await page.getByLabel('lined up with B at').fill('3')
+  await page.getByLabel('lined up with B at').press('Enter')
   expect(await poc(page)).toMatchObject({ before: 8, after: 16 })
   await expect(page.getByTestId('blend-summary')).toContainText(
     'Before trimmed to 2 bars: B has no music before that.',
@@ -514,4 +523,62 @@ test('a phrase line or a section is a starting point for the blend', async ({ pa
     before: 32,
     after: 32,
   })
+})
+
+test('track B has its own blend lane for the beat lined up with the blend start', async ({
+  page,
+}) => {
+  const lane = 'blend-lane-B'
+  await expect(page.getByTestId(lane)).toContainText('B at blend start 17.1')
+
+  // A click in B's lane chooses the beat of B at the blend start; A's side stays.
+  let at = await xOfBeat(page, lane, 4 * 12 + 2, 'B') // B 13.3
+  await page.mouse.click(at.x, at.y)
+  expect(await poc(page)).toMatchObject({
+    points: { exitBarA: 25, entryBarB: 13, entryBeatB: 3 },
+    blendStart: 96,
+    before: 50,
+    after: 64,
+  })
+  await expect(page.getByLabel('lined up with B at')).toHaveValue('13.3')
+  await expect(page.getByTestId(lane)).toContainText('B at blend start 13.3')
+  await expect(page.getByTestId('blend-summary')).toContainText(
+    'Before trimmed to 12 bars 2 beats: B has no music before that.',
+  )
+
+  // Dragging the flag moves it, and B's edges size the same area.
+  const flag = page.getByTestId(lane).locator('.ov-flag')
+  const box = (await flag.boundingBox())!
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  at = await xOfBeat(page, lane, 4 * 8, 'B') // B 9.1
+  await page.mouse.move(at.x, at.y, { steps: 6 })
+  await page.mouse.up()
+  expect((await poc(page)).points).toEqual({ exitBarA: 25, entryBarB: 9 })
+  const edge = page.getByTestId(lane).locator('.ov-handle[data-edge="before"]')
+  const e = (await edge.boundingBox())!
+  await page.mouse.move(e.x + e.width / 2, e.y + e.height / 2)
+  await page.mouse.down()
+  at = await xOfBeat(page, lane, 4 * 4, 'B') // 4 bars before B 9.1
+  await page.mouse.move(at.x, at.y, { steps: 6 })
+  await page.mouse.up()
+  expect(await poc(page)).toMatchObject({
+    area: { beforeBars: 4, afterBars: 4, linked: true },
+    before: 16,
+    after: 16,
+  })
+
+  // B's phrase lines line up with the blend start, and a click on track B moves the cursor.
+  await page
+    .getByRole('button', { name: "Line up B's phrase line at bar 17 with the blend start" })
+    .click()
+  expect((await poc(page)).points).toEqual({ exitBarA: 25, entryBarB: 17 })
+  at = await xOfBeat(page, 'overview-track-B', 4 * 20, 'B') // B 21.1
+  await page.mouse.click(at.x, at.y + 30)
+  await expect.poll(async () => (await poc(page)).cursor).toBe(16)
+
+  // Typed exactly, on any beat.
+  await page.getByLabel('lined up with B at').fill('5.2')
+  await page.getByLabel('lined up with B at').press('Enter')
+  expect((await poc(page)).points).toEqual({ exitBarA: 25, entryBarB: 5, entryBeatB: 2 })
 })

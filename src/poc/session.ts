@@ -94,13 +94,26 @@ export function defaultExitBar(source: DeckSource, area: AreaRequest = DEFAULT_A
   return Math.max(Math.ceil(area.beforeBars / 8) * 8 + 9, last)
 }
 
-/** A track beat as `bar.beat` points: the bar, and the beat when it is not the first. */
+/** One deck's half of the points at a track beat: its bar, and the beat when it is not the first. */
 export function pointsAt(
+  deck: DeckId,
   grid: BeatGrid,
   trackBeat: number,
-): Pick<TransitionPoints, 'exitBarA' | 'exitBeatA'> {
+): Partial<TransitionPoints> {
   const { bar, beat } = toBarBeat(grid, Math.round(trackBeat))
-  return beat === 1 ? { exitBarA: bar } : { exitBarA: bar, exitBeatA: beat }
+  return deck === 'A'
+    ? { exitBarA: bar, exitBeatA: beat === 1 ? undefined : beat }
+    : { entryBarB: bar, entryBeatB: beat === 1 ? undefined : beat }
+}
+
+/** The points without beats left at their default, so equal points compare equal. */
+function tidy(points: TransitionPoints): TransitionPoints {
+  const { exitBeatA, entryBeatB, ...bars } = points
+  return {
+    ...bars,
+    ...(exitBeatA !== undefined && exitBeatA !== 1 && { exitBeatA }),
+    ...(entryBeatB !== undefined && entryBeatB !== 1 && { entryBeatB }),
+  }
 }
 
 function demoSource(deck: DeckId, sampleRate: number): DeckSource {
@@ -190,7 +203,7 @@ export class PocSession {
     const decks = { ...this.decks, [deck]: source }
     const points =
       deck === 'A'
-        ? { exitBarA: defaultExitBar(source, this.area), entryBarB: this.points.entryBarB }
+        ? tidy({ ...this.points, exitBarA: defaultExitBar(source, this.area), exitBeatA: 1 })
         : this.points
     this.change(decks, points)
   }
@@ -201,18 +214,27 @@ export class PocSession {
 
   /** New points; the cursor keeps its place in track A. */
   setPoints(points: TransitionPoints): void {
-    this.change(this.decks, points, this.area, true)
+    this.change(this.decks, tidy(points), this.area, true)
   }
 
   /** Track beat of A at the blend start. */
   get blendStartBeat(): number {
-    return transitionBeatToDeckBeat(this.timing, 'A', 0)
+    return this.markBeat('A')
+  }
+
+  /** Track beat of a deck at the blend start: A's blend start, or the beat of B lined up with it. */
+  markBeat(deck: DeckId): number {
+    return transitionBeatToDeckBeat(this.timing, deck, 0)
+  }
+
+  /** Moves a deck's side of the blend start to one of its track beats, on the nearest beat. */
+  setMark(deck: DeckId, trackBeat: number): void {
+    this.setPoints({ ...this.points, ...pointsAt(deck, this.decks[deck].grid, trackBeat) })
   }
 
   /** Moves the blend start to a track beat of A, on the nearest beat. */
   setBlendStart(trackBeatA: number): void {
-    const { entryBarB } = this.points
-    this.setPoints({ ...pointsAt(this.decks.A.grid, trackBeatA), entryBarB })
+    this.setMark('A', trackBeatA)
   }
 
   /** Moves the blend start to where the cursor is. */
@@ -224,17 +246,17 @@ export class PocSession {
     this.change(this.decks, this.points, area)
   }
 
-  /** A likely section of A as the area: the blend start on its middle bar, the area across it. */
-  useSection(fromBar: number, toBar: number): void {
+  /**
+   * A likely section of one deck as the area: that deck's side of the blend start on
+   * the section's middle bar, and the area across the section.
+   */
+  useSection(deck: DeckId, fromBar: number, toBar: number): void {
     const bars = toBar - fromBar + 1
     const before = Math.floor(bars / 2)
     const area = { beforeBars: before, afterBars: bars - before, linked: before === bars - before }
-    this.change(
-      this.decks,
-      { exitBarA: fromBar + before, entryBarB: this.points.entryBarB },
-      area,
-      true,
-    )
+    const grid = this.decks[deck].grid
+    const points = { ...this.points, ...pointsAt(deck, grid, barToBeat(grid, fromBar + before)) }
+    this.change(this.decks, tidy(points), area, true)
   }
 
   /** The fitted area in transition beats. */
@@ -379,7 +401,7 @@ export class PocSession {
     const beatsOf = (s: DeckSource) => secToBeat(s.grid, s.buffer.duration)
     const fitted = fitArea(this.area, {
       startBeatA: transitionBeatToDeckBeat(timing, 'A', 0),
-      entryBeatB: barToBeat(B.grid, this.points.entryBarB),
+      entryBeatB: transitionBeatToDeckBeat(timing, 'B', 0),
       beatsA: beatsOf(A),
       beatsB: beatsOf(B),
     })

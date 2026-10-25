@@ -695,7 +695,7 @@
   pointer-events: none;
 }
 
-.ov-track[data-testid='overview-track-A'] {
+.ov-track {
   cursor: text;
 }
 

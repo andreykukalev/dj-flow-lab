@@ -117,11 +117,18 @@ export function validate(
     }
   }
   const exitBeat = plan.points.exitBeatA ?? 1
-  if (!Number.isInteger(exitBeat) || exitBeat < 1 || exitBeat > plan.decks.A.grid.beatsPerBar) {
-    error(
-      'point-outside-track',
-      `The exit beat of A must be a whole beat from 1 to ${plan.decks.A.grid.beatsPerBar}, got ${fmt(exitBeat)}`,
-    )
+  const entryBeat = plan.points.entryBeatB ?? 1
+  for (const [label, beat, deck] of [
+    ['exit beat of A', exitBeat, 'A'],
+    ['entry beat of B', entryBeat, 'B'],
+  ] as const) {
+    const perBar = plan.decks[deck].grid.beatsPerBar
+    if (!Number.isInteger(beat) || beat < 1 || beat > perBar) {
+      error(
+        'point-outside-track',
+        `The ${label} must be a whole beat from 1 to ${perBar}, got ${fmt(beat)}`,
+      )
+    }
   }
 
   // Initial state
@@ -206,7 +213,7 @@ export function validate(
     if (durations.B !== undefined && startB >= durations.B) {
       error(
         'point-outside-track',
-        `Entry bar ${plan.points.entryBarB} is after the end of track B`,
+        `Entry ${plan.points.entryBarB}.${entryBeat} is after the end of track B`,
         {
           deck: 'B',
         },
