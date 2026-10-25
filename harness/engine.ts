@@ -7,11 +7,14 @@ import { compile, stateAt } from '../src/engine/plan/compile'
 import { longBlendPlan } from '../src/engine/plan/longBlend'
 import type { TransitionPlanV1 } from '../src/engine/plan/types'
 import { CONTROL_KEYS } from '../src/engine/mixer'
-import { DECK_IDS, type BeatGrid, type DeckId } from '../src/engine/model'
+import { DECK_IDS, type BeatGrid, type DeckId, type DeckLoop } from '../src/engine/model'
+import { planTiming } from '../src/engine/plan/loop'
 import {
   anchorBeatAt,
   anchorTimeOf,
+  deckRuns,
   secondsPerBeat,
+  transitionBeatToDeckBeat,
   transitionBeatToDeckSec,
   type PlaybackAnchor,
 } from '../src/engine/time'
@@ -576,6 +579,179 @@ export async function declicking() {
     threshold: maxSlope + 0.01,
     maxJump: { A: maxJump(r.A), B: maxJump(r.B), master: maxJump(r.master) },
   }
+}
+
+// ---------------------------------------------------------------------------
+// Loops (#81)
+
+/** Pulse level on each bar of a coded signal: five levels, so a jump back shows. */
+export function barLevel(trackBeat: number): number {
+  return 0.5 + 0.1 * (((Math.floor(trackBeat / 4) % 5) + 5) % 5)
+}
+
+/** A deck signal whose pulse on each beat has its bar's level (see `barLevel`). */
+export function codedSignal(grid: BeatGrid, sampleRate: number, seconds: number): Float32Array {
+  const out = new Float32Array(Math.ceil(seconds * sampleRate))
+  const beatSec = secondsPerBeat(grid.bpm)
+  for (let k = 0; ; k++) {
+    const tb = grid.anchorSec + k * beatSec
+    if (tb >= seconds) break
+    const first = Math.ceil(tb * sampleRate)
+    const last = Math.floor((tb + PULSE_SEC) * sampleRate)
+    for (let n = first; n <= last && n < out.length; n++) {
+      const u = (n / sampleRate - tb) / PULSE_SEC
+      out[n]! += barLevel(k) * 0.5 * (1 - Math.cos(2 * Math.PI * u))
+    }
+  }
+  return out
+}
+
+/** Tones for the seam check: no whole number of cycles in a loop, so a hard seam is a step. */
+const SEAM_TONES_HZ = [107.3, 1013.7]
+
+/** Both decks lined up at their bar 9; A held from the blend start, B's bars 3–4 played 4 times before it. */
+export const LOOP_POINTS = { exitBarA: 9, entryBarB: 9 }
+export const LOOPS: Record<DeckId, DeckLoop> = {
+  A: { deck: 'A', startBeat: 32, lengthBeats: 8, repeats: 2 },
+  B: { deck: 'B', startBeat: 8, lengthBeats: 8, repeats: 3 },
+}
+
+function loopPlan(loop: DeckLoop): TransitionPlanV1 {
+  return { ...flatPlan(40), points: LOOP_POINTS, span: { startBeat: -64, endBeat: 40 }, loop }
+}
+
+/**
+ * Onsets of a looped deck after the last anchor: the deck beat each one should be
+ * (from the plan's map), how far it is from the anchor's time once the chain's constant
+ * delay is removed, and whether its level is that beat's bar level.
+ */
+function loopOnsets(r: EngineRender, plan: TransitionPlanV1, deck: DeckId, fromBeat: number) {
+  const anchor = r.anchors.at(-1)!
+  const timing = planTiming(plan)
+  const data = r[deck]
+  const runs = deckRuns(timing, deck)
+  const eps = deck === 'B' ? resamplerTempoError(RATE_B, SR) : 0
+  const found = [...onsetsByBeat(data, SR, anchor, anchor.ctxTime + 0.011)].filter(
+    ([beat]) => beat >= fromBeat,
+  )
+  const rows = found.map(([beat, onset]) => {
+    let t = onset
+    const deckBeat = transitionBeatToDeckBeat(timing, deck, beat)
+    // The resampler's tempo error builds up from the start of each run's source.
+    const run = runs.find((x) => beat < x.to)!
+    const runStart = anchorTimeOf(anchor, Math.max(run.from, anchor.beat))
+    // Pulses differ in level, so time them by their peak (refined on a parabola), not
+    // by where they cross the onset threshold.
+    const s = Math.round(t * SR)
+    let k = s
+    for (let i = s; i < s + PULSE_SEC * SR * 1.5; i++)
+      if (Math.abs(data[i] ?? 0) > Math.abs(data[k] ?? 0)) k = i
+    const [y0, y1, y2] = [k - 1, k, k + 1].map((i) => Math.abs(data[i] ?? 0)) as [
+      number,
+      number,
+      number,
+    ]
+    const den = y0 - 2 * y1 + y2
+    const peakTime = (k + (den === 0 ? 0 : (0.5 * (y0 - y2)) / den)) / SR
+    const peak = y1
+    t = peakTime
+    return {
+      beat,
+      deckBeat,
+      raw: (t - anchorTimeOf(anchor, beat)) * SR,
+      corrected: (t + eps * (t - runStart) - anchorTimeOf(anchor, beat)) * SR,
+      level: peak / barLevel(deckBeat),
+    }
+  })
+  const median = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] ?? 0
+  const rawOffset = median(rows.map((r) => r.raw))
+  const correctedOffset = median(rows.map((r) => r.corrected))
+  const gain = median(rows.map((r) => r.level))
+  return {
+    compared: rows.length,
+    /** Deck beats heard, in order: shows the jumps back. */
+    deckBeats: rows.map((r) => r.deckBeat),
+    maxSamples: Math.max(0, ...rows.map((r) => Math.abs(r.raw - rawOffset))),
+    maxCorrectedSamples: Math.max(0, ...rows.map((r) => Math.abs(r.corrected - correctedOffset))),
+    /** Largest relative difference between a pulse's level and its bar's: 0.11 or more is another bar. */
+    maxLevelError: Math.max(0, ...rows.map((r) => Math.abs(r.level / gain - 1))),
+    missing: rows.length === 0 ? 0 : rows.at(-1)!.beat - rows[0]!.beat + 1 - rows.length,
+  }
+}
+
+/**
+ * Loop playback: each deck with its loop, played through and after seeks into a pass.
+ * Every pulse must land on the beat the plan's map gives, carry the level of the bar
+ * the map says plays there, and the seams must not click.
+ */
+export async function loopPlayback() {
+  const spb = secondsPerBeat(124)
+  const signals = { A: codedSignal(GRID_A, SR, 80), B: codedSignal(GRID_B, SR, 80) }
+  const out = {} as Record<
+    DeckId,
+    {
+      through: ReturnType<typeof loopOnsets>
+      seek: ReturnType<typeof loopOnsets>
+      maxJump: number
+      maxJumpWithoutCrossfade: number
+    }
+  >
+  for (const deck of DECK_IDS) {
+    const plan = loopPlan(LOOPS[deck])
+    const through = await renderEngine({
+      sampleRate: SR,
+      seconds: 0.05 + 104 * spb,
+      plan,
+      signals,
+      steps: [{ at: 0, run: (t, at) => t.startAt(-64, at) }],
+    })
+    // Seeks: into the middle of a pass, then to just before a jump back.
+    const seekBeat = deck === 'A' ? 10.5 : -37.5
+    const steps: Step[] = [
+      { at: 0, run: (t, at) => t.startAt(-64, at) },
+      { at: 2 * spb, run: (t, at) => t.startAt(seekBeat, at) },
+      { at: 4 * spb, run: (t, at) => t.startAt(seekBeat - 2.75, at) },
+    ]
+    const seek = await renderEngine({
+      sampleRate: SR,
+      seconds: 4 * spb + 0.05 + 40 * spb,
+      plan,
+      signals,
+      steps,
+    })
+    // Seams with continuous tones: a jump back without a crossfade is a step in the wave.
+    const freqs = SEAM_TONES_HZ
+    const tone = new Float32Array(Math.ceil(80 * SR))
+    for (const f of freqs) {
+      const x = sine(SR, 80, f, 0.5)
+      for (let i = 0; i < tone.length; i++) tone[i]! += x[i]!
+    }
+    const toneRender = await renderEngine({
+      sampleRate: SR,
+      seconds: 0.05 + 104 * spb,
+      plan,
+      signals: { A: tone, B: tone },
+      steps: [{ at: 0, run: (t, at) => t.startAt(-64, at) }],
+    })
+    // The same without the crossfade, to show the measurement hears a hard seam.
+    const hard = await renderEngine({
+      sampleRate: SR,
+      seconds: 0.05 + 104 * spb,
+      plan,
+      signals: { A: tone, B: tone },
+      steps: [{ at: 0, run: (t, at) => t.startAt(-64, at) }],
+      transport: { seamSec: 0 },
+    })
+    out[deck] = {
+      through: loopOnsets(through, plan, deck, -64),
+      seek: loopOnsets(seek, plan, deck, -64),
+      maxJump: maxJump(toneRender[deck]),
+      maxJumpWithoutCrossfade: maxJump(hard[deck]),
+    }
+  }
+  // Deck B plays faster than its file, and so do its tones.
+  const maxSlope = SEAM_TONES_HZ.reduce((s, f) => s + (0.5 * 2 * Math.PI * f * RATE_B) / SR, 0)
+  return { ...out, threshold: maxSlope + 0.01 }
 }
 
 /**

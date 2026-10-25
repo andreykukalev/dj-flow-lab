@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { nudgeBpm, nudgeGrid, setBpm, setDownbeatAt, twoPointGrid } from '../engine/grid'
 import type { BeatGrid, DeckId } from '../engine/model'
-import { formatBarBeat, parseBarBeat, toBarBeat } from '../engine/time'
+import { formatBarBeat, parseBarBeat, toBarBeat, transitionBeatToDeckBeat } from '../engine/time'
 import { AutoPanel } from './AutoPanel'
+import { LoopPanel } from './LoopPanel'
 import { decodeFile, type PocSession } from './session'
 
 // Track and grid controls of the proof of concept (#46): load a local file on each
 // deck, then type or nudge its BPM and "the 1" (±1 ms, ±0.01 BPM, two-point BPM), and
 // choose the blend start in A, the bar of B lined up with it and the transition area
 // around it (#75). Changes apply while playing. The same blend start and area are set
-// from the whole-track view; these fields always show the session's values.
+// from the whole-track view; these fields always show the session's values. When the area
+// is trimmed because a track runs out, a loop that gives the bars back is offered (#81).
 
 function NumberField({
   label,
@@ -193,18 +195,23 @@ function beatsText(beats: number): string {
 }
 
 function BlendControls({ session }: { session: PocSession }) {
-  const { area, fitted, decks } = session
+  const { area, fitted, decks, timing } = session
   const gridA = decks.A.grid
   const gridB = decks.B.grid
   const startA = session.blendStartBeat
   const entryB = session.markBeat('B')
-  const at = (grid: BeatGrid, beat: number) => formatBarBeat(toBarBeat(grid, beat))
-  const fromA = at(gridA, startA - fitted.beforeBeats)
-  const toA = at(gridA, startA + fitted.afterBeats)
+  // Each deck's bars at a transition beat, through its loop when it has one.
+  const at = (deck: 'A' | 'B', beat: number) =>
+    formatBarBeat(
+      toBarBeat(deck === 'A' ? gridA : gridB, transitionBeatToDeckBeat(timing, deck, beat)),
+    )
+  const fromA = at('A', -fitted.beforeBeats)
+  const toA = at('A', fitted.afterBeats)
   const handoff = session.plan.annotations.find((a) => a.id === 'bass-swap')?.atBeat ?? 0
-  const swapA = at(gridA, startA + handoff)
-  const fromB = at(gridB, entryB - fitted.beforeBeats)
-  const toB = at(gridB, entryB + fitted.afterBeats)
+  const swapA = at('A', handoff)
+  const fromB = at('B', -fitted.beforeBeats)
+  const toB = at('B', fitted.afterBeats)
+  const fill = session.loopRequest ? null : session.loopToFill
   const setBars = (edge: 'before' | 'after' | 'both', v: number) => {
     const value = Math.max(0, Math.round(v))
     session.setArea(
@@ -287,7 +294,21 @@ function BlendControls({ session }: { session: PocSession }) {
         {fitted.trimmed.length > 0 && (
           <span className="poc-trimmed"> {fitted.trimmed.join(' ')}</span>
         )}
+        {fill && (
+          <>
+            {' '}
+            <button
+              className="btn btn-small"
+              onClick={() => session.setLoop(fill)}
+              data-testid="fill-with-loop"
+              title={`Loop ${fill.deck === 'B' ? "B's first" : "A's"} ${fill.bars} bars ${fill.passes} times to give the area its bars back`}
+            >
+              Fill it with a loop
+            </button>
+          </>
+        )}
       </p>
+      <LoopPanel session={session} />
     </>
   )
 }

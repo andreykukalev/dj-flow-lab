@@ -101,3 +101,32 @@ test('real-time playback follows the anchor @realtime', async ({ page }, info) =
   )
   expect(Math.max(...residuals)).toBeLessThanOrEqual(0.02)
 })
+
+test('loops: every pass on the beat, the right bars, no clicks at the seams (#81)', async ({
+  page,
+}, info) => {
+  const r = await page.evaluate(() => window.harness.engine.loopPlayback())
+  record(info, r)
+  for (const deck of ['A', 'B'] as const) {
+    for (const run of ['through', 'seek'] as const) {
+      const o = r[deck][run]
+      const what = `deck ${deck}, ${run}`
+      expect(o.compared, what).toBeGreaterThanOrEqual(32)
+      expect(o.missing, what).toBe(0)
+      // Neighbouring bars differ in level by 11 % or more.
+      expect(o.maxLevelError, what).toBeLessThanOrEqual(0.03)
+      expect(o.maxCorrectedSamples, what).toBeLessThanOrEqual(SAMPLE)
+      if (!isFirefox(info)) expect(o.maxSamples, what).toBeLessThanOrEqual(SAMPLE)
+    }
+    expect(r[deck].maxJump, `deck ${deck} seams`).toBeLessThanOrEqual(r.threshold)
+    expect(r[deck].maxJumpWithoutCrossfade, `deck ${deck} hard seams`).toBeGreaterThan(r.threshold)
+  }
+  // The decks really jump back: A plays its bars 9–10 three times, B its bars 3–4 four times.
+  const a = r.A.through.deckBeats
+  expect(a.slice(a.indexOf(32), a.indexOf(32) + 25)).toEqual([
+    ...[0, 1, 2].flatMap(() => Array.from({ length: 8 }, (_, k) => 32 + k)),
+    40,
+  ])
+  const b = r.B.through.deckBeats
+  expect(b.filter((x) => x === 8)).toHaveLength(4)
+})

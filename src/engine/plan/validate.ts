@@ -7,9 +7,10 @@ import {
   type ControlKey,
   type ControlState,
 } from '../mixer'
-import { DECK_IDS, type BeatGrid, type DeckId } from '../model'
-import { rateB, rateToSemitones, transitionBeatToDeckSec, type TransitionTiming } from '../time'
+import { DECK_IDS, LOOP_BEATS, MAX_LOOP_REPEATS, type BeatGrid, type DeckId } from '../model'
+import { deckEntryBeat, loopSide, rateB, rateToSemitones, transitionBeatToDeckSec } from '../time'
 import { compile, stateAt } from './compile'
+import { loopInsideAudio, planTiming } from './loop'
 import { PLAN_SCHEMA_VERSION, type ControlEvent, type TransitionPlanV1 } from './types'
 
 // Plan validation (D-19). Plans with errors are never compiled or scheduled.
@@ -29,6 +30,7 @@ export type ErrorCode =
   | 'point-outside-track'
   | 'deck-b-ends-early'
   | 'missing-annotation'
+  | 'loop'
 
 export type WarningCode =
   | 'off-grid'
@@ -37,6 +39,7 @@ export type WarningCode =
   | 'bass-clash'
   | 'poor-grid-fit'
   | 'grid-changed'
+  | 'loop-grid'
 
 export interface PlanIssue<C extends string> {
   code: C
@@ -193,12 +196,12 @@ export function validate(
 
   // Tracks
   if (!errors.some((e) => e.code === 'invalid-grid' || e.code === 'point-outside-track')) {
-    const timing: TransitionTiming = {
-      gridA: plan.decks.A.grid,
-      gridB: plan.decks.B.grid,
-      ...plan.points,
-    }
+    const timing = planTiming(plan)
     const durations = context.durationSec ?? {}
+    if (plan.loop) {
+      checkLoop(plan, durations, error, warn, context)
+      if (errors.some((e) => e.code === 'loop')) delete timing.loop
+    }
     const startA = transitionBeatToDeckSec(timing, 'A', 0)
     const startB = transitionBeatToDeckSec(timing, 'B', 0)
     if (durations.A !== undefined && startA >= durations.A) {
@@ -266,6 +269,59 @@ export function validate(
   }
 
   return { errors, warnings }
+}
+
+/** A loop (#81): one deck, 2, 4 or 8 bars on its downbeats, 2 to 8 passes, inside its audio, not across the blend start. */
+function checkLoop(
+  plan: TransitionPlanV1,
+  durations: Partial<Record<DeckId, number>>,
+  error: (code: ErrorCode, message: string, extra?: Partial<PlanIssue<ErrorCode>>) => void,
+  warn: (code: WarningCode, message: string, extra?: Partial<PlanIssue<WarningCode>>) => void,
+  context: ValidationContext,
+) {
+  const loop = plan.loop!
+  const deck = loop.deck
+  if (!DECK_IDS.includes(deck)) {
+    error('loop', `The loop is on unknown deck "${String(deck)}"`)
+    return
+  }
+  const grid = plan.decks[deck].grid
+  const where = { deck }
+  if (!LOOP_BEATS.includes(loop.lengthBeats)) {
+    error(
+      'loop',
+      `The loop on ${deck} is ${fmt(loop.lengthBeats)} beats; loops are 2, 4 or 8 bars`,
+      where,
+    )
+  }
+  if (!Number.isInteger(loop.repeats) || loop.repeats < 1 || loop.repeats > MAX_LOOP_REPEATS) {
+    error(
+      'loop',
+      `The loop on ${deck} plays ${fmt(loop.repeats + 1)} times; it plays 2 to ${MAX_LOOP_REPEATS + 1} times`,
+      where,
+    )
+  }
+  if (!Number.isInteger(loop.startBeat) || loop.startBeat % grid.beatsPerBar !== 0) {
+    error(
+      'loop',
+      `The loop on ${deck} starts at beat ${fmt(loop.startBeat)}, not on a downbeat`,
+      where,
+    )
+  }
+  const duration = durations[deck]
+  if (loop.startBeat < 0 || (duration !== undefined && !loopInsideAudio(loop, grid, duration))) {
+    error('loop', `The loop on ${deck} is outside the track's audio`, where)
+  }
+  if (!loopSide(loop, deckEntryBeat(planTiming(plan), deck))) {
+    error('loop', `The loop on ${deck} crosses the blend start`, where)
+  }
+  if (grid.source === 'analysis' || context.poorGridFit?.[deck]) {
+    warn(
+      'loop-grid',
+      `Deck ${deck}'s grid is not confirmed: a loop on it may stutter at each pass`,
+      where,
+    )
+  }
 }
 
 function onGrid(beat: number): boolean {
