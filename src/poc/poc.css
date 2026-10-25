@@ -857,3 +857,65 @@
   margin: 0;
   font-size: 13px;
 }
+
+/* #81: a loop on one deck. On the mixing line, one box per pass next to the deck's
+   lanes; in the whole-track view, the looped bars bracketed; the folded loop section. */
+.timeline-loop {
+  height: 20px;
+}
+
+.timeline-loop-pass {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  box-sizing: border-box;
+  padding-left: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 14px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.timeline-loop.deck-a .timeline-loop-pass {
+  border: 1px solid var(--deck-a);
+  background: color-mix(in srgb, var(--deck-a) 18%, transparent);
+}
+
+.timeline-loop.deck-b .timeline-loop-pass {
+  border: 1px solid var(--deck-b);
+  background: color-mix(in srgb, var(--deck-b) 18%, transparent);
+}
+
+.ov-loop {
+  position: absolute;
+  top: 2px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--text);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  font-size: 10px;
+  line-height: 12px;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.poc-loop > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.poc-loop[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.poc-loop-note,
+.poc-loop-text {
+  margin: 0;
+  font-size: 13px;
+}

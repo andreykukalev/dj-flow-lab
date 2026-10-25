@@ -433,10 +433,10 @@ test('the blend lane sets the blend start and sizes the area', async ({ page }) 
 
   // Unlinked, one edge moves on its own.
   await page.getByLabel('Same before and after').uncheck()
-  const b = (await page
-    .getByTestId('blend-lane')
-    .locator('.ov-handle[data-edge="before"]')
-    .boundingBox())!
+  const before = page.getByTestId('blend-lane').locator('.ov-handle[data-edge="before"]')
+  // Unchecking scrolls the checkbox into view; bring the lane back before dragging.
+  await before.scrollIntoViewIfNeeded()
+  const b = (await before.boundingBox())!
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2)
   await page.mouse.down()
   at = await xOfBeat(page, lane, 96 - 16) // 4 bars before
@@ -654,4 +654,176 @@ test('Auto suggests a blend start with its reasons, and the user can go back', a
   // Auto again from an idea keeps the version from before the first Auto to go back to.
   await page.getByRole('button', { name: 'Back to yours' }).click()
   expect(await poc(page)).toMatchObject({ points: yours.points, area: yours.area })
+})
+
+// #81: one loop on one deck, as part of the transition; the blend start never moves.
+
+const loopState = (page: import('@playwright/test').Page) =>
+  page.evaluate(() => {
+    const p = window.poc!
+    return {
+      points: p.points,
+      request: p.loopRequest,
+      loop: p.plan.loop ?? null,
+      before: p.fitted.beforeBeats,
+      after: p.fitted.afterBeats,
+      trimmed: p.fitted.trimmed,
+      errors: p.errors,
+    }
+  })
+
+test("a loop on B's first bars fills the run-in B does not have", async ({ page }) => {
+  // B's bar 9 on the blend start: only 8 of the 16 bars before it.
+  await page.getByLabel('lined up with B at').fill('9')
+  await page.getByLabel('lined up with B at').press('Enter')
+  await expect(page.getByTestId('blend-summary')).toContainText('B has no music before that')
+  expect(await loopState(page)).toMatchObject({ before: 32, loop: null })
+
+  await page.getByTestId('fill-with-loop').click()
+  const looped = await loopState(page)
+  expect(looped).toMatchObject({
+    points: { exitBarA: 25, entryBarB: 9 },
+    request: { deck: 'B', side: 'before', bars: 8, passes: 2 },
+    loop: { deck: 'B', startBeat: 0, lengthBeats: 32, repeats: 1 },
+    before: 64,
+    trimmed: [],
+    errors: [],
+  })
+  await expect(page.getByTestId('loop-summary')).toHaveText('B bars 1–8 × 2')
+  await expect(page.getByTestId('loop-text')).toContainText(
+    'B starts 8 bars earlier and still has its bar 9.1 on the blend start',
+  )
+  const row = page.getByTestId('timeline-loop')
+  await expect(row).toContainText('B 1–8')
+  await expect(row).toContainText('×2')
+  await expect(page.getByTestId('overview-loop-B')).toContainText('×2')
+
+  // It plays, and B's position follows the loop: 12 bars before the blend start B is in
+  // its first pass of bars 1–8, where straight it would not have started yet.
+  await page.getByTestId('play').click()
+  await expect(page.getByTestId('transport-state')).toHaveText('playing')
+  await page.evaluate(() => window.poc!.transport.cue(-48))
+  await expect(page.locator('.poc-decks')).toHaveText('A 13.1 · B 5.1')
+
+  await page.getByRole('button', { name: 'Play straight' }).click()
+  expect(await loopState(page)).toMatchObject({
+    points: { exitBarA: 25, entryBarB: 9 },
+    loop: null,
+    before: 32,
+  })
+})
+
+test('holding A: length, passes and position, carried along with the blend start', async ({
+  page,
+}) => {
+  await page.getByTestId('loop').locator('summary').click()
+  await page.getByLabel('What to loop').selectOption({ label: 'Hold A after the blend start' })
+  expect(await loopState(page)).toMatchObject({
+    points: { exitBarA: 25, entryBarB: 17 },
+    loop: { deck: 'A', startBeat: 96, lengthBeats: 16, repeats: 1 },
+  })
+  await expect(page.getByTestId('loop-text')).toContainText('A holds this groove while B plays on')
+
+  await page.getByRole('button', { name: 'Play the loop more times' }).click()
+  await page.getByRole('button', { name: '2 bars' }).click()
+  await page.getByRole('button', { name: 'Loop one bar later' }).click()
+  expect((await loopState(page)).loop).toEqual({
+    deck: 'A',
+    startBeat: 100,
+    lengthBeats: 8,
+    repeats: 2,
+  })
+  await expect(page.getByTestId('loop-summary')).toHaveText('A bars 26–27 × 3')
+  await expect(page.getByTestId('timeline-loop')).toContainText('×3')
+
+  // The blend start moves; the loop stays one bar after it, and the area is untouched.
+  await page.getByLabel('Blend start at A').fill('17')
+  await page.getByLabel('Blend start at A').press('Enter')
+  const moved = await loopState(page)
+  expect(moved.points.exitBarA).toBe(17)
+  expect(moved.loop).toMatchObject({ startBeat: 68, lengthBeats: 8, repeats: 2 })
+  expect(moved.errors).toEqual([])
+
+  // Takes stay on top of the loop: the original and the take both keep it.
+  await page.evaluate(() =>
+    window.poc!.addTake({
+      id: 'e2e',
+      control: 'A.filter',
+      points: [
+        { beat: 0, value: 0 },
+        { beat: 8, value: -0.4 },
+      ],
+    }),
+  )
+  expect(await page.evaluate(() => window.poc!.plan.loop?.startBeat)).toBe(68)
+  await page.getByRole('button', { name: 'Original' }).click()
+  expect(await page.evaluate(() => window.poc!.plan.loop?.startBeat)).toBe(68)
+})
+
+test('Auto offers a loop-assisted form of an idea, and keeps your loop to go back to', async ({
+  page,
+}) => {
+  const full = { kick: true, bass: true, hats: true }
+  const intro = { kick: true, bass: false, hats: false }
+  const quiet = { kick: false, bass: false, hats: false }
+  const tracks = {
+    A: [
+      { bars: 16, ...intro },
+      { bars: 32, ...full },
+      { bars: 16, ...quiet },
+      { bars: 32, ...full },
+      { bars: 16, ...intro },
+    ],
+    // An 8-bar intro: too short for 16 bars of run-in.
+    B: [
+      { bars: 8, ...intro },
+      { bars: 32, ...full },
+      { bars: 8, ...quiet },
+      { bars: 16, ...full },
+    ],
+  }
+  for (const deck of ['A', 'B'] as const) {
+    await page.getByTestId(`file-${deck}`).setInputFiles({
+      name: `arranged-${deck}.wav`,
+      mimeType: 'audio/wav',
+      buffer: arrangementWav(tracks[deck]),
+    })
+    const panel = page.locator(`[data-track="${deck}"]`)
+    await expect(panel.locator('.poc-deck-name')).toHaveText(`arranged-${deck}.wav`)
+    await panel.getByLabel('BPM').fill('120')
+    await panel.getByLabel('BPM').press('Enter')
+  }
+  // Your own version: A held from its bar 30.
+  await page.getByLabel('Blend start at A').fill('30')
+  await page.getByLabel('Blend start at A').press('Enter')
+  await page.getByTestId('loop').locator('summary').click()
+  await page.getByLabel('What to loop').selectOption({ label: 'Hold A after the blend start' })
+  const yours = await loopState(page)
+  expect(yours.loop).toMatchObject({ deck: 'A', startBeat: 116 })
+
+  await page.getByRole('button', { name: 'Auto', exact: true }).click()
+  const result = page.getByTestId('auto-result')
+  await expect(result).toContainText('Idea 1 of 3: A bar 97 with B bar 9')
+  // Straight first: the run-in is trimmed, and nothing loops.
+  expect(await loopState(page)).toMatchObject({ loop: null, before: 32 })
+  await expect(page.getByTestId('auto-strategy')).toContainText('A loop on B gives back 8 bars')
+
+  await page.getByRole('button', { name: 'With a loop', exact: true }).click()
+  expect(await loopState(page)).toMatchObject({
+    points: { exitBarA: 97, entryBarB: 9 },
+    loop: { deck: 'B', startBeat: 0, lengthBeats: 32, repeats: 1 },
+    before: 64,
+  })
+  await expect(result).toContainText('with a loop on B')
+  await expect(result).toContainText("Looping B's bars 1–8 twice gives B 16 bars to come in")
+  await expect(result).toContainText('Listen to each jump back')
+
+  await page.getByRole('button', { name: 'Straight', exact: true }).click()
+  expect(await loopState(page)).toMatchObject({ loop: null, before: 32 })
+  await page.getByRole('button', { name: 'With a loop', exact: true }).click()
+
+  await page.getByRole('button', { name: 'Back to yours' }).click()
+  expect(await loopState(page)).toMatchObject({ points: yours.points, loop: yours.loop })
+  await page.getByRole('button', { name: "Auto's idea" }).click()
+  expect((await loopState(page)).loop).toMatchObject({ deck: 'B', startBeat: 0 })
 })

@@ -104,6 +104,37 @@ describe('suggestBlendStarts', () => {
     expect(ideas.some((c) => c.entryBarB > 17)).toBe(true)
   })
 
+  it('offers no loop where the straight area fits', () => {
+    for (const c of suggestBlendStarts(A, B, DEFAULT_AREA, {}, 10)) {
+      if (c.fitted.trimmed.length === 0) expect(c.alternative).toBeUndefined()
+    }
+  })
+
+  it("offers a loop on B's intro where B has too little run-in, the straight form first", () => {
+    // B's intro is 8 bars: lining up its bar 9 trims the 16 bars before to 8.
+    const shortIntro = track([
+      { bars: 8, ...intro },
+      { bars: 32, ...full },
+      { bars: 8, ...quiet },
+      { bars: 32, ...full },
+      { bars: 16, ...intro },
+    ])
+    const ideas = suggestBlendStarts(A, shortIntro, DEFAULT_AREA, {}, 10)
+    const idea = ideas.find((c) => c.entryBarB === 9)!
+    expect(idea.fitted.beforeBeats).toBe(32)
+    expect(idea.alternative).toMatchObject({
+      loop: { deck: 'B', side: 'before', bars: 8, passes: 2, gapBars: 0 },
+      fitted: { beforeBeats: 64, afterBeats: 64, trimmed: [] },
+    })
+    expect(idea.alternative!.reasons.join(' ')).toContain(
+      "Looping B's bars 1–8 twice gives B 16 bars to come in, and bar 9 still lands on the blend start",
+    )
+    expect(idea.alternative!.cautions.join(' ')).toContain('Listen to each jump back')
+    // The loop is ranked by what it gives back, less its cost; it does not change the straight form.
+    expect(idea.alternative!.score).toBeGreaterThan(idea.score)
+    expect(idea.alternative!.score - idea.score).toBeLessThan(3)
+  })
+
   it('finds nothing in a track without a full bar', () => {
     const tiny = track([{ bars: 0, ...full }])
     expect(suggestBlendStarts(tiny, tiny, DEFAULT_AREA)).toEqual([])

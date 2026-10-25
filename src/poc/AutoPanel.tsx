@@ -12,6 +12,10 @@ import type { PocSession } from './session'
 // optional and folded away. The user's own choice is kept, so "Back to yours" and
 // "Auto's idea" switch between the two to compare them; any edit after that is the
 // user's, as with every other control.
+//
+// Where the idea's area had to be trimmed because a track runs out and a loop gives the
+// bars back (#81), "With a loop" switches to that form of the same pairing, with what the
+// loop changes. The straight form always comes first.
 
 const LENGTHS: { value: AutoLength | undefined; label: string }[] = [
   { value: undefined, label: 'Your area' },
@@ -32,6 +36,8 @@ export function AutoPanel({ session }: { session: PocSession }) {
   const [energy, setEnergy] = useState<AutoEnergy>(auto?.prefs.energy ?? 'steady')
   const idea = auto?.candidates[auto.index]
   const showing = session.autoShowing
+  const alt = idea?.alternative
+  const looped = showing && auto?.withLoop && alt !== undefined
 
   return (
     <div className="poc-auto" data-testid="auto">
@@ -46,7 +52,9 @@ export function AutoPanel({ session }: { session: PocSession }) {
         {auto && auto.candidates.length > 1 && (
           <button
             className="btn btn-small"
-            onClick={() => session.showIdea((auto.index + 1) % auto.candidates.length)}
+            onClick={() =>
+              session.showIdea((auto.index + 1) % auto.candidates.length, auto.withLoop)
+            }
           >
             Next idea
           </button>
@@ -57,7 +65,10 @@ export function AutoPanel({ session }: { session: PocSession }) {
               Back to yours
             </button>
           ) : (
-            <button className="btn btn-small" onClick={() => session.showIdea(auto.index)}>
+            <button
+              className="btn btn-small"
+              onClick={() => session.showIdea(auto.index, auto.withLoop)}
+            >
               Auto&apos;s idea
             </button>
           ))}
@@ -93,7 +104,8 @@ export function AutoPanel({ session }: { session: PocSession }) {
           </div>
           <p className="muted poc-auto-note">
             Not offered yet: a gradual bass handoff, and dramatic or contrasting transitions. The
-            long blend always swaps the bass on the blend start and has no cuts or effects.
+            long blend always swaps the bass on the blend start and has no cuts or effects. A loop
+            is offered only where it gives back bars a track does not have.
           </p>
         </details>
       </div>
@@ -104,6 +116,7 @@ export function AutoPanel({ session }: { session: PocSession }) {
             <strong>
               Idea {auto.index + 1} of {auto.candidates.length}: A bar {idea.exitBarA} with B bar{' '}
               {idea.entryBarB}, {areaText(idea.area)}
+              {looped && `, with a loop on ${alt.loop.deck}`}
             </strong>
             {showing ? (
               <span className="muted"> · cued at its pre-roll, press play to hear it</span>
@@ -114,14 +127,49 @@ export function AutoPanel({ session }: { session: PocSession }) {
               </span>
             )}
           </p>
+          {alt && (
+            <div className="poc-deck-row" data-testid="auto-strategy">
+              <div className="poc-segmented" role="group" aria-label="Transition">
+                <button
+                  className="btn btn-small"
+                  aria-pressed={showing && !auto.withLoop}
+                  onClick={() => session.showIdea(auto.index, false)}
+                >
+                  Straight
+                </button>
+                <button
+                  className="btn btn-small"
+                  aria-pressed={looped}
+                  onClick={() => session.showIdea(auto.index, true)}
+                >
+                  With a loop
+                </button>
+              </div>
+              <span className="muted">
+                {looped
+                  ? 'Compare with Straight: same pairing, both tracks playing through.'
+                  : `This area is trimmed. A loop on ${alt.loop.deck} gives back ${Math.round((alt.fitted.beforeBeats + alt.fitted.afterBeats - idea.fitted.beforeBeats - idea.fitted.afterBeats) / 4)} bars.`}
+              </span>
+            </div>
+          )}
           <ul className="poc-auto-why" aria-label="Why it may work">
-            {idea.reasons.map((r) => (
+            {(looped
+              ? // The straight form's bar ranges do not hold with the loop.
+                [...alt.reasons, ...idea.reasons.filter((r) => !r.startsWith('It blends'))]
+              : idea.reasons
+            ).map((r) => (
               <li key={r}>{r}</li>
             ))}
           </ul>
-          {idea.cautions.length > 0 && (
+          {(looped ? alt.cautions : idea.cautions).length > 0 && (
             <ul className="poc-auto-cautions" aria-label="Listen for">
-              {idea.cautions.map((c) => (
+              {(looped
+                ? [
+                    ...alt.cautions,
+                    ...idea.cautions.filter((c) => !idea.fitted.trimmed.includes(c)),
+                  ]
+                : idea.cautions
+              ).map((c) => (
                 <li key={c}>{c}</li>
               ))}
             </ul>

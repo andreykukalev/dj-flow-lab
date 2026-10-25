@@ -2,11 +2,15 @@ import { compile, stateAt, valueAt, type CompiledPlan } from '../engine/plan/com
 import type { TransitionPlanV1 } from '../engine/plan/types'
 import { validate } from '../engine/plan/validate'
 import { CONTROL_KEYS, type ControlKey, type ControlState } from '../engine/mixer'
-import { DECK_IDS, type DeckId } from '../engine/model'
+import { DECK_IDS, type DeckId, type DeckLoop } from '../engine/model'
+import { planTiming } from '../engine/plan/loop'
 import {
   anchorBeatAt,
+  anchorTimeOf,
+  beatToSec,
+  deckRuns,
   rateB,
-  transitionBeatToDeckSec,
+  secondsPerBeat,
   type PlaybackAnchor,
   type TransitionTiming,
 } from '../engine/time'
@@ -15,18 +19,24 @@ import { DEFAULT_SCHEDULE, schedulePlan, type ScheduleOptions } from './schedule
 
 // The transport (D-04, D-05, D-06). Every way of starting playback — play, resume,
 // seek, replay — is `startAt(beat)`. The anchor is the only record of position.
+// A deck plays one source per run of its map (#81): one for a straight deck, and for a
+// looped deck one per pass, each started and stopped on the context clock at its beat,
+// with a short crossfade just before every jump back.
 
 export interface TransportOptions extends ScheduleOptions {
   /** Time between a start request and the first sound, in seconds (provisional). */
   leadSec: number
   /** Transport gate fade for starts, stops and seeks, in seconds (D-15). */
   fadeSec: number
+  /** Crossfade at each jump back of a loop, in seconds (#81). */
+  seamSec: number
 }
 
 export const DEFAULT_TRANSPORT: TransportOptions = {
   ...DEFAULT_SCHEDULE,
   leadSec: 0.03,
   fadeSec: 0.01,
+  seamSec: 0.004,
 }
 
 export type TransportState =
@@ -52,6 +62,8 @@ export class Transport {
   private timing: TransitionTiming | undefined
   private buffers: Record<DeckId, AudioBuffer> | undefined
   private sources: AudioBufferSourceNode[] = []
+  /** The loop the sources were started with, to restart them when it changes. */
+  private loop: DeckLoop | undefined
   private current: TransportState = { kind: 'stopped' }
   /** Recent gate ramps, oldest first. */
   private gates: GateRamp[] = []
@@ -87,7 +99,8 @@ export class Transport {
     }
     this.stop()
     this.compiled = compile(plan)
-    this.timing = { gridA: plan.decks.A.grid, gridB: plan.decks.B.grid, ...plan.points }
+    this.timing = planTiming(plan)
+    this.loop = plan.loop
     this.buffers = buffers
     this.mixer.applyState(stateAt(this.compiled, plan.span.startBeat))
   }
@@ -113,7 +126,8 @@ export class Transport {
   /**
    * Swaps in another plan for the same tracks, grids and points (a take, or the
    * original back) without interrupting playback: from a short lead on, every
-   * control that is not held follows the new plan.
+   * control that is not held follows the new plan. A plan with another loop restarts
+   * the decks at the beat playing, since what they play changes.
    */
   replacePlan(plan: TransitionPlanV1, at: number = this.ctx.currentTime): void {
     const { buffers } = this.loaded()
@@ -123,6 +137,14 @@ export class Transport {
       throw new Error(`Plan has errors: ${errors.map((e) => e.message).join('; ')}`)
     }
     this.compiled = compile(plan)
+    if (JSON.stringify(plan.loop) !== JSON.stringify(this.loop)) {
+      this.timing = planTiming(plan)
+      this.loop = plan.loop
+      if (this.current.kind === 'playing') {
+        this.startAt(this.beatAt(at), at)
+        return
+      }
+    }
     if (this.current.kind !== 'playing') {
       if (this.current.kind === 'stopped') {
         this.mixer.applyState(stateAt(this.compiled, plan.span.startBeat))
@@ -171,24 +193,66 @@ export class Transport {
     this.silence(at)
 
     const anchor: PlaybackAnchor = { ctxTime, beat, bpm: timing.gridA.bpm }
-    for (const deck of DECK_IDS) {
-      const rate = deck === 'A' ? 1 : rateB(timing)
-      const buffer = buffers[deck]
-      const offset = transitionBeatToDeckSec(timing, deck, beat)
-      if (offset >= buffer.duration) continue
-      const source = new AudioBufferSourceNode(this.ctx, { buffer, playbackRate: rate })
-      source.connect(this.mixer.decks[deck].input)
-      // A deck whose audio starts later than this beat waits for it.
-      if (offset >= 0) source.start(ctxTime, offset)
-      else source.start(ctxTime - offset / rate, 0)
-      this.sources.push(source)
-    }
+    for (const deck of DECK_IDS) this.startDeck(deck, anchor, timing, buffers[deck])
 
     // Parameters jump to the state at `beat` while the gates are closed, then follow the plan.
     schedulePlan(compiled, this.mixer, anchor, this.options)
     this.rampGate(ctxTime, 0, ctxTime + fadeSec, 1)
     this.set({ kind: 'playing', anchor })
     return anchor
+  }
+
+  /**
+   * Starts one deck's sources from the anchor: one per run of its map. At each jump back
+   * the next run starts `seamSec` early, with the music just before the loop start, and
+   * fades in while the run before fades out, so both meet at full level on the loop's
+   * downbeat and its attack is untouched. A straight deck has one run and no seam gain.
+   */
+  private startDeck(
+    deck: DeckId,
+    anchor: PlaybackAnchor,
+    timing: TransitionTiming,
+    buffer: AudioBuffer,
+  ): void {
+    const seamBeats = this.options.seamSec / secondsPerBeat(anchor.bpm)
+    const rate = deck === 'A' ? 1 : rateB(timing)
+    const grid = deck === 'A' ? timing.gridA : timing.gridB
+    const runs = deckRuns(timing, deck)
+    const input = this.mixer.decks[deck].input
+    for (const run of runs) {
+      if (run.to <= anchor.beat) continue
+      const seamIn = run.from > anchor.beat
+      const from = seamIn ? Math.max(anchor.beat, run.from - seamBeats) : anchor.beat
+      const offset = beatToSec(grid, from + run.offset)
+      if (offset >= buffer.duration) continue
+      const source = new AudioBufferSourceNode(this.ctx, { buffer, playbackRate: rate })
+      const t0 = anchorTimeOf(anchor, from)
+      let stopAt: number | undefined
+      if (runs.length === 1) {
+        source.connect(input)
+      } else {
+        // Silent until the fade-in, in case the engine starts a resampled source a
+        // sample early (found on Firefox).
+        const seam = new GainNode(this.ctx, { gain: seamIn ? 0 : 1 })
+        if (seamIn) {
+          seam.gain.setValueAtTime(0, t0)
+          seam.gain.linearRampToValueAtTime(1, anchorTimeOf(anchor, run.from))
+        }
+        if (Number.isFinite(run.to)) {
+          const t1 = anchorTimeOf(anchor, run.to)
+          seam.gain.setValueAtTime(1, Math.max(t0, anchorTimeOf(anchor, run.to - seamBeats)))
+          seam.gain.linearRampToValueAtTime(0, t1)
+          stopAt = t1
+        }
+        source.connect(seam).connect(input)
+        source.addEventListener('ended', () => seam.disconnect())
+      }
+      // A deck whose audio starts later than this beat waits for it.
+      if (offset >= 0) source.start(t0, offset)
+      else source.start(t0 - offset / rate, 0)
+      if (stopAt !== undefined) source.stop(stopAt)
+      this.sources.push(source)
+    }
   }
 
   /** Pauses at the beat being rendered at `at`. */

@@ -14,7 +14,7 @@ import {
   sameCurve,
   type Move,
 } from './lanes'
-import { transitionBeatToDeckBeat } from '../engine/time'
+import { loopSchedule, transitionBeatToDeckBeat } from '../engine/time'
 import type { PocSession } from './session'
 import { deckPosition } from './session'
 
@@ -26,7 +26,8 @@ import { deckPosition } from './session'
 // and dimmed. While there is a take, the version not playing is drawn dashed on every
 // lane where it differs. The transition area is shaded (#75), the blend start is marked
 // and the handoff dashed, and the playhead and the readouts next to each lane are moved
-// by the controller loop. #20 builds the full timeline.
+// by the controller loop. A loop (#81) gets a row next to its deck, one box per pass;
+// the deck's ruler numbers follow it. #20 builds the full timeline.
 
 const MARKERS: { id: string; label: string }[] = [
   { id: 'bring-in', label: 'B in, no bass' },
@@ -294,6 +295,39 @@ export function Timeline({
 
   const crossfader = laneInfo('mixer.crossfader', compiled, compared)
 
+  const deckLoop = loopSchedule(timing)
+  /** The loop's passes on the deck it plays on, clipped to the plan. */
+  const loopRow = (deck: DeckId) => {
+    if (!deckLoop || deckLoop.deck !== deck) return null
+    const firstBar = deckLoop.startBeat / 4 + 1
+    const lastBar = firstBar + deckLoop.lengthBeats / 4 - 1
+    return (
+      <div
+        className={`timeline-row timeline-loop deck-${deck.toLowerCase()}`}
+        data-testid="timeline-loop"
+        title={`Deck ${deck} loops bars ${firstBar}–${lastBar}, ${deckLoop.passes} passes`}
+      >
+        <div className="timeline-label">
+          <span className="timeline-label-name">Loop</span>
+        </div>
+        {Array.from({ length: deckLoop.passes }, (_, k) => {
+          const b0 = Math.max(startBeat, deckLoop.from + k * deckLoop.lengthBeats)
+          const b1 = Math.min(endBeat, deckLoop.from + (k + 1) * deckLoop.lengthBeats)
+          if (b1 <= b0) return null
+          return (
+            <span
+              key={k}
+              className="timeline-loop-pass"
+              style={{ left: pct(b0), width: `${((b1 - b0) / span) * 100}%` }}
+            >
+              {k === 0 ? `${deck} ${firstBar}–${lastBar}` : `×${k + 1}`}
+            </span>
+          )
+        })}
+      </div>
+    )
+  }
+
   // A's phrase lines, in transition beats: they stay on A's bars when the blend start is
   // off a phrase line or off the downbeat.
   const startA = transitionBeatToDeckBeat(timing, 'A', 0)
@@ -336,6 +370,7 @@ export function Timeline({
             <div key={b} className="timeline-phrase-line" style={{ left: pct(b) }} />
           ))}
           {faderLane('A')}
+          {loopRow('A')}
           {controlLanes('A')}
           <div className="timeline-markers">
             {MARKERS.map((m) => {
@@ -352,6 +387,7 @@ export function Timeline({
           {(crossfader.moves.length > 0 || crossfader.differs) &&
             controlLane('mixer.crossfader', 'X-fader', 'Crossfader', 'x')}
           {controlLanes('B')}
+          {loopRow('B')}
           {faderLane('B')}
           {handoff !== undefined && (
             <div className="timeline-handoff" style={{ left: pct(handoff) }} />

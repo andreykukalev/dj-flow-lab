@@ -200,7 +200,10 @@ export function PocPage({ session }: { session: PocSession }) {
             <span className="deck-a">{session.decks.A.name}</span> <span className="muted">→</span>{' '}
             <span className="deck-b">{session.decks.B.name}</span>
           </div>
-          <div className="muted">Long blend with bass swap · proof of concept</div>
+          <div className="muted">
+            Long blend with bass swap
+            {session.loopRequest && ` · loop on ${session.loopRequest.deck}`} · proof of concept
+          </div>
         </div>
         <div className="poc-flash" ref={flash} aria-hidden="true" hidden={!flashOn} />
       </header>

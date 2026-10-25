@@ -42,3 +42,27 @@ export interface TransitionPoints {
   /** 1-based beat of `entryBarB` that lines up with the blend start. Default 1. */
   entryBeatB?: number
 }
+
+/** Loop lengths (#81): 2, 4 or 8 bars. */
+export type LoopBeats = 8 | 16 | 32
+
+export const LOOP_BEATS: readonly LoopBeats[] = [8, 16, 32]
+
+/** Most extra passes of a loop: it plays at most 1 + this many times. */
+export const MAX_LOOP_REPEATS = 7
+
+/**
+ * One loop on one deck (#81): `lengthBeats` of the deck from `startBeat`, played
+ * 1 + `repeats` times in all. The loop never crosses the deck's blend-start beat: one
+ * that ends at or before it plays its extra passes before the blend start (the deck's
+ * earlier music starts earlier), one that starts at or after it plays them after (its
+ * later music comes later). Either way the blend start keeps its pairing.
+ */
+export interface DeckLoop {
+  deck: DeckId
+  /** Track beat where the loop starts: a downbeat of the deck's grid. */
+  startBeat: number
+  lengthBeats: LoopBeats
+  /** Extra passes, at least 1. */
+  repeats: number
+}

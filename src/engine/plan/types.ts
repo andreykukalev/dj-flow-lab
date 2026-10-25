@@ -1,5 +1,5 @@
 import type { ControlKey } from '../mixer'
-import type { BeatGrid, DeckId, Layer, TransitionPoints } from '../model'
+import type { BeatGrid, DeckId, DeckLoop, Layer, TransitionPoints } from '../model'
 
 // Transition plan schema v1 (D-16). A plan is data: strategies produce it, the
 // compiler turns it into per-control segments, and the scheduler and UI read those.
@@ -48,6 +48,8 @@ export interface TransitionPlanV1 {
   decks: Record<DeckId, PlanDeck>
   /** 1-based bars. */
   points: TransitionPoints
+  /** One deck playing a few bars more than once (#81). Optional: plans without it play straight. */
+  loop?: DeckLoop
   /** Deck B's rate is derived from the grids, never stored. */
   tempo: { master: 'A' }
   /** Transition beats covered by the plan, e.g. a pre-roll before 0 to a tail after the overlap. */

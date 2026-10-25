@@ -1,7 +1,8 @@
 import { isPhraseStart } from '../grid'
 import type { BeatGrid } from '../model'
 import { fitArea, type AreaRequest, type FittedArea } from '../plan/area'
-import { barToBeat } from '../time'
+import { areaContextFor, loopToFill, resolveLoop, type LoopRequest } from '../plan/loop'
+import { barToBeat, type TransitionTiming } from '../time'
 import { mainLevels, type BarFeatures, type TrackStructure } from './structure'
 
 // Auto transition point (#77): candidate blend starts for the long blend, ranked from
@@ -19,6 +20,12 @@ import { mainLevels, type BarFeatures, type TrackStructure } from './structure'
 // tracks: two masters differ in loudness. Vocals, key and melody are not analysed, so
 // nothing here claims anything about them (AUTO_LIMITS). A candidate is a suggestion
 // with its reasons, for the user to hear and change; the ranking is not a verdict.
+//
+// Loop-assisted alternative (#81): where a pairing's area had to be trimmed because one
+// track has no music there, Auto also tries the loop that gives the bars back (B's first
+// bars before the blend start, or A's bars from it). The pairing ranks by its better
+// form, the loop paying a small cost, but the straight form is always the one put in
+// place first; the loop is offered beside it. Auto never claims a loop sounds better.
 
 export type AutoLength = 'short' | 'medium' | 'long'
 export type AutoEnergy = 'steady' | 'lift'
@@ -41,6 +48,16 @@ export interface AutoTrack {
   beats: number
 }
 
+/** The same pairing with a loop that fills what the straight form had to trim. */
+export interface LoopAlternative {
+  loop: LoopRequest
+  fitted: FittedArea
+  score: number
+  /** What the loop gives back, measured in bars. */
+  reasons: string[]
+  cautions: string[]
+}
+
 export interface AutoCandidate {
   exitBarA: number
   entryBarB: number
@@ -51,7 +68,12 @@ export interface AutoCandidate {
   reasons: string[]
   /** What to listen for, or what Auto could not check. */
   cautions: string[]
+  /** A loop-assisted form of the same pairing, when a loop gives back trimmed bars. */
+  alternative?: LoopAlternative
 }
+
+/** What a loop costs in the ranking: a straight form wins when the two are equal. */
+export const LOOP_COST = 0.5
 
 export const AUTO_LIMITS =
   'Auto reads level, low end and highs per bar on your grids. It does not hear vocals, key or melody, so listen for clashes.'
@@ -266,11 +288,15 @@ export function suggestBlendStarts(
         cautions.push(`B comes in late, at bar ${entryBarB} of ${nB}, so little of B is left.`)
       cautions.push(...fitted.trimmed)
 
-      scored.push({ exitBarA, entryBarB, area, fitted, score, reasons, cautions })
+      const alternative =
+        loopAlternative(a, b, exitBarA, entryBarB, area, fitted, wantBeats) ?? undefined
+      if (alternative) alternative.score += score - 3 * fit * fit
+      scored.push({ exitBarA, entryBarB, area, fitted, score, reasons, cautions, alternative })
     }
   }
 
-  scored.sort((x, y) => y.score - x.score || y.exitBarA - x.exitBarA || x.entryBarB - y.entryBarB)
+  const rank = (c: AutoCandidate) => Math.max(c.score, c.alternative?.score ?? -Infinity)
+  scored.sort((x, y) => rank(y) - rank(x) || y.exitBarA - x.exitBarA || x.entryBarB - y.entryBarB)
   const picked: AutoCandidate[] = []
   for (const c of scored) {
     if (picked.length >= count) break
@@ -288,6 +314,65 @@ export function suggestBlendStarts(
     shared.push(
       'Neither track shows clear changes in level or low end, so this rests on phrase lines and where the tracks are.',
     )
-  for (const c of picked) c.cautions.push(...shared)
+  for (const c of picked) {
+    c.cautions.push(...shared)
+    if (c.alternative) {
+      const deck = c.alternative.loop.deck
+      if (gridDoubt((deck === 'A' ? a : b).structure))
+        c.alternative.cautions.push(
+          `Check ${deck}'s grid before trusting the loop: a loop on an off grid stutters at every pass.`,
+        )
+    }
+  }
   return picked
+}
+
+/**
+ * The loop that fills what this pairing's area had to trim, with its fitted area and the
+ * part of the score that changes (the fit, less the loop's cost), or null.
+ */
+function loopAlternative(
+  a: AutoTrack,
+  b: AutoTrack,
+  exitBarA: number,
+  entryBarB: number,
+  area: AreaRequest,
+  straight: FittedArea,
+  wantBeats: number,
+): LoopAlternative | null {
+  if (straight.trimmed.length === 0) return null
+  const timing: TransitionTiming = { gridA: a.grid, gridB: b.grid, exitBarA, entryBarB }
+  const beats = { A: a.beats, B: b.beats }
+  const request = loopToFill(area, timing, beats)
+  if (!request) return null
+  const t = request.deck === 'A' ? a : b
+  const entryBeat = barToBeat(t.grid, request.deck === 'A' ? exitBarA : entryBarB)
+  const resolved = resolveLoop(request, { grid: t.grid, entryBeat, beats: t.beats })
+  if ('error' in resolved) return null
+  const fitted = fitArea(area, areaContextFor({ ...timing, loop: resolved.loop }, beats))
+  const gained = fitted.beforeBeats + fitted.afterBeats - straight.beforeBeats - straight.afterBeats
+  if (gained < 4 || fitted.tooShort) return null
+  const fit = wantBeats > 0 ? clamp01((fitted.beforeBeats + fitted.afterBeats) / wantBeats) : 1
+
+  const { loop } = resolved
+  const fromBar = loop.startBeat / 4 + 1
+  const toBar = fromBar + request.bars - 1
+  const deckBars = `${request.deck}'s bars ${fromBar}–${toBar}`
+  const reasons: string[] = []
+  const cautions: string[] = []
+  const times = request.passes === 2 ? 'twice' : `${request.passes} times`
+  if (request.deck === 'B') {
+    reasons.push(
+      `B has ${Math.floor(straight.beforeBeats / 4)} bars before bar ${entryBarB}. Looping ${deckBars} ${times} gives B ${Math.floor(fitted.beforeBeats / 4)} bars to come in, and bar ${entryBarB} still lands on the blend start.`,
+    )
+  } else {
+    reasons.push(
+      `A has ${Math.floor(straight.afterBeats / 4)} bars after bar ${exitBarA}. Looping ${deckBars} ${times} holds A for ${Math.floor(fitted.afterBeats / 4)} bars while B takes over.`,
+    )
+  }
+  cautions.push(
+    `Listen to each jump back from bar ${toBar + 1} to bar ${fromBar}: a melody or vocal there repeats too.`,
+  )
+  cautions.push(...fitted.trimmed)
+  return { loop: request, fitted, score: 3 * fit * fit - LOOP_COST, reasons, cautions }
 }

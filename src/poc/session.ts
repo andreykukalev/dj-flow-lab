@@ -22,17 +22,26 @@ import {
 } from '../engine/plan/area'
 import { compile, type CompiledPlan } from '../engine/plan/compile'
 import { longBlendPlan } from '../engine/plan/longBlend'
+import {
+  areaContextFor,
+  loopToFill,
+  planTiming,
+  requestOf,
+  resolveLoop,
+  type LoopRequest,
+} from '../engine/plan/loop'
 import { applyTakes, TakeHistory, type Take } from '../engine/plan/take'
 import type { TransitionPlanV1 } from '../engine/plan/types'
-import { validate } from '../engine/plan/validate'
+import { validate, type PlanIssue, type WarningCode } from '../engine/plan/validate'
 import {
   barToBeat,
+  deckSecToTransitionBeat,
   rateB,
   rateToSemitones,
   secondsPerBar,
   secToBeat,
   toBarBeat,
-  transitionBeatToDeckBeat,
+  transitionBeatToDeckBeat as deckBeatAt,
   type BarBeat,
   type TransitionTiming,
 } from '../engine/time'
@@ -51,6 +60,11 @@ import { DEMO_TRACKS, renderDemoTrack } from './demoTracks'
 // all change these, and the plan is generated for the area that fits both tracks.
 // Auto (#77) proposes blend starts from both tracks' structure and sets the same two
 // values; the user's own choice is kept so the two can be compared.
+//
+// A loop on one deck (#81) is part of the same arrangement: the user asks for it relative
+// to the blend start, like the area, and the plan carries it in that deck's beats. Takes
+// stay in transition beats, so they replay with the loop; Auto's ideas and "yours" each
+// keep their loop.
 
 export interface DeckSource {
   name: string
@@ -58,27 +72,27 @@ export interface DeckSource {
   grid: BeatGrid
 }
 
-/** Auto's ideas, and the user's blend start and area from before Auto, to compare with. */
+/** Auto's ideas, and the user's blend start, area and loop from before Auto, to compare with. */
 export interface AutoState {
   prefs: AutoPreferences
   /** Best first. */
   candidates: AutoCandidate[]
   /** The idea last put in place. */
   index: number
-  yours: { points: TransitionPoints; area: AreaRequest }
+  /** Whether that idea was put in place straight or with its loop. */
+  withLoop: boolean
+  yours: { points: TransitionPoints; area: AreaRequest; loop: LoopRequest | null }
 }
 
 /** A's bar 25 with B's bar 17, ±16 bars: A bars 9–41 blended with B bars 1–33. */
 export const DEMO_POINTS: TransitionPoints = { exitBarA: 25, entryBarB: 17 }
 
-export function timingOf(plan: TransitionPlanV1): TransitionTiming {
-  return { gridA: plan.decks.A.grid, gridB: plan.decks.B.grid, ...plan.points }
-}
+export const timingOf = planTiming
 
 /** A deck's bar.beat at a transition beat. */
 export function deckPosition(timing: TransitionTiming, deck: DeckId, beat: number): BarBeat {
   const grid = deck === 'A' ? timing.gridA : timing.gridB
-  return toBarBeat(grid, transitionBeatToDeckBeat(timing, deck, beat))
+  return toBarBeat(grid, deckBeatAt(timing, deck, beat))
 }
 
 /** Decodes a local file: natively, or with the AIFF parser where the engine cannot (D-03). */
@@ -152,6 +166,8 @@ export class PocSession {
   area: AreaRequest = DEFAULT_AREA
   /** The area that fits both tracks: what the plan blends. */
   fitted!: FittedArea
+  /** The loop the user asked for (#81), or null for a straight transition. */
+  loopRequest: LoopRequest | null = null
   /** The plan the strategy made, before any take. */
   basePlan!: TransitionPlanV1
   /** The plan playing: the strategy's plan with the takes, or without them while comparing. */
@@ -165,6 +181,8 @@ export class PocSession {
   timing!: TransitionTiming
   /** Auto's ideas since the last Auto click, or null. */
   auto: AutoState | null = null
+  /** Advisories on the plan in place, such as a loop on a grid that is not confirmed. */
+  warnings: PlanIssue<WarningCode>[] = []
   /** Errors of the last change that was refused; the previous plan stays loaded. */
   errors: string[] = []
   /** Changes on every accepted or refused change, for React. */
@@ -225,7 +243,8 @@ export class PocSession {
       deck === 'A'
         ? tidy({ ...this.points, exitBarA: defaultExitBar(source, this.area), exitBeatA: 1 })
         : this.points
-    this.change(decks, points)
+    const loop = this.loopRequest?.deck === deck ? null : this.loopRequest
+    this.change(decks, points, this.area, false, loop)
   }
 
   setGrid(deck: DeckId, grid: BeatGrid): void {
@@ -245,7 +264,7 @@ export class PocSession {
 
   /** Track beat of a deck at the blend start: A's blend start, or the beat of B lined up with it. */
   markBeat(deck: DeckId): number {
-    return transitionBeatToDeckBeat(this.timing, deck, 0)
+    return deckBeatAt(this.timing, deck, 0)
   }
 
   /** Moves a deck's side of the blend start to one of its track beats, on the nearest beat. */
@@ -260,11 +279,33 @@ export class PocSession {
 
   /** Moves the blend start to where the cursor is. */
   setBlendStartAtCursor(): void {
-    this.setBlendStart(transitionBeatToDeckBeat(this.timing, 'A', this.transport.beatAt()))
+    this.setBlendStart(deckBeatAt(this.timing, 'A', this.transport.beatAt()))
   }
 
   setArea(area: AreaRequest): void {
     this.change(this.decks, this.points, area)
+  }
+
+  /** A loop on one deck, or null for none (#81). The blend start and area stay where they are. */
+  setLoop(loop: LoopRequest | null): void {
+    this.change(this.decks, this.points, this.area, false, loop)
+  }
+
+  /**
+   * A loop that gives back bars the area had to trim because one track has no music
+   * there, for the current blend start and area; null when there is none to offer.
+   */
+  get loopToFill(): LoopRequest | null {
+    if (this.fitted.trimmed.length === 0) return null
+    const straight: TransitionTiming = { ...this.timing }
+    delete straight.loop
+    return loopToFill(this.area, straight, { A: this.beatsOf('A'), B: this.beatsOf('B') })
+  }
+
+  /** Track beats of music from bar 1 to the end of a deck's file. */
+  beatsOf(deck: DeckId): number {
+    const source = this.decks[deck]
+    return secToBeat(source.grid, source.buffer.duration)
   }
 
   /**
@@ -300,34 +341,43 @@ export class PocSession {
       return
     }
     const yours =
-      this.auto && this.autoShowing ? this.auto.yours : { points: this.points, area: this.area }
-    this.auto = { prefs, candidates, index: 0, yours }
+      this.auto && this.autoShowing
+        ? this.auto.yours
+        : { points: this.points, area: this.area, loop: this.loopRequest }
+    this.auto = { prefs, candidates, index: 0, withLoop: false, yours }
     this.showIdea(0)
   }
 
-  /** Puts one of Auto's ideas in place, cued at its pre-roll. */
-  showIdea(index: number): void {
+  /**
+   * Puts one of Auto's ideas in place, cued at its pre-roll: straight, or with its
+   * loop-assisted alternative when it has one and `withLoop` asks for it.
+   */
+  showIdea(index: number, withLoop = false): void {
     const auto = this.auto
     const c = auto?.candidates[index]
     if (!auto || !c) return
     auto.index = index
-    this.change(this.decks, { exitBarA: c.exitBarA, entryBarB: c.entryBarB }, c.area)
+    auto.withLoop = withLoop && c.alternative !== undefined
+    const loop = auto.withLoop ? c.alternative!.loop : null
+    this.change(this.decks, { exitBarA: c.exitBarA, entryBarB: c.entryBarB }, c.area, false, loop)
     this.cueStart()
   }
 
-  /** The user's blend start and area from before Auto, cued at the pre-roll. */
+  /** The user's blend start, area and loop from before Auto, cued at the pre-roll. */
   backToYours(): void {
     if (!this.auto) return
-    const { points, area } = this.auto.yours
-    this.change(this.decks, points, area)
+    const { points, area, loop } = this.auto.yours
+    this.change(this.decks, points, area, false, loop)
     this.cueStart()
   }
 
-  /** Whether the blend start and area are Auto's idea, unchanged. */
+  /** Whether the blend start, area and loop are Auto's idea, unchanged. */
   get autoShowing(): boolean {
-    const c = this.auto?.candidates[this.auto.index]
-    if (!c) return false
+    const auto = this.auto
+    const c = auto?.candidates[auto.index]
+    if (!auto || !c) return false
     const p = this.points
+    const loop = auto.withLoop ? (c.alternative?.loop ?? null) : null
     return (
       p.exitBarA === c.exitBarA &&
       (p.exitBeatA ?? 1) === 1 &&
@@ -335,7 +385,8 @@ export class PocSession {
       (p.entryBeatB ?? 1) === 1 &&
       this.area.beforeBars === c.area.beforeBars &&
       this.area.afterBars === c.area.afterBars &&
-      this.area.linked === c.area.linked
+      this.area.linked === c.area.linked &&
+      sameLoop(this.loopRequest, loop)
     )
   }
 
@@ -355,8 +406,7 @@ export class PocSession {
   /** Where the cursor can go: all of track A, and the plan. */
   get seekRange(): { from: number; to: number } {
     const a = this.decks.A
-    const toTransition = (sec: number) =>
-      secToBeat(a.grid, sec) - transitionBeatToDeckBeat(this.timing, 'A', 0)
+    const toTransition = (sec: number) => deckSecToTransitionBeat(this.timing, 'A', sec)
     const { startBeat, endBeat } = this.compiled.span
     return {
       from: Math.min(startBeat, Math.ceil(toTransition(0))),
@@ -452,6 +502,7 @@ export class PocSession {
     points: TransitionPoints,
     area: AreaRequest = this.area,
     keepTrackPosition = false,
+    loop: LoopRequest | null = this.loopRequest,
   ): void {
     const before = this.transport.state
     const startBefore = this.blendStartBeat
@@ -461,14 +512,21 @@ export class PocSession {
         : before.kind === 'paused'
           ? before.beat
           : undefined
-    const previous = { decks: this.decks, points: this.points, area: this.area }
+    const previous = {
+      decks: this.decks,
+      points: this.points,
+      area: this.area,
+      loop: this.loopRequest,
+    }
     this.decks = decks
     this.points = points
     this.area = area
+    this.loopRequest = loop
     if (!this.apply()) {
       this.decks = previous.decks
       this.points = previous.points
       this.area = previous.area
+      this.loopRequest = previous.loop
     } else {
       this.loop.setPlan(this.compiled, this.barAt)
       if (beat !== undefined) {
@@ -486,28 +544,41 @@ export class PocSession {
   private apply(): boolean {
     const { A, B } = this.decks
     const timing: TransitionTiming = { gridA: A.grid, gridB: B.grid, ...this.points }
-    const beatsOf = (s: DeckSource) => secToBeat(s.grid, s.buffer.duration)
-    const fitted = fitArea(this.area, {
-      startBeatA: transitionBeatToDeckBeat(timing, 'A', 0),
-      entryBeatB: transitionBeatToDeckBeat(timing, 'B', 0),
-      beatsA: beatsOf(A),
-      beatsB: beatsOf(B),
-    })
+    const beats = { A: this.beatsOf('A'), B: this.beatsOf('B') }
+    if (this.loopRequest) {
+      const deck = this.loopRequest.deck
+      const resolved = resolveLoop(this.loopRequest, {
+        grid: this.decks[deck].grid,
+        entryBeat: deckBeatAt(timing, deck, 0),
+        beats: beats[deck],
+      })
+      if ('error' in resolved) {
+        this.errors = [resolved.error]
+        return false
+      }
+      timing.loop = resolved.loop
+      // Shown as it plays: a gap the deck has no music for is shortened.
+      this.loopRequest = requestOf(resolved.loop, timing)
+    }
+    const fitted = fitArea(this.area, areaContextFor(timing, beats))
     // A blend too short to play is still built, so the validator can say why.
     const area = fitted.tooShort
       ? { ...fitted, beforeBeats: 0, afterBeats: MIN_AREA_BEATS }
       : fitted
-    const plan = longBlendPlan(
-      {
-        A: { trackFingerprint: A.name, grid: A.grid },
-        B: { trackFingerprint: B.name, grid: B.grid },
-      },
-      this.points,
-      area,
-    )
+    const plan: TransitionPlanV1 = {
+      ...longBlendPlan(
+        {
+          A: { trackFingerprint: A.name, grid: A.grid },
+          B: { trackFingerprint: B.name, grid: B.grid },
+        },
+        this.points,
+        area,
+      ),
+      ...(timing.loop && { loop: timing.loop }),
+    }
     const buffers = { A: A.buffer, B: B.buffer }
     const durationSec = { A: buffers.A.duration, B: buffers.B.duration }
-    const { errors } = validate(plan, { durationSec })
+    const { errors, warnings } = validate(plan, { durationSec })
     this.errors = errors.map((e) => e.message)
     if (errors.length === 0 && fitted.tooShort) {
       this.errors = ['There is less than a bar of music in both tracks around this blend start']
@@ -523,8 +594,20 @@ export class PocSession {
     this.compared = this.compileCompared()
     this.timing = timingOf(plan)
     this.fitted = fitted
+    this.warnings = warnings
     return true
   }
+}
+
+function sameLoop(a: LoopRequest | null, b: LoopRequest | null): boolean {
+  if (!a || !b) return a === b
+  return (
+    a.deck === b.deck &&
+    a.side === b.side &&
+    a.bars === b.bars &&
+    a.passes === b.passes &&
+    a.gapBars === b.gapBars
+  )
 }
 
 export function createSession(options: { logFrames?: number } = {}): PocSession {

@@ -3,7 +3,14 @@ import type { TrackStructure } from '../engine/analysis/structure'
 import { phraseStarts, setPhraseOffset } from '../engine/grid'
 import type { DeckId } from '../engine/model'
 import { moveEdge } from '../engine/plan/area'
-import { barToBeat, formatBarBeat, toBarBeat, transitionBeatToDeckBeat } from '../engine/time'
+import {
+  barToBeat,
+  deckBeatToTransitionBeat,
+  formatBarBeat,
+  loopSchedule,
+  toBarBeat,
+  transitionBeatToDeckBeat,
+} from '../engine/time'
 import type { PocSession } from './session'
 
 // The whole of each track (#29): level per bar, low end, 8-bar phrase lines, the bars
@@ -91,6 +98,8 @@ function DeckOverview({
   const areaTo = deckBar(session, deck, area.to)
   const markBar = deckBar(session, deck, 0)
   const markText = formatBarBeat(toBarBeat(grid, mark))
+  const loop = loopSchedule(session.timing)
+  const looped = loop?.deck === deck ? loop : null
 
   /** Track beat of this deck under the pointer, on the nearest beat. */
   const beatAt = (e: React.PointerEvent<HTMLElement>, el: HTMLElement) => {
@@ -101,7 +110,7 @@ function DeckOverview({
 
   const seekTrack = (e: React.PointerEvent<HTMLDivElement>) => {
     if ((e.target as Element).closest('button')) return
-    onSeek(beatAt(e, e.currentTarget) - mark)
+    onSeek(deckBeatToTransitionBeat(session.timing, deck, beatAt(e, e.currentTarget)))
   }
 
   const dragTo = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -187,6 +196,19 @@ function DeckOverview({
           title={`The transition area: deck ${deck} bars ${Math.floor(areaFrom)}–${Math.ceil(areaTo) - 1} are blended`}
           data-testid={`area-${deck}`}
         />
+        {looped && (
+          <div
+            className="ov-loop"
+            style={{
+              left: x(looped.startBeat / 4 + 1),
+              width: x(looped.lengthBeats / 4 + 1),
+            }}
+            title={`Loop: bars ${looped.startBeat / 4 + 1}–${(looped.startBeat + looped.lengthBeats) / 4} play ${looped.passes} times`}
+            data-testid={`overview-loop-${deck}`}
+          >
+            ⟲ ×{looped.passes}
+          </div>
+        )}
         {phrases.map((bar, k) => (
           <div key={bar} className="ov-phrase" style={{ left: x(bar) }}>
             {k % labelEvery === 0 && (
