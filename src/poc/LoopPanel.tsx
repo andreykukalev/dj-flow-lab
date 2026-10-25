@@ -30,10 +30,11 @@ export function LoopPanel({ session }: { session: PocSession }) {
   return (
     <details className="poc-loop" open={request !== null || undefined} data-testid="loop">
       <summary>
-        Loop{' '}
-        <span className="muted" data-testid="loop-summary">
+        <strong>Loop</strong>
+        <span data-testid="loop-summary">
           {request ? loopName(request, session.timing) : 'off'}
         </span>
+        {!request && <span className="muted">repeat 2, 4 or 8 bars of A or B</span>}
       </summary>
       <p className="muted poc-loop-note">
         A loop repeats a few bars of one track, so it can hold on longer or come in earlier while
