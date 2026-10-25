@@ -2,11 +2,11 @@
 
 A music-learning product that helps DJs understand **why** a transition works musically, **when** to make it, and **how** to carry it out, by connecting musical reasoning, synchronized audio, and a virtual controller.
 
-The first product is the **Transition Builder**: load two of your own tracks, choose where to leave one and enter the other, try different transition approaches, and watch the mixer perform each one while you listen.
+The first product is the **Transition Builder**: load two of your own tracks, choose where to leave one and enter the other, try different transition approaches, and watch the mixer perform each one while you listen. Choosing that moment is the heart of it: mark moments in both tracks, try any pairing (including ones that do not work), and find out why each one worked or did not.
 
 ## Documents
 
-- [Product brief v0.3](docs/PRODUCT_BRIEF_v0.3.md) (current) and [v0.2](docs/product-brief.md) (history)
+- [Product brief v0.4](docs/PRODUCT_BRIEF_v0.4.md) (current), [v0.3](docs/PRODUCT_BRIEF_v0.3.md) and [v0.2](docs/product-brief.md) (history)
 - [Technical audit of v0.2](docs/TECHNICAL_AUDIT_v0.2.md)
 - [Technical decisions](docs/TECHNICAL_DECISIONS.md)
 - [Technical spikes and proof of concept](docs/TECHNICAL_SPIKES.md)

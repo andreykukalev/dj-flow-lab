@@ -1,6 +1,6 @@
 # Technical spikes
 
-- **Status:** v0.3, 2026-10-24
+- **Status:** v0.3, 2026-10-24; proof of concept passed 2026-10-25 (#46)
 - **Purpose:** resolve the highest-risk technical assumptions with small, time-boxed experiments before full implementation. Decisions referenced as D-xx are in [TECHNICAL_DECISIONS.md](TECHNICAL_DECISIONS.md); risks as R-xx in [RISKS.md](RISKS.md).
 - **Rule:** spike code lives in `spikes/<name>/` and is not product code. What survives is the decision, the measurements, and any test that is worth keeping.
 
@@ -15,6 +15,7 @@
 | S5 | Visual sync and output latency | Decides D-21 and calibration UX | 1 day |
 | S6 | BPM and downbeat accuracy on real tracks | Decides how much correction UX the MVP needs | 3 days |
 | S7 | Storage durability and track identity | Data loss risk, low rewrite risk | 0.5 day |
+| S9 | AI explainer grounded in outcome facts (brief v0.4) | Decides whether the explainer is trustworthy enough for beginners | 1 day |
 
 S1, S3, and S5 together form the **proof of concept** below.
 
@@ -55,6 +56,14 @@ S1, S3, and S5 together form the **proof of concept** below.
 **Fail handling:** any of P1–P4 failing in one engine → investigate engine-specific behaviour before continuing; P1/P2 failing in both → revisit D-04/D-05 (architecture risk R-01). P9 failing because of grid accuracy, not engine timing → record for S6, not a PoC failure.
 
 **Time-box:** 5 days in total (S1 3 days, S3 and S5 one day each, overlapping).
+
+### Result (2026-10-25, #46): passed
+
+- **P1–P8 and P10:** green in CI on Chromium and Firefox (S1 #42, S3 #44, S5 #45), except P1 on Firefox, which misses 1 ms by the resampler drift (≤ 1.5 ms over 64 bars, D-07). The drift is accepted at the gate (see D-07).
+- **P9 (listening check, Andrei, deployed PoC page):** two of his own tracks loaded, gridded by hand and mixed with the long blend. "Concept works … not perfectly, but overall mechanic works." No flam, bass or sync problem was reported. Wired versus Bluetooth, the browser used and a calibration offset were not reported, so the ±40 ms perceived-offset criterion (S5) has no number yet and is rechecked in the M2 listening check.
+- **What was not right was musical, not technical.** The phrases the transition used were technically correct but did not live well together. The PoC places the exit at the last phrase line that leaves 40 bars of A and enters B at bar 1, which says nothing about whether those moments belong together. This is the brief's first risk ("technically correct, musically weak") observed on the first real pair, and it is the reason for brief v0.4: choosing the moment becomes the centre of the product.
+- **Safari:** not checked (no Mac in the session); stays open for P10's Tier 2 checklist.
+- **Decision:** the architecture holds (D-04, D-05, D-17, D-18, D-21 at their stated confidence). M1 proceeds on this engine. No M1 issue changes because of the gate; the product refocus changes M2 onwards ([backlog.md](backlog.md)).
 
 ---
 
@@ -218,3 +227,12 @@ S1, S3, and S5 together form the **proof of concept** below.
 - **Pass/fail:** reload restores corrections in all engines; quota errors produce a message and export offer; a tag-edited file is offered the name+duration match.
 - **Time-box:** 0.5 day.
 - **Decision:** fingerprint strategy (D-22); whether to hash only the audio payload in a later version.
+
+## S9 — AI explainer grounded in outcome facts _(brief v0.4)_
+
+- **Question:** can a language model, given only a pairing's outcome facts, explain what the listener hears and why, correctly enough for beginners, without inventing facts?
+- **Minimal implementation:** the outcome-facts JSON for a reference set of 20 pairings on 5 track pairs (half that work, half that do not, for different reasons: phrases misaligned, breakdown against a peak, a downbeat moved by a beat, a long bass clash, a key clash); a fixed system prompt; a script that calls the model through the same proxy shape the app will use. Andrei writes a short expert explanation for each pairing. Only facts and explanations are committed, never audio.
+- **Test procedure:** generate an explanation per pairing three times; Andrei rates each against his own (right / partly / wrong) blind to which run it is; check every claim against the facts; time and cost per explanation.
+- **Pass/fail:** ≥ 16/20 rated right, none rated wrong in more than one of three runs; no claim that the facts do not support; median response under 5 s.
+- **Time-box:** 1 day plus Andrei's ratings.
+- **Decision:** whether the explainer ships for the pilot, which facts it needs that are missing, and the prompt and model to start from.
