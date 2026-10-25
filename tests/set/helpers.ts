@@ -68,17 +68,20 @@ const wav = (name: string, bpm: number, parts: Part[]) => ({
   buffer: songWav(bpm, parts),
 })
 
+/** Each DJ's files, the same bytes every time, so a fingerprint matches across runs. */
+export const collectionFiles = () => ({
+  dj1: [wav('deep-122.wav', 122, DEEP), wav('peak-124.wav', 124, PEAK)],
+  dj2: [wav('deep-123.wav', 123, DEEP), wav('tool-126.wav', 126, TOOL)],
+})
+
 export async function addCollection(page: Page) {
+  const files = collectionFiles()
   await page.getByLabel('DJ 1 name').fill('Andrei')
   await page.getByLabel('DJ 1 name').press('Enter')
   await page.getByLabel('DJ 2 name').fill('Lena')
   await page.getByLabel('DJ 2 name').press('Enter')
-  await page
-    .getByTestId('add-dj1')
-    .setInputFiles([wav('deep-122.wav', 122, DEEP), wav('peak-124.wav', 124, PEAK)])
-  await page
-    .getByTestId('add-dj2')
-    .setInputFiles([wav('deep-123.wav', 123, DEEP), wav('tool-126.wav', 126, TOOL)])
+  await page.getByTestId('add-dj1').setInputFiles(files.dj1)
+  await page.getByTestId('add-dj2').setInputFiles(files.dj2)
   await expect(page.locator('[data-testid="collection-track"][data-status="ready"]')).toHaveCount(
     4,
     { timeout: 60_000 },

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { longBlendPlan } from '../plan/longBlend'
 import { grid } from '../test-helpers'
 import { track } from './fixtures'
 import { readings } from './readings'
@@ -34,7 +35,20 @@ const STATE: LabState = {
   grids: { A: grid(122, 0), B: grid(124, 0) },
 }
 
-const version = (id: string, author: 'dj1' | 'dj2') => ({ id, name: id, author, state: STATE })
+const PLAN = longBlendPlan(
+  {
+    A: { trackFingerprint: 'a', grid: STATE.grids.A },
+    B: { trackFingerprint: 'b', grid: STATE.grids.B },
+  },
+  STATE.points,
+)
+const version = (id: string, author: 'dj1' | 'dj2') => ({
+  id,
+  name: id,
+  author,
+  state: STATE,
+  plan: PLAN,
+})
 
 describe('versions and picks', () => {
   it('moves a transition from tried to versions to agreed', () => {

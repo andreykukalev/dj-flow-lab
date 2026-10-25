@@ -2,6 +2,7 @@ import type { BeatGrid, TransitionPoints } from '../model'
 import type { AreaRequest } from '../plan/area'
 import type { LoopRequest } from '../plan/loop'
 import type { Take } from '../plan/take'
+import type { TransitionPlanV1 } from '../plan/types'
 import type { DjId } from './profile'
 
 // Versions of a transition and the decision on them (#93, #94). A version is what was
@@ -23,6 +24,8 @@ export interface TransitionVersion {
   name: string
   author: DjId
   state: LabState
+  /** The plan that played, takes included: what the set sheet and export are made from. */
+  plan: TransitionPlanV1
 }
 
 export interface BarComment {
