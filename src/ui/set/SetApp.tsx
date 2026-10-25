@@ -1,7 +1,8 @@
-import { useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { ConceptExplorer } from './ConceptExplorer'
 import { LabScreen } from './LabScreen'
 import { Perform } from './Perform'
+import { keep } from './persist'
 import { SetSpine } from './SetSpine'
 import { SetStore, type Screen } from './store'
 import { YourMusic } from './YourMusic'
@@ -19,12 +20,13 @@ const STEPS: { screen: Exclude<Screen, 'lab'>; label: string }[] = [
 export function SetApp({ store: given }: { store?: SetStore }) {
   const [store] = useState(() => given ?? new SetStore())
   useSyncExternalStore(store.subscribe, () => store.version)
+  useEffect(() => keep(store, (message) => store.say(message)), [store])
   const enabled = (s: Exclude<Screen, 'lab'>) =>
     s === 'music' ||
     (s === 'concepts' && store.profiles.length >= 2) ||
     ((s === 'set' || s === 'perform') && store.plan !== null)
   return (
-    <div className="set-app">
+    <div className="set-app" data-ready={store.ready ? 'true' : undefined}>
       <header className="set-header">
         <h1>DJ Flow Lab</h1>
         <nav aria-label="Steps">
@@ -59,6 +61,14 @@ export function SetApp({ store: given }: { store?: SetStore }) {
           ))}
         </div>
       </header>
+      {store.notice && (
+        <p className="set-notice" role="alert">
+          {store.notice}{' '}
+          <button className="btn btn-small" onClick={() => store.say(null)}>
+            OK
+          </button>
+        </p>
+      )}
       {store.screen === 'music' && <YourMusic store={store} />}
       {store.screen === 'concepts' && <ConceptExplorer store={store} />}
       {store.screen === 'set' && <SetSpine store={store} />}

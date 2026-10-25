@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DJ_IDS, formatDuration, type DjId } from '../../engine/set/profile'
+import { parseSet } from '../../engine/set/setFile'
 import { CommitField, Layer, NotMeasured, Shape } from './Bits'
 import type { CollectionTrack, SetStore } from './store'
 
@@ -11,14 +12,37 @@ function TrackRow({ store, track }: { store: SetStore; track: CollectionTrack })
   return (
     <li className="set-row" data-testid="collection-track" data-status={track.status}>
       <div className="set-row-head">
-        <span className="set-row-name">{track.file.name}</span>
+        <span className="set-row-name">{track.fileName}</span>
         {track.status === 'waiting' && <span className="muted">Waiting…</span>}
         {track.status === 'analysing' && <span className="muted">Analysing…</span>}
+        {track.status === 'missing' && (
+          <label
+            className="btn btn-small"
+            title="Its analysis is kept; the file is needed to listen"
+          >
+            Select its file
+            <input
+              type="file"
+              accept="audio/*,.aif,.aiff,.aifc"
+              hidden
+              data-testid={`file-${track.id}`}
+              onChange={(e) => {
+                store.addFiles(track.owner, Array.from(e.target.files ?? []))
+                e.target.value = ''
+              }}
+            />
+          </label>
+        )}
+        {track.matchedBy && (
+          <span className="muted" title="The file selected again is this track">
+            matched by {track.matchedBy}
+          </span>
+        )}
         {p && <span className="muted">{formatDuration(p.durationSec)}</span>}
         <button
           className="btn btn-small set-icon"
           onClick={() => store.removeFromCollection(track.id)}
-          aria-label={`Remove ${track.file.name}`}
+          aria-label={`Remove ${track.fileName}`}
           title="Remove from the collection"
         >
           ✕
@@ -131,6 +155,85 @@ function DjColumn({ store, dj }: { store: SetStore; dj: DjId }) {
   )
 }
 
+/** Save, reload and pass the set as a file, without audio (#96). */
+function KeepAndPass({ store }: { store: SetStore }) {
+  const [sure, setSure] = useState(false)
+  const missing = store.tracks.filter((t) => t.status === 'missing').length
+  const pass = () => {
+    const text = JSON.stringify(store.toSaved())
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))
+    const a = document.createElement('a')
+    a.href = url
+    const names = `${store.djName('dj1')} and ${store.djName('dj2')}`.replace(/[^\w -]+/g, '')
+    a.download = `${names || 'our'} set.djset.json`
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+  const open = async (file: File | undefined) => {
+    if (!file) return
+    const set = parseSet(await file.text())
+    if ('error' in set) store.say(set.error)
+    else {
+      store.restore(set)
+      store.say(null)
+    }
+  }
+  return (
+    <section className="card set-keep" aria-label="Keep and pass the set">
+      <strong>Keep and pass the set</strong>
+      <p className="muted">
+        The set is kept in this browser as you work: tracks, tempos and keys, the reading, the
+        order, versions, comments and picks. No audio: after a reload, or on the other DJ’s
+        computer, select the files again and they are matched to their tracks.
+        {missing > 0 && ` ${missing} track${missing === 1 ? '' : 's'} need their file to listen.`}
+      </p>
+      <div className="set-actions">
+        <button className="btn btn-small" onClick={pass} disabled={store.tracks.length === 0}>
+          Pass the set (file)
+        </button>
+        <label className="btn btn-small">
+          Open a set file
+          <input
+            type="file"
+            accept=".json,application/json"
+            hidden
+            data-testid="open-set"
+            onChange={(e) => {
+              void open(e.target.files?.[0])
+              e.target.value = ''
+            }}
+          />
+        </label>
+        {!sure ? (
+          <button
+            className="btn btn-small"
+            onClick={() => setSure(true)}
+            disabled={store.tracks.length === 0}
+          >
+            Start a new set
+          </button>
+        ) : (
+          <>
+            <span className="muted">This clears the set kept in this browser.</span>
+            <button
+              className="btn btn-small"
+              onClick={() => {
+                store.clear()
+                setSure(false)
+              }}
+            >
+              Clear it
+            </button>
+            <button className="btn btn-small" onClick={() => setSure(false)}>
+              Keep it
+            </button>
+          </>
+        )}
+      </div>
+    </section>
+  )
+}
+
 export function YourMusic({ store }: { store: SetStore }) {
   const ready = store.profiles.length
   return (
@@ -144,6 +247,7 @@ export function YourMusic({ store }: { store: SetStore }) {
         </p>
       </header>
       <NotMeasured />
+      <KeepAndPass store={store} />
       <div className="set-djs">
         {DJ_IDS.map((dj) => (
           <DjColumn key={dj} store={store} dj={dj} />

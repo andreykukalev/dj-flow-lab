@@ -551,3 +551,23 @@
     border: 1px solid #bbb;
   }
 }
+
+.set-keep {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.set-keep p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.set-notice {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  color: var(--deck-b-soft);
+}

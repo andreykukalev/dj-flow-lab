@@ -19,7 +19,7 @@ export function Perform({ store }: { store: SetStore }) {
   const download = () => {
     const tracks = plan.order.flatMap((id) => {
       const t = store.tracks.find((x) => x.id === id)
-      return t?.profile ? [{ profile: t.profile, fileName: t.file.name }] : []
+      return t?.profile ? [{ profile: t.profile, fileName: t.fileName }] : []
     })
     const xml = rekordboxXml({
       playlist: `${title} (${store.djName('dj1')} & ${store.djName('dj2')})`,
