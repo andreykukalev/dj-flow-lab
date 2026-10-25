@@ -41,7 +41,7 @@ import { createSession, decodeFile, deckPosition, type PocSession } from '../../
 // analysed here, only its features are kept, and it is decoded again when someone
 // listens. The Lab is the proof of concept's Transition Builder, with its own session.
 
-export type Screen = 'music' | 'concepts' | 'set' | 'lab'
+export type Screen = 'music' | 'concepts' | 'set' | 'perform' | 'lab'
 
 export type TrackStatus = 'waiting' | 'analysing' | 'ready' | 'failed'
 
@@ -265,7 +265,7 @@ export class SetStore {
 
   go(screen: Exclude<Screen, 'lab'>): void {
     this.stopHearing()
-    if (screen === 'set' && !this.plan) return
+    if ((screen === 'set' || screen === 'perform') && !this.plan) return
     if (this.screen === 'lab') this.leaveLab()
     this.screen = screen
     this.notify()
@@ -326,7 +326,8 @@ export class SetStore {
     const mine = this.labWork.versions.filter((v) => v.author === this.me).length
     const label = name.trim() || `${this.djName(this.me)}’s version ${mine + 1}`
     const state = this.audio.snapshot()
-    this.changeWork((w) => addVersion(w, { id, name: label, author: this.me, state }))
+    const plan = this.audio.plan
+    this.changeWork((w) => addVersion(w, { id, name: label, author: this.me, state, plan }))
   }
 
   loadVersion(id: string): void {

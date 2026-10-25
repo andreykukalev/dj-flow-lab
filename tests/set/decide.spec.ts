@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test'
 import { addCollection } from './helpers'
 
 // #87 slice 3: alternatives beside a slot, versions of a transition by each DJ, comparing
-// them on one playhead, a comment on a bar, and both DJs picking the same version.
+// them on one playhead, a comment on a bar, both DJs picking the same version, and the
+// set sheet and rekordbox export made from it (slice 4).
 
 test('two DJs save versions of a transition, compare them and agree', async ({ page }) => {
   test.setTimeout(120_000)
@@ -98,4 +99,23 @@ test('two DJs save versions of a transition, compare them and agree', async ({ p
     'data-status',
     'agreed by both',
   )
+
+  // The sheet for the night, and the rekordbox export (#95).
+  await page.getByRole('button', { name: 'Perform' }).click()
+  await expect(page.getByTestId('sheet-slot')).toHaveCount(3)
+  await expect(page.getByTestId('sheet-slot').first()).toContainText('Deck 1')
+  await expect(page.getByTestId('sheet-slot').nth(1)).toContainText('Deck 2')
+  const first = page.getByTestId('sheet-transition').first()
+  await expect(first).toContainText('Auto, long by Andrei. Agreed by both.')
+  await expect(first).toContainText('press PLAY on deck 2')
+  await expect(first.locator('tbody tr').first()).toContainText('Channel 2 fader')
+  await expect(page.getByTestId('sheet-transition').nth(1)).toContainText('No version saved yet')
+  await page.getByLabel('Folder of the tracks').fill('/Users/andrei/Music/B2B')
+  const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download rekordbox XML' }).click()
+  const file = await (await download).path()
+  const xml = (await import('node:fs')).readFileSync(file, 'utf8')
+  expect(xml).toContain('<DJ_PLAYLISTS Version="1.0.0">')
+  expect(xml).toContain(`Location="file://localhost/Users/andrei/Music/B2B/${names[0]}.wav"`)
+  expect(xml).toContain('Num="-1"')
 })
