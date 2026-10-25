@@ -132,7 +132,7 @@ The product should begin with a clear, approachable musical action and reveal ad
 In practice:
 
 - **One musical action first.** After loading two tracks (or opening the demo pair), the screen offers one thing to do: hear a transition between a moment in A and a moment in B. The first result plays with one click.
-- **Three levels of detail.** _Hear_: both tracks with their phrase lines, the two moments, play, the mixer's faders, EQ and crossfader moving with the sound, and the outcome in one sentence. _Explore_: hot cues, jumps, other pairings, other approaches, why each control moves, and comparing variants. _Shape_: beat-grid tools, plan lanes, taking over a control, trim and filter, the latency offset. [WEB_UX.md](WEB_UX.md) maps each screen element to a level.
+- **Three levels of detail.** _Hear_: both tracks with their phrase lines, the two moments, play, the mixer's faders, EQ and crossfader moving with the sound, and the outcome in one sentence. _Explore_: hot cues, jumps, other pairings, other approaches, why each control moves, and comparing variants. Taking over one control while the transition plays is part of _Explore_. _Shape_: beat-grid tools, plan lanes and editing the recorded script, trim and filter, the latency offset. [WEB_UX.md](WEB_UX.md) maps each screen element to a level.
 - **When more appears.** A control appears when the user asks for it, when the task needs it (grid tools when the beat grid fits poorly, D-10), or when the guided first transition introduces it (#34). Once shown, it stays shown for that user.
 - **Every element answers a question the user has now.** A control or a number with no musical question behind it at that level is hidden at that level (§12, "Too much information").
 
@@ -171,7 +171,7 @@ _(v0.2)_ **Sequencing the modes.** The modes differ only in who fills in each in
 | Strategy and parameters | User | System proposes 2–3, user picks | System proposes |
 | Explanation | System | System | System |
 
-_(v0.4)_ **The space of possibilities.** Within a pair, the user marks hot cues on both tracks or starts from the phrase lines and suggestions. Any A moment can be paired with any B moment. Each pairing plays in one action from a few bars before the exit, with the chosen strategy, and jumps move either moment by a beat, a bar or a phrase while listening. Pairings already tried stay visible with their outcome, and the ones worth keeping become variants for comparison. Who moves the mixer during a pairing is open (§15, question 9); the backlog assumes the app performs the plan and the user can take over a control, with the move recorded into the plan.
+_(v0.4)_ **The space of possibilities.** Within a pair, the user marks hot cues on both tracks or starts from the phrase lines and suggestions. Any A moment can be paired with any B moment. Each pairing plays in one action from a few bars before the exit, with the chosen strategy, and jumps move either moment by a beat, a bar or a phrase while listening. Pairings already tried stay visible with their outcome, and the ones worth keeping become variants for comparison. **The app performs, the user can take over** (decided by Andrei, §15 question 9). While a pairing plays, the user can grab any control. Their moves are recorded as an editable script: plan events marked _your choice_ in a variant called "Your take", next to the strategy's plan. The take can be repeated, compared with the original and explained like any plan, and edited on the timeline. Experimenting becomes learning, and a beginner never has to run the whole mixer at once.
 
 ## 8. Core User Experience
 
@@ -228,6 +228,7 @@ _(v0.4)_ **The mixing toolset stays minimal:** 3-band EQ, channel faders, crossf
 - _(v0.4)_ Hear any pairing of an A moment and a B moment in one action, including pairings that do not line up.
 - _(v0.4)_ Explain the outcome of each pairing: what lined up, which sections met, what clashed, and what the listener hears because of it.
 - _(v0.4)_ A first screen with one musical action, and the rest revealed progressively (§5b).
+- _(v0.4)_ Take over any control while a transition plays; the moves are recorded as an editable script (a "Your take" variant) that can be replayed, compared and explained.
 
 ### Should have
 
@@ -320,6 +321,7 @@ Each criterion names how it is tested: **U** = unit test (Node), **I** = integra
 | _(v0.4)_ Hot cues and jumps | Hot cues snap to bars and are restored by fingerprint after a reload. A jump while playing lands on its target within the 10 ms transport fade, for every jump size. | U, I |
 | _(v0.4)_ Any pairing is playable | Every pairing of moments that lies within both tracks plays; pairings off the phrase lines or off the downbeat play and are reported as outcome facts, never refused. | U, I |
 | _(v0.4)_ Outcome | Each played pairing lists its outcome facts, each with its knowledge layer; each fact has an authored explanation that resolves without unfilled placeholders. | U |
+| _(v0.4)_ Take over | A take recorded during playback is stored as validated plan events at the heard beat, replays identically, and can be switched against the strategy's plan from the same beat. | U, I |
 | _(v0.4)_ First action | After two tracks are loaded, or with the demo pair, one click starts a transition; no grid, mixer or strategy control is required first. | I, M |
 | Local persistence | After a reload, re-selecting the same files restores grid corrections, points, and variants. Clearing site data leaves the app working with a clean state. | I |
 
@@ -440,7 +442,7 @@ Recommended answers are in bold and are what the backlog assumes until changed. 
 6. **AI in the MVP.** Any language model before Assisted mode? → ~~No. Add it with Assisted mode, behind a small server-side proxy that holds the API key.~~ _(v0.4)_ **Yes, as the explainer of outcomes (§10), once the authored explanations work and before the pilot, behind a small server-side proxy that holds the API key. It reads facts, never audio. Assisted mode's intent interpretation stays after the MVP.**
 7. **Key.** Manual key entry in the MVP, detection later? → **Yes.**
 8. **Pilot.** Who are the first pilot users, and will sessions be moderated in person or remote? This shapes onboarding and the session log.
-9. _(v0.4)_ **Who moves the mixer while exploring?** The app performs the plan and the user watches; the app performs and the user can take over a control (recorded into the plan, so it can be replayed, compared and explained); or the user mixes by hand and the app explains afterwards. → **App performs, the user can take over** (pending Andrei's choice).
+9. _(v0.4)_ **Who moves the mixer while exploring?** The app performs the plan and the user watches; the app performs and the user can take over a control (recorded into the plan, so it can be replayed, compared and explained); or the user mixes by hand and the app explains afterwards. → **Decided (Andrei, 2026-10-25): the app performs, and the user can take over.** The application must record the user's actions as an editable script, so that they can be repeated, compared and understood (#68, #27).
 
 ### Technical uncertainties _(v0.3)_
 
