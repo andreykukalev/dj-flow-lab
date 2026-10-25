@@ -261,12 +261,58 @@
   color: var(--text-muted);
 }
 
+.poc-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.poc-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.poc-deck-head,
+.poc-deck-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.poc-deck-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 40ch;
+}
+
+.btn-small {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.poc-input,
 .poc-field input[type='number'] {
-  width: 64px;
+  width: 96px;
   padding: 4px 6px;
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--surface-raised);
   color: var(--text);
   font: inherit;
+}
+
+.poc-error {
+  margin: 0;
+  color: var(--deck-b-soft);
 }

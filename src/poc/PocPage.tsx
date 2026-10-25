@@ -4,6 +4,7 @@ import type { MixerRenderer } from '../ui/mixer/renderer'
 import { Mixer } from '../ui/mixer/Mixer'
 import { deckPosition, type PocSession } from './session'
 import { Timeline } from './Timeline'
+import { Tracks } from './Tracks'
 import './poc.css'
 
 // Proof-of-concept page, laid out like the Try screen (mockup iPad 4) without the
@@ -37,8 +38,10 @@ function transitionBar(beat: number): string {
 }
 
 export function PocPage({ session }: { session: PocSession }) {
-  const { transport, loop, ctx, timing, tempoChange } = session
+  const { transport, loop, ctx } = session
   const state = useTransportState(session)
+  const version = useSyncExternalStore(session.subscribe, () => session.version)
+  const { tempoChange } = session
   const position = useRef<HTMLSpanElement>(null)
   const decks = useRef<HTMLSpanElement>(null)
   const output = useRef<HTMLSpanElement>(null)
@@ -68,8 +71,8 @@ export function PocPage({ session }: { session: PocSession }) {
             ? `Bar ${transitionBar(beat)} of ${OVERLAP_BEATS / BAR}`
             : `Bar ${transitionBar(beat)}`
       if (decks.current) {
-        const a = deckPosition(timing, 'A', beat)
-        const b = deckPosition(timing, 'B', beat)
+        const a = deckPosition(session.timing, 'A', beat)
+        const b = deckPosition(session.timing, 'B', beat)
         decks.current.textContent = `A ${a.bar}.${a.beat} · B ${b.bar >= 1 ? `${b.bar}.${b.beat}` : '–'}`
       }
       if (output.current && frameMs - lastOutput > 250) {
@@ -84,7 +87,7 @@ export function PocPage({ session }: { session: PocSession }) {
       }
       lastBeat = whole
     })
-  }, [loop, timing])
+  }, [loop, session])
 
   const startAt = useCallback(
     async (beat: number) => {
@@ -148,8 +151,8 @@ export function PocPage({ session }: { session: PocSession }) {
       <header className="poc-header">
         <div>
           <div className="poc-title">
-            <span className="deck-a">Demo A</span> <span className="muted">→</span>{' '}
-            <span className="deck-b">Demo B</span>
+            <span className="deck-a">{session.decks.A.name}</span> <span className="muted">→</span>{' '}
+            <span className="deck-b">{session.decks.B.name}</span>
           </div>
           <div className="muted">Long blend with bass swap · proof of concept</div>
         </div>
@@ -157,7 +160,8 @@ export function PocPage({ session }: { session: PocSession }) {
       </header>
 
       <main className="poc-main">
-        <Timeline session={session} onSeek={seek} />
+        <Tracks session={session} />
+        <Timeline key={version} session={session} onSeek={seek} />
         <Mixer onRenderer={onRenderer} note="The crossfader stays in the middle in this plan." />
       </main>
 

@@ -60,9 +60,9 @@ export class ControllerLoop {
   readonly options: ControllerLoopOptions
   readonly log: FrameRecord[] = []
   readonly transport: Transport
-  readonly compiled: CompiledPlan
+  private compiled: CompiledPlan
   /** A-deck bar number at a transition beat, for captions such as "kill at 113". */
-  readonly barAt: (beat: number) => number
+  private barAt: (beat: number) => number
 
   constructor(
     transport: Transport,
@@ -74,6 +74,12 @@ export class ControllerLoop {
     this.compiled = compiled
     this.barAt = barAt
     this.options = { calibrationMs: 0, logFrames: 0, ...options }
+  }
+
+  /** The plan the transport has loaded now (after a new track, grid or point). */
+  setPlan(compiled: CompiledPlan, barAt: (beat: number) => number): void {
+    this.compiled = compiled
+    this.barAt = barAt
   }
 
   setCalibration(ms: number): void {
