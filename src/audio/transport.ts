@@ -1,7 +1,7 @@
 import { compile, stateAt, valueAt, type CompiledPlan } from '../engine/plan/compile'
 import type { TransitionPlanV1 } from '../engine/plan/types'
 import { validate } from '../engine/plan/validate'
-import { CONTROL_KEYS, type ControlState } from '../engine/mixer'
+import { CONTROL_KEYS, type ControlKey, type ControlState } from '../engine/mixer'
 import { DECK_IDS, type DeckId } from '../engine/model'
 import {
   anchorBeatAt,
@@ -55,6 +55,8 @@ export class Transport {
   private current: TransportState = { kind: 'stopped' }
   /** Recent gate ramps, oldest first. */
   private gates: GateRamp[] = []
+  /** Controls the user is holding (#68): they follow the hand, not the plan. */
+  private readonly held = new Set<ControlKey>()
   private readonly listeners = new Set<(state: TransportState) => void>()
   readonly options: TransportOptions
   readonly ctx: BaseAudioContext
@@ -106,6 +108,58 @@ export class Transport {
   stateAt(beat: number): ControlState {
     if (!this.compiled) throw new Error('No plan loaded')
     return stateAt(this.compiled, beat)
+  }
+
+  /**
+   * Swaps in another plan for the same tracks, grids and points (a take, or the
+   * original back) without interrupting playback: from a short lead on, every
+   * control that is not held follows the new plan.
+   */
+  replacePlan(plan: TransitionPlanV1, at: number = this.ctx.currentTime): void {
+    const { buffers } = this.loaded()
+    const durationSec = { A: buffers.A.duration, B: buffers.B.duration }
+    const { errors } = validate(plan, { durationSec })
+    if (errors.length > 0) {
+      throw new Error(`Plan has errors: ${errors.map((e) => e.message).join('; ')}`)
+    }
+    this.compiled = compile(plan)
+    if (this.current.kind !== 'playing') {
+      if (this.current.kind === 'stopped') {
+        this.mixer.applyState(stateAt(this.compiled, plan.span.startBeat))
+      }
+      return
+    }
+    const { anchor } = this.current
+    const t = at + this.options.leadSec
+    const keys = CONTROL_KEYS.filter((k) => !this.held.has(k))
+    for (const key of keys) {
+      for (const { param } of this.mixer.targetsOf(key)) param.cancelScheduledValues(t)
+    }
+    const from: PlaybackAnchor = { ctxTime: t, beat: anchorBeatAt(anchor, t), bpm: anchor.bpm }
+    schedulePlan(this.compiled, this.mixer, from, this.options, keys)
+  }
+
+  /** The user takes hold of a control: its planned automation stops at `at`. */
+  hold(key: ControlKey, value: number, at: number = this.ctx.currentTime): void {
+    this.held.add(key)
+    for (const { param, map } of this.mixer.targetsOf(key)) {
+      param.cancelScheduledValues(at)
+      param.setValueAtTime(map(value), at)
+    }
+  }
+
+  /** Moves a held control. A short smoothing constant keeps fast drags free of zipper noise. */
+  move(key: ControlKey, value: number, at: number = this.ctx.currentTime): void {
+    if (!this.held.has(key)) return
+    for (const { param, map } of this.mixer.targetsOf(key)) {
+      param.cancelScheduledValues(at)
+      param.setTargetAtTime(map(value), at, 0.008)
+    }
+  }
+
+  /** Lets go of a control. The caller loads the plan that now includes the take. */
+  release(key: ControlKey): void {
+    this.held.delete(key)
   }
 
   /** Starts playback at a transition beat. Play, resume, seek and replay all come here. */

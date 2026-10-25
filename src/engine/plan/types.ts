@@ -26,6 +26,8 @@ export interface ControlEvent {
   /** Ramps only. `smooth` is a cosine ease in control space. Default `linear`. */
   curve?: 'linear' | 'smooth'
   annotationId?: string
+  /** Who wrote the event: a strategy (default) or the user, by taking over a control (#68). */
+  source?: 'strategy' | 'user'
 }
 
 /** The musical reason behind an action, shown in time with playback. */

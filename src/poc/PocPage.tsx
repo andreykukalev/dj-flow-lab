@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { TransportState } from '../audio/transport'
+import { TakeOver } from '../ui/controller/takeover'
 import type { MixerRenderer } from '../ui/mixer/renderer'
 import { Mixer } from '../ui/mixer/Mixer'
 import { deckPosition, type PocSession } from './session'
+import { TakesBar } from './TakesBar'
 import { Timeline } from './Timeline'
 import { Tracks } from './Tracks'
 import './poc.css'
 
 // Proof-of-concept page, laid out like the Try screen (mockup iPad 4) without the
 // "Why it moves" column: the ruler with both decks, the mixer, and the transport.
+// Any control can be grabbed while it plays; the moves become "Your take" (#68).
 
 const REPLAY_BEAT = -32 // 8 bars before A's exit
 const BAR = 4
 const PHRASE = 32
 const OVERLAP_BEATS = 128
+const HINT_MS = 3000
 
 const SOURCE_NAMES: Record<string, string> = {
   outputTimestamp: 'output timestamp',
@@ -49,7 +53,29 @@ export function PocPage({ session }: { session: PocSession }) {
   const [calibrationMs, setCalibrationMs] = useState(loop.options.calibrationMs)
   const [flashOn, setFlashOn] = useState(false)
 
-  const onRenderer = useCallback((r: MixerRenderer | null) => loop.setRenderer(r), [loop])
+  const [hint, setHint] = useState<string | null>(null)
+  const hintTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const showHint = useCallback((text: string) => {
+    clearTimeout(hintTimer.current)
+    setHint(text)
+    hintTimer.current = setTimeout(() => setHint(null), HINT_MS)
+  }, [])
+  useEffect(() => () => clearTimeout(hintTimer.current), [])
+
+  const takeOver = useRef<TakeOver | null>(null)
+  const onRenderer = useCallback(
+    (r: MixerRenderer | null) => {
+      loop.setRenderer(r)
+      takeOver.current?.dispose()
+      takeOver.current = r
+        ? new TakeOver(r.root, transport, loop, {
+            onTake: (take) => session.addTake(take),
+            onIdleGrab: () => showHint('Press play, then grab a knob or fader while it plays.'),
+          })
+        : null
+    },
+    [loop, transport, session, showHint],
+  )
 
   useEffect(() => {
     loop.start()
@@ -131,6 +157,14 @@ export function PocPage({ session }: { session: PocSession }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return
+      if (e.ctrlKey || e.metaKey) {
+        const redo = e.code === 'KeyY' || (e.code === 'KeyZ' && e.shiftKey)
+        if (redo) session.redo()
+        else if (e.code === 'KeyZ') session.undo()
+        else return
+        e.preventDefault()
+        return
+      }
       // A focused button handles Space itself.
       if (e.code === 'Space' && e.target instanceof HTMLButtonElement) return
       if (e.code === 'Space') void playPause()
@@ -142,7 +176,7 @@ export function PocPage({ session }: { session: PocSession }) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [playPause, step, startAt])
+  }, [playPause, step, startAt, session])
 
   const sign = (n: number) => (n >= 0 ? '+' : '−') + Math.abs(n).toFixed(2)
 
@@ -162,6 +196,7 @@ export function PocPage({ session }: { session: PocSession }) {
       <main className="poc-main">
         <Tracks session={session} />
         <Timeline key={version} session={session} onSeek={seek} />
+        <TakesBar session={session} hint={hint} />
         <Mixer onRenderer={onRenderer} note="The crossfader stays in the middle in this plan." />
       </main>
 
