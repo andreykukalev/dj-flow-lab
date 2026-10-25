@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Transition Lab</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#111216}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-interp{background:#2b2645;color:#cbbcff}
+.l-choice{background:#e8e9ed;color:#111216}
+.l-action{background:#2c2f38;color:#e8e9ed}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:14px;font-weight:600;box-sizing:border-box;text-decoration:none}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.tabs{display:flex;flex-wrap:wrap;padding:3px;gap:2px;background:#1b1d23;border-radius:12px;border:1px solid #2c2f38}
+.tabs a{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:9px;color:#9a9ead;font-size:14px;font-weight:600;text-decoration:none}
+.tabs a.on{background:#3a3e4a;color:#e8e9ed}
+.seg2{display:flex;flex-wrap:wrap;padding:3px;gap:2px;background:#23262e;border-radius:12px}
+.seg2 button{min-height:36px;padding:0 12px;border:0;border-radius:9px;background:transparent;color:#9a9ead;font:inherit;font-size:13px;font-weight:600}
+.seg2 button.on{background:#3a3e4a;color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.av{width:24px;height:24px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:none;box-sizing:border-box}
+.av-a{background:#15382a;color:#86e3b6;border:1px solid #2f7a57}
+.av-l{background:#3b1d31;color:#f6a8d3;border:1px solid #8a4472}
+.fn{display:inline-flex;font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:6px;background:#2b2645;color:#cbbcff}
+.sec{position:absolute;top:0;bottom:0;border-radius:4px;font-size:10px;font-weight:700;padding:4px 5px;box-sizing:border-box;overflow:hidden}
+.cue{position:absolute;top:-8px;width:18px;height:18px;margin-left:-9px;border-radius:5px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.cell{min-height:56px;border-radius:10px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:12px;font-weight:600;padding:6px 8px;text-align:left;display:flex;flex-direction:column;gap:2px;justify-content:center}
+.play{width:32px;height:32px;min-height:32px;min-width:32px;padding:0;border-radius:16px}
+</style>
+</helmet>
+<div style="min-height: 1060px; background: #111216; color: #e8e9ed; font-family: Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding-bottom: 32px; box-sizing: border-box">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 24px; border-bottom: 1px solid #2c2f38">
+<a class="btn" href="Main.dc.html" style="background: transparent; border-color: transparent; color: #4fb3ff; padding: 0 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Set</a>
+<div style="display: flex; flex-direction: column; min-width: 240px; flex: 1">
+<div style="font-size: 20px; font-weight: 800"><span style="color: #4fb3ff">Night Ferry</span> <span class="muted">→</span> <span style="color: #ff8a4f">Glass Orchard</span></div>
+<div class="muted" style="font-size: 13px; display: flex; gap: 6px; align-items: center">Slot 3 → 4 · <span class="av av-a" style="width: 20px; height: 20px; font-size: 10px">A</span> Andrei brings it in · story: Hidden Euphoria</div>
+</div>
+<nav class="tabs" aria-label="Steps">
+<a href="Library.dc.html">1 Discover</a><a href="Concepts.dc.html">2 Imagine</a><a class="on" href="Main.dc.html" aria-current="page">3 Explore</a><a href="Perform.dc.html">Perform</a>
+</nav>
+</header>
+
+<main style="max-width: 1440px; margin: 0 auto; padding: 16px 24px 0; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box">
+
+<section class="card" aria-label="Both tracks, whole length" style="padding: 14px 18px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center"><span class="lbl">Where in each track</span><span class="muted" style="font-size: 12px">Bright = the section you are pairing. Numbered = hot cues. Sections are</span><span class="chip l-likely">likely</span></div>
+
+<div style="display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 6px 10px; align-items: center">
+<span style="font-size: 18px; font-weight: 800; color: #4fb3ff">A</span>
+<div style="position: relative; height: 34px">
+<span class="sec" style="left: 0; width: 14%; background: #1e3346">INTRO</span>
+<span class="sec" style="left: 14.3%; width: 28%; background: #1e3346">GROOVE</span>
+<span class="sec" style="left: 42.6%; width: 14%; background: #1e3346">BREAKDOWN</span>
+<span class="sec" style="left: 56.9%; width: 26%; background: #1e3346">DROP</span>
+<span class="sec" style="left: 83.2%; width: 16.8%; background: #4fb3ff; color: #111216">OUTRO · 161–192</span>
+<span class="cue" style="left: 33.8%; background: #e8e9ed; color: #111216">1</span>
+<span class="cue" style="left: 67%; background: #e8e9ed; color: #111216">2</span>
+<span class="cue" style="left: 83.5%; background: #e8e9ed; color: #111216">3</span>
+</div>
+<span style="font-size: 18px; font-weight: 800; color: #ff8a4f">B</span>
+<div style="position: relative; height: 34px">
+<span class="sec" style="left: 0; width: 15%; background: #ff8a4f; color: #111216">INTRO · 1–32</span>
+<span class="sec" style="left: 15.3%; width: 30%; background: #46291b">GROOVE</span>
+<span class="sec" style="left: 45.6%; width: 15%; background: #46291b">BREAKDOWN</span>
+<span class="sec" style="left: 60.9%; width: 24%; background: #46291b">DROP</span>
+<span class="sec" style="left: 85.2%; width: 14.8%; background: #46291b">OUTRO</span>
+<span class="cue" style="left: 0.6%; background: #e8e9ed; color: #111216">1</span>
+<span class="cue" style="left: 7.5%; background: #e8e9ed; color: #111216">2</span>
+<span class="cue" style="left: 15.5%; background: #e8e9ed; color: #111216">3</span>
+</div>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+
+<section class="card" aria-label="Pairings" style="flex: 1 1 400px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px"><h2 style="margin: 0; font-size: 16px">Pairings</h2><span class="muted" style="font-size: 12px">leave A here, enter B here</span></div>
+<div style="display: grid; grid-template-columns: 92px repeat(3, minmax(0, 1fr)); gap: 6px; font-size: 12px">
+<span></span>
+<span style="color: #ff8a4f; font-weight: 700">B cue 1 · bar 1<br><span class="muted" style="font-weight: 500">intro, drums</span></span>
+<span style="color: #ff8a4f; font-weight: 700">B cue 2 · bar 17<br><span class="muted" style="font-weight: 500">pads arrive</span></span>
+<span style="color: #ff8a4f; font-weight: 700">B cue 3 · bar 33<br><span class="muted" style="font-weight: 500">groove, bass</span></span>
+
+<span style="color: #4fb3ff; font-weight: 700">A cue 2 · 129<br><span class="muted" style="font-weight: 500">drop returns</span></span>
+<button type="button" class="cell"><span>Two grooves compete</span><span class="muted" style="font-weight: 500">tried</span></button>
+<button type="button" class="cell" style="border-style: dashed; color: #9a9ead"><span>Not tried</span></button>
+<button type="button" class="cell"><span>Bass on bass</span><span class="muted" style="font-weight: 500">tried · clash</span></button>
+
+<span style="color: #4fb3ff; font-weight: 700">A cue 3 · 161<br><span class="muted" style="font-weight: 500">outro, drums</span></span>
+<button type="button" class="cell" style="background: #e8e9ed; color: #111216; border-color: #e8e9ed"><span>A natural HANDOFF</span><span style="font-weight: 500">playing · 3 versions</span></button>
+<button type="button" class="cell"><span>Pads come too soon</span><span class="muted" style="font-weight: 500">tried</span></button>
+<button type="button" class="cell"><span>B lands hard</span><span class="muted" style="font-weight: 500">tried · for a cut</span></button>
+
+<span style="color: #4fb3ff; font-weight: 700">A · 177<br><span class="muted" style="font-weight: 500">phrase line</span></span>
+<button type="button" class="cell"><span>A runs out early</span><span class="muted" style="font-weight: 500">tried</span></button>
+<button type="button" class="cell" style="border-style: dashed; color: #9a9ead"><span>Not tried</span></button>
+<button type="button" class="cell" style="border-style: dashed; color: #9a9ead"><span>Not tried</span></button>
+</div>
+<div class="muted" style="font-size: 12px">Pairings that do not work stay playable. Hearing why is part of the lesson.</div>
+</section>
+
+<section class="card" aria-label="Selected pairing" style="flex: 999 1 640px; min-width: 0; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center">
+<h2 style="margin: 0; font-size: 16px; flex: 1 1 260px">A bar 161 meets B bar 1</h2>
+<div class="seg2" aria-label="Approach"><button type="button" class="on">Long blend, bass swap</button><button type="button">Loop-assisted</button><button type="button">Phrase cut</button></div>
+<div class="seg2" aria-label="Overlap"><button type="button">16</button><button type="button" class="on">32 bars</button><button type="button">64</button></div>
+</div>
+
+<div style="display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 4px 10px; align-items: center; font-size: 11px">
+<span></span>
+<div class="mono muted" style="position: relative; height: 14px"><span style="position: absolute; left: 0">A 153</span><span style="position: absolute; left: 20%">161</span><span style="position: absolute; left: 46.7%">177</span><span style="position: absolute; left: 73.3%">193</span><span style="position: absolute; right: 0">201</span></div>
+
+<span style="font-weight: 800; color: #4fb3ff; font-size: 13px">A outro</span>
+<div style="position: relative; height: 34px; background: #111216; border-radius: 6px">
+<div style="position: absolute; left: 0; width: 73.3%; top: 4px; bottom: 4px; background: #1e3346; border-radius: 4px"></div>
+<div style="position: absolute; left: 46.7%; width: 26.6%; top: 4px; bottom: 4px; background: repeating-linear-gradient(90deg, #1e3346 0 6px, #111216 6px 9px); border-radius: 4px"></div>
+</div>
+<span style="font-weight: 800; color: #ff8a4f; font-size: 13px">B intro</span>
+<div style="position: relative; height: 34px; background: #111216; border-radius: 6px">
+<div style="position: absolute; left: 20%; right: 0; top: 4px; bottom: 4px; background: #46291b; border-radius: 4px"></div>
+</div>
+
+<span class="muted">A low</span>
+<svg width="100%" height="24" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 4 H140 L141 20 H300" fill="none" stroke="#4fb3ff" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<span class="muted">B low</span>
+<svg width="100%" height="24" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H140 L141 4 H300" fill="none" stroke="#ff8a4f" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<span class="muted">B fader</span>
+<svg width="100%" height="24" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 H60 L100 4 H300" fill="none" stroke="#ff8a4f" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+<span class="muted">A fader</span>
+<svg width="100%" height="24" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0 4 H180 L220 20 H300" fill="none" stroke="#4fb3ff" stroke-width="2" vector-effect="non-scaling-stroke"></path></svg>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<button class="btn btn-primary" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Play from 8 bars before</button>
+<button class="btn" type="button">Move blend start −1 bar</button>
+<button class="btn" type="button">+1 bar</button>
+<span class="muted" style="font-size: 12px; flex: 1 1 200px">Blend starts at A 161; bass swaps at A 177 = B 17; A is gone by A 193. Grab any control while it plays to record your take.</span>
+</div>
+</section>
+
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+
+<section class="card" aria-label="What happens" style="flex: 999 1 560px; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">What the listener goes through</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px">
+<span style="display: flex; gap: 6px; align-items: center"><span class="chip l-measured">measured</span>phrases line up, 32 and 32 bars</span>
+<span style="display: flex; gap: 6px; align-items: center"><span class="chip l-measured">measured</span>basses overlap 0 bars</span>
+<span style="display: flex; gap: 6px; align-items: center"><span class="chip l-likely">likely</span>A outro meets B intro</span>
+</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.5"><span class="chip l-interp" style="margin-right: 6px">interpretation</span>A's outro RELEASEs into drums while B OPENs with its own. The pads arriving at B bar 17 coincide with the bass swap, so the new colour and the new bass land together: a clear HANDOFF that keeps the hypnotic HOLD of the story intact.</p>
+<p class="muted" style="margin: 0; font-size: 13px; line-height: 1.5">Try next: Loop-assisted, to give B's intro 16 more bars before the pads, or pairing A 161 with B 17 to hear the pads arrive with no warning.</p>
+</section>
+
+<section class="card" aria-label="Versions" style="flex: 1 1 380px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 8px"><h2 style="margin: 0; font-size: 16px; flex: 1">Versions of this pairing</h2><a class="btn" href="Decide.dc.html" style="min-height: 36px">Compare two</a></div>
+<div style="display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #23262e">
+<button class="btn play" type="button" aria-label="Play suggested version"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button>
+<span style="flex: 1; display: flex; flex-direction: column; font-size: 13px"><strong>Suggested</strong><span class="muted">long blend, 32 bars, bass swap at 17</span></span>
+<span class="chip l-likely">suggestion</span>
+</div>
+<div style="display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #23262e">
+<button class="btn play" type="button" aria-label="Play Lena's take"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button>
+<span style="flex: 1; display: flex; flex-direction: column; font-size: 13px"><strong>Lena's take</strong><span class="muted">same blend, A's vocal kept to bar 185</span></span>
+<span class="av av-l">L</span>
+</div>
+<div style="display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #23262e">
+<button class="btn play" type="button" aria-label="Play Andrei's loop-in"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button>
+<span style="flex: 1; display: flex; flex-direction: column; font-size: 13px"><strong>Andrei's loop-in</strong><span class="muted">loops A 185–192, B's pads enter alone</span></span>
+<span class="av av-a">A</span>
+</div>
+<button class="btn" type="button" style="border-style: dashed">Save what is playing as a version</button>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

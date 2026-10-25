@@ -1,0 +1,32 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-10-25T21:00:00Z"},
+  "title": "DJ Flow Lab · Set planning together",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Journey.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 1480, "title": "Discovery · Journey, friction and product models", "expand": "fill"},
+    "AiMap.dc.html": {"x": 1520, "y": 0, "w": 1440, "h": 1180, "title": "Discovery · Where AI helps, and where it stays out", "expand": "fill"},
+    "Library.dc.html": {"x": 0, "y": 1900, "w": 1440, "h": 1060, "title": "1 · Discover: your music", "expand": "fill"},
+    "Concepts.dc.html": {"x": 1520, "y": 1900, "w": 1440, "h": 1060, "title": "2 · Imagine: Concept Explorer", "expand": "fill"},
+    "Main.dc.html": {"x": 3040, "y": 1900, "w": 1440, "h": 1060, "title": "3 · Explore: the set spine", "expand": "fill"},
+    "Lab.dc.html": {"x": 4560, "y": 1900, "w": 1440, "h": 1060, "title": "4 · Transition Lab: one relationship", "expand": "fill"},
+    "Decide.dc.html": {"x": 6080, "y": 1900, "w": 1440, "h": 1060, "title": "5 · Compare and decide together", "expand": "fill"},
+    "Perform.dc.html": {"x": 7600, "y": 1900, "w": 1440, "h": 1060, "title": "6 · Prepare to perform: set sheet and Rekordbox", "expand": "fill"}
+  },
+  "order": [
+    "Journey.dc.html",
+    "AiMap.dc.html",
+    "Library.dc.html",
+    "Concepts.dc.html",
+    "Main.dc.html",
+    "Lab.dc.html",
+    "Decide.dc.html",
+    "Perform.dc.html"
+  ],
+  "notes": {
+    "rowDiscovery": {"x": 0, "y": -300, "text": "Discovery: two DJs, fifteen tracks, one story", "kind": "title1", "maxW": 2960},
+    "rowScreens": {"x": 0, "y": 1600, "text": "Prototype 1: Discover, Imagine, Explore, then perform", "kind": "title1", "maxW": 9040}
+  },
+  "designSystems": []
+}

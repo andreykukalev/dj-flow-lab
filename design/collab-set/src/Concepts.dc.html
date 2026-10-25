@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Concept Explorer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#111216}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-interp{background:#2b2645;color:#cbbcff}
+.l-choice{background:#e8e9ed;color:#111216}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:14px;font-weight:600;box-sizing:border-box;text-decoration:none}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.tabs{display:flex;flex-wrap:wrap;padding:3px;gap:2px;background:#1b1d23;border-radius:12px;border:1px solid #2c2f38}
+.tabs a{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:9px;color:#9a9ead;font-size:14px;font-weight:600;text-decoration:none}
+.tabs a.on{background:#3a3e4a;color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.av{width:24px;height:24px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:none;box-sizing:border-box}
+.av-a{background:#15382a;color:#86e3b6;border:1px solid #2f7a57}
+.av-l{background:#3b1d31;color:#f6a8d3;border:1px solid #8a4472}
+.fn{display:inline-flex;font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:6px;background:#2b2645;color:#cbbcff}
+.ev{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:8px;border:1px dashed #5b6070;font-size:12px;color:#c9ccd5;text-decoration:none}
+.play{width:32px;height:32px;min-height:32px;min-width:32px;padding:0;border-radius:16px}
+</style>
+</helmet>
+<div style="min-height: 1060px; background: #111216; color: #e8e9ed; font-family: Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding-bottom: 32px; box-sizing: border-box">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 24px; border-bottom: 1px solid #2c2f38">
+<div style="display: flex; flex-direction: column; min-width: 220px; flex: 1">
+<div class="muted" style="font-size: 12px; font-weight: 600">DJ Flow Lab · Rooftop B2B</div>
+<div style="font-size: 20px; font-weight: 800">Concept Explorer</div>
+</div>
+<nav class="tabs" aria-label="Steps">
+<a href="Library.dc.html">1 Discover</a><a class="on" href="Concepts.dc.html" aria-current="page">2 Imagine</a><a href="Main.dc.html">3 Explore</a><a href="Perform.dc.html">Perform</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 8px"><span class="av av-a" title="Andrei">A</span><span class="av av-l" title="Lena">L</span></div>
+</header>
+
+<main style="max-width: 1440px; margin: 0 auto; padding: 20px 24px 0; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box">
+
+<section aria-label="Question" style="display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end">
+<div style="flex: 999 1 520px; display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -0.01em">What story could this music tell?</h1>
+<p class="muted" style="margin: 0; font-size: 15px; line-height: 1.5">Four readings of the same 15 tracks. None of them is the right one. Each rests on things you can hear, and each is a starting point you can change.</p>
+</div>
+<div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 6px">
+<label for="own-story" class="lbl">Or describe your own</label>
+<div style="display: flex; gap: 8px">
+<input id="own-story" type="text" placeholder="e.g. a slow sunrise that never gets loud" style="flex: 1; min-width: 0; min-height: 44px; border-radius: 12px; border: 1px solid #2c2f38; background: #1b1d23; color: #e8e9ed; padding: 0 12px; font: inherit; font-size: 14px">
+<button class="btn" type="button">Read it</button>
+</div>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px">
+
+<article class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 13px; font-weight: 700">1</span><span class="chip l-interp">interpretation</span></div>
+<h2 style="margin: 0; font-size: 21px; font-weight: 800">Into the Unknown</h2>
+<div class="muted" style="font-size: 13px; font-weight: 600">Immersion · mystery · gradual revelation</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5">Begin with deep, restrained grooves that pull the room inward, then slowly reveal the melodic side of the music.</p>
+<svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 34 C60 34 100 32 130 26 S180 8 200 6" fill="none" stroke="#e8e9ed" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"></path></svg>
+<div style="display: flex; flex-wrap: wrap; gap: 4px"><span class="fn">OPEN</span><span class="fn">HOLD</span><span class="fn">HOLD</span><span class="fn">TRANSFORM</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="lbl">Why this might work</span><span style="font-size: 13px; line-height: 1.45">Several tracks hold a steady groove, and three melodic ones could be the moments of revelation.</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><a class="ev" href="Library.dc.html">Shared groove</a><a class="ev" href="Library.dc.html">Late melodies</a></div></div>
+<div style="font-size: 13px; line-height: 1.45; font-style: italic; color: #c9ccd5">Which tracks create immersion, and which one opens a new emotional perspective?</div>
+<div style="display: flex; align-items: center; gap: 6px; font-size: 12px" class="muted"><span class="av av-a">A</span><span class="av av-l">L</span>Uses 9 tracks: 5 Andrei, 4 Lena</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto"><button class="btn" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Hear the idea · 90 s</button><a class="btn" href="Main.dc.html">Explore the concept</a></div>
+</article>
+
+<article class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 10px; border: 2px solid #e8e9ed">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 13px; font-weight: 700">2</span><span style="display: flex; gap: 6px; align-items: center"><span class="chip l-choice">you both chose this</span><span class="chip l-interp">interpretation</span></span></div>
+<h2 style="margin: 0; font-size: 21px; font-weight: 800">Hidden Euphoria</h2>
+<div class="muted" style="font-size: 13px; font-weight: 600">Restraint · anticipation · emotional uplift</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5">Instead of constantly raising the energy, keep the listener in a hypnotic state until a melody or harmony takes on a new meaning.</p>
+<svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C40 24 80 22 120 22 S160 10 200 18" fill="none" stroke="#e8e9ed" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"></path></svg>
+<div style="display: flex; flex-wrap: wrap; gap: 4px"><span class="fn">OPEN</span><span class="fn">HOLD</span><span class="fn">BUILD</span><span class="fn">RELEASE</span><span class="fn">RESOLVE</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="lbl">Why this might work</span><span style="font-size: 13px; line-height: 1.45">A repetitive groove against emotionally expressive elements lets the set develop without the beat always getting harder.</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><a class="ev" href="Library.dc.html">Shared groove</a><a class="ev" href="Library.dc.html">Late melodies</a><a class="ev" href="Library.dc.html">Few voices</a></div></div>
+<div style="font-size: 13px; line-height: 1.45; font-style: italic; color: #c9ccd5">Which melody should change the meaning of the groove, and how long can the room wait for it?</div>
+<div style="display: flex; align-items: center; gap: 6px; font-size: 12px" class="muted"><span class="av av-a">A</span><span class="av av-l">L</span>Uses 8 tracks: 4 Andrei, 4 Lena</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto"><button class="btn" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Hear the idea · 90 s</button><a class="btn btn-primary" href="Main.dc.html">Explore the concept</a></div>
+</article>
+
+<article class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 13px; font-weight: 700">3</span><span class="chip l-interp">interpretation</span></div>
+<h2 style="margin: 0; font-size: 21px; font-weight: 800">Two Rooms, One Night</h2>
+<div class="muted" style="font-size: 13px; font-weight: 600">Dialogue · contrast · a meeting point</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5">Let the set be a conversation. Andrei's darker grooves and Lena's warmer melodies take turns, and the two rooms slowly become one sound.</p>
+<svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 L25 12 L50 28 L75 15 L100 26 L125 18 L150 22 L200 20" fill="none" stroke="#e8e9ed" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"></path></svg>
+<div style="display: flex; flex-wrap: wrap; gap: 4px"><span class="fn">OPEN</span><span class="fn">HANDOFF</span><span class="fn">HANDOFF</span><span class="fn">TRANSFORM</span><span class="fn">HOLD</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="lbl">Why this might work</span><span style="font-size: 13px; line-height: 1.45">Your two collections differ most in atmosphere and melody, and one pair shares a bass pattern that could be where the rooms meet.</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><a class="ev" href="Library.dc.html">Unexpected pair</a><a class="ev" href="Library.dc.html">Few voices</a></div></div>
+<div style="font-size: 13px; line-height: 1.45; font-style: italic; color: #c9ccd5">Where should the two sounds meet, and who leads after that?</div>
+<div style="display: flex; align-items: center; gap: 6px; font-size: 12px" class="muted"><span class="av av-a">A</span><span class="av av-l">L</span>Uses 10 tracks: 5 Andrei, 5 Lena</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto"><button class="btn" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Hear the idea · 90 s</button><a class="btn" href="Main.dc.html">Explore the concept</a></div>
+</article>
+
+<article class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 13px; font-weight: 700">4</span><span class="chip l-interp">interpretation</span></div>
+<h2 style="margin: 0; font-size: 21px; font-weight: 800">Pressure and Breath</h2>
+<div class="muted" style="font-size: 13px; font-weight: 600">Tension · release · waves</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5">Build in waves: three short climbs, each released by a breakdown, so the room can breathe between peaks.</p>
+<svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 32 Q25 6 45 30 Q75 4 100 28 Q130 2 155 26 Q180 10 200 20" fill="none" stroke="#e8e9ed" stroke-width="2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"></path></svg>
+<div style="display: flex; flex-wrap: wrap; gap: 4px"><span class="fn">BUILD</span><span class="fn">RELEASE</span><span class="fn">BUILD</span><span class="fn">RELEASE</span><span class="fn">RESOLVE</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><span class="lbl">Why this might work</span><span style="font-size: 13px; line-height: 1.45">Four tracks have long breakdowns followed by strong returns; they could be the breaths between climbs.</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><a class="ev" href="Library.dc.html">Breakdowns with returns</a></div></div>
+<div style="font-size: 13px; line-height: 1.45; font-style: italic; color: #c9ccd5">How many waves can the room take in 90 minutes?</div>
+<div style="display: flex; align-items: center; gap: 6px; font-size: 12px" class="muted"><span class="av av-a">A</span><span class="av av-l">L</span>Uses 8 tracks: 3 Andrei, 5 Lena</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto"><button class="btn" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>Hear the idea · 90 s</button><a class="btn" href="Main.dc.html">Explore the concept</a></div>
+</article>
+
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+
+<section class="card" aria-label="Check Hidden Euphoria by ear" style="flex: 999 1 640px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px"><h2 style="margin: 0; font-size: 16px">Check Hidden Euphoria by ear</h2><span class="muted" style="font-size: 13px">each claim, with the bars it rests on</span></div>
+<div style="display: flex; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #23262e; flex-wrap: wrap">
+<button class="btn play" type="button" aria-label="Hear Deep Current bars 33 to 96"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button>
+<span style="flex: 1 1 360px; font-size: 13px; line-height: 1.45"><strong>The groove can hold.</strong> Deep Current changes little for 64 bars, bars 33 to 96. <span class="chip l-likely">likely</span></span>
+<button class="btn" type="button" style="min-height: 32px; font-size: 12px">Doesn't sound like that</button>
+</div>
+<div style="display: flex; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #23262e; flex-wrap: wrap">
+<button class="btn play" type="button" aria-label="Hear Night Ferry bar 65"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button>
+<span style="flex: 1 1 360px; font-size: 13px; line-height: 1.45"><strong>A melody can change the meaning.</strong> In Night Ferry the melody enters at bar 65 while the groove stays the same. <span class="chip l-likely">likely</span></span>
+<button class="btn" type="button" style="min-height: 32px; font-size: 12px">Doesn't sound like that</button>
+</div>
+<div style="display: flex; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #23262e; flex-wrap: wrap">
+<button class="btn play" type="button" aria-label="Hear the energy of the eight tracks"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></button>
+<span style="flex: 1 1 360px; font-size: 13px; line-height: 1.45"><strong>No need to push.</strong> Across the 8 tracks, drum energy stays within a narrow band; the change comes from harmony. <span class="chip l-measured">measured</span></span>
+<button class="btn" type="button" style="min-height: 32px; font-size: 12px">Doesn't sound like that</button>
+</div>
+</section>
+
+<aside class="card" aria-label="How these readings are made" style="flex: 1 1 320px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.5">
+<h2 style="margin: 0; font-size: 16px">How these readings are made</h2>
+<span>The app measures tempo, energy, structure and which elements are present. A language model turns those observations into stories, in the musical language you already use.</span>
+<span class="muted">It never hears the audio and never picks for you. If a claim does not hold when you listen, say so and the reading changes.</span>
+<button class="btn" type="button" style="align-self: flex-start">Show four other readings</button>
+</aside>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

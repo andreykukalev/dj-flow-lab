@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Where AI helps</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#111216}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-interp{background:#2b2645;color:#cbbcff}
+.l-choice{background:#e8e9ed;color:#111216}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.45}
+th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9a9ead;padding:10px 12px;border-bottom:1px solid #2c2f38;vertical-align:bottom}
+td{padding:10px 12px;border-bottom:1px solid #23262e;vertical-align:top}
+td:first-child{font-weight:800;white-space:nowrap}
+</style>
+</helmet>
+<div style="min-height: 1180px; background: #111216; color: #e8e9ed; font-family: Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding: 28px 0 40px; box-sizing: border-box">
+<main style="max-width: 1440px; margin: 0 auto; padding: 0 28px; display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+
+<section style="display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end">
+<div style="flex: 999 1 560px; display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 800">Where a language model helps</h1>
+<p class="muted" style="margin: 0; font-size: 15px; line-height: 1.5">The model turns facts into words and words into choices the engine can check. Analysis measures, the engine plays, the DJs decide.</p>
+</div>
+<div style="flex: 1 1 360px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px"><span class="chip l-interp">interpretation</span><span class="muted">model output is always labelled, names its evidence, and can be corrected at the source</span></div>
+</section>
+
+<section class="card" aria-label="AI by step" style="padding: 4px 0">
+<div style="overflow-x: auto">
+<table>
+<thead><tr><th scope="col">Step</th><th scope="col">What the model does</th><th scope="col">What it gets</th><th scope="col">What it never does</th><th scope="col">When</th></tr></thead>
+<tbody>
+<tr><td>Discover</td><td>Writes observations about the shared collection in plain words: shared grooves, late melodies, an unexpected pair. Each one points to the bars that show it.</td><td>Per-track features: tempo, energy per bar, sections, which elements are present; owners' notes and rekordbox comments</td><td>Claims a pattern it cannot point to in the music</td><td><span class="chip l-choice">prototype 1</span></td></tr>
+<tr><td>Imagine</td><td>Proposes 3 to 4 concept readings of the same music, in the project's musical language. Reads a story the DJs type ("a slow sunrise") into an arc and a sequence of functions.</td><td>The observations, both DJs' words and preferences</td><td>Presents one set as the right one, or a conclusion with no evidence behind it</td><td><span class="chip l-choice">prototype 1</span></td></tr>
+<tr><td>Explore</td><td>Explains why a candidate could fill a slot, and the trade-off. On request, critiques the spine: "three long blends in a row may feel the same".</td><td>A ranked shortlist from the analysis (tempo, key, how A ends against how B begins), the story, the spine</td><td>Reorders the set or swaps tracks by itself</td><td><span class="chip l-choice">prototype 1</span></td></tr>
+<tr><td>Test</td><td>Explains a played pairing (planned in brief v0.4). Turns a wish ("let the pads arrive alone") into a strategy and its settings.</td><td>Outcome facts of the pairing, the plan's actions, the story</td><td>Writes control events. The engine builds and validates the plan.</td><td><span class="chip l-choice">prototype 1</span></td></tr>
+<tr><td>Decide</td><td>Summarises where the two DJs agree and differ, from their comments and picks, and proposes a version that tries both ideas.</td><td>Comments, picks and reasons, both versions' differences</td><td>Picks the winner or scores either DJ's taste</td><td><span class="chip l-choice">prototype 1</span></td></tr>
+<tr><td>Prepare</td><td>Phrases each plan step in the names of the user's controller, and writes a short practice list for the hardest transitions.</td><td>The agreed plans, the controller model</td><td>Changes the timing or the steps; it only words them</td><td><span class="chip l-likely">next</span></td></tr>
+<tr><td>Learn</td><td>Asks reflective questions where the recorded performance left the plan.</td><td>Plan against the recording's measured timing and levels</td><td>Grades the performance</td><td><span class="chip l-likely">later</span></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+
+<section class="card" style="flex: 1 1 380px; padding: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.5">
+<h2 style="margin: 0; font-size: 18px">Build first</h2>
+<span><strong>1. Pairing explainer.</strong> Already in the brief; reference explanations exist as the baseline and offline fallback.</span>
+<span><strong>2. Where you stand.</strong> Text in, text out; cheap; directly serves the hardest collaborative moment.</span>
+<span><strong>3. Concept readings.</strong> The heart of the new direction, and the riskiest: it depends on observations the analysis cannot make yet.</span>
+</section>
+
+<section class="card" style="flex: 1 1 380px; padding: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.5">
+<h2 style="margin: 0; font-size: 18px">What the analysis must add first</h2>
+<span>The model can only be as honest as its facts. Concepts need:</span>
+<span><strong>Elements present per section:</strong> vocal, bass, melody, atmosphere. Needs a new spike, probably source separation or a small classifier.</span>
+<span><strong>Key:</strong> imported from rekordbox, or typed by the DJ. No detection in the MVP.</span>
+<span><strong>Groove similarity:</strong> the "same bass pattern" kind of observation; a research spike.</span>
+</section>
+
+<section class="card" style="flex: 1 1 380px; padding: 18px; display: flex; flex-direction: column; gap: 10px; font-size: 13px; line-height: 1.5">
+<h2 style="margin: 0; font-size: 18px">Where AI stays out</h2>
+<span>Choosing tracks or an order by default. An automatic set is available only when asked, and labelled as one reading.</span>
+<span>Settling a disagreement between the two DJs.</span>
+<span>Hearing audio: it receives features, never the music.</span>
+<span>Playing anything: control events come only from strategies and the DJs' own moves.</span>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

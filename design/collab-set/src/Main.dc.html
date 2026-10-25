@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Set Workspace</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0;background:#111216}
+a{color:#4fb3ff}a:hover{color:#8fd0ff}
+.card{background:#1b1d23;border:1px solid #2c2f38;border-radius:14px}
+.muted{color:#9a9ead}
+.mono{font-variant-numeric:tabular-nums}
+.chip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.02em;white-space:nowrap;box-sizing:border-box}
+.l-measured{border:1px solid #5b6070;color:#c9ccd5}
+.l-likely{border:1px dashed #9a9ead;color:#c9ccd5}
+.l-interp{background:#2b2645;color:#cbbcff}
+.l-choice{background:#e8e9ed;color:#111216}
+.l-action{background:#2c2f38;color:#e8e9ed}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;border-radius:12px;border:1px solid #2c2f38;background:#23262e;color:#e8e9ed;font:inherit;font-size:14px;font-weight:600;box-sizing:border-box;text-decoration:none}
+.btn-primary{background:#e8e9ed;color:#111216;border-color:#e8e9ed}
+.tabs{display:flex;flex-wrap:wrap;padding:3px;gap:2px;background:#1b1d23;border-radius:12px;border:1px solid #2c2f38}
+.tabs a{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:9px;color:#9a9ead;font-size:14px;font-weight:600;text-decoration:none}
+.tabs a.on{background:#3a3e4a;color:#e8e9ed}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#9a9ead;text-transform:uppercase}
+.av{width:24px;height:24px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex:none;box-sizing:border-box}
+.av-a{background:#15382a;color:#86e3b6;border:1px solid #2f7a57}
+.av-l{background:#3b1d31;color:#f6a8d3;border:1px solid #8a4472}
+.fn{display:inline-flex;align-self:flex-start;font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 6px;border-radius:6px;background:#2b2645;color:#cbbcff}
+.seg{height:6px;border-radius:2px}
+</style>
+</helmet>
+<div style="min-height: 1060px; background: #111216; color: #e8e9ed; font-family: Inter, -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; padding-bottom: 32px; box-sizing: border-box">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 24px; border-bottom: 1px solid #2c2f38">
+<div style="display: flex; flex-direction: column; min-width: 220px; flex: 1">
+<div class="muted" style="font-size: 12px; font-weight: 600">DJ Flow Lab · Sets</div>
+<div style="font-size: 20px; font-weight: 800">Rooftop B2B · 23:00 to 00:30</div>
+</div>
+<nav class="tabs" aria-label="Areas">
+<a href="Library.dc.html">1 Discover</a><a href="Concepts.dc.html">2 Imagine</a><a class="on" href="Main.dc.html" aria-current="page">3 Explore</a><a href="Perform.dc.html">Perform</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 8px">
+<span class="av av-a" title="Andrei">A</span><span class="av av-l" title="Lena">L</span>
+<span class="muted" style="font-size: 12px">Lena edited 2 h ago</span>
+</div>
+<button class="btn" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"></path></svg>Pass the set to Lena</button>
+<a class="btn btn-primary" href="Perform.dc.html">Prepare to perform</a>
+</header>
+
+<main style="max-width: 1440px; margin: 0 auto; padding: 16px 24px 0; display: flex; flex-direction: column; gap: 16px; box-sizing: border-box">
+
+<section class="card" aria-label="Set intention" style="padding: 16px 18px; display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center">
+<div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center"><span class="lbl">Our story</span><a href="Concepts.dc.html" class="chip l-interp" style="text-decoration: none">Hidden Euphoria · from Concepts</a><span class="chip l-choice">your choice · both</span></div>
+<div style="font-size: 18px; font-weight: 600; line-height: 1.4">Keep the room hypnotic and patient, let a melody change the meaning of the groove around midnight, and end warm rather than at the peak.</div>
+</div>
+<div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 6px">
+<span class="lbl">The arc in our words</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px">
+<span class="fn">OPEN</span><span class="muted">→</span><span class="fn">HOLD</span><span class="muted">→</span><span class="fn">BUILD</span><span class="muted">→</span><span class="fn">RELEASE</span><span class="muted">→</span><span class="fn">HOLD</span><span class="muted">→</span><span class="fn">RESOLVE</span>
+</div>
+</div>
+</section>
+
+<section class="card" aria-label="Set spine" style="padding: 14px 0 12px">
+<div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 0 18px 8px">
+<span class="lbl">Energy</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px"><svg width="28" height="8" aria-hidden="true"><path d="M0 4h28" stroke="#e8e9ed" stroke-width="2" stroke-dasharray="5 4"></path></svg>Arc you drew <span class="chip l-choice">your choice</span></span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px"><svg width="10" height="10" aria-hidden="true"><circle cx="5" cy="5" r="4" fill="#9a9ead"></circle></svg>Each track, in the part you play <span class="chip l-likely">likely</span></span>
+<span style="flex: 1"></span>
+<span class="muted" style="font-size: 12px">Drag the arc to reshape the plan. Tracks never move by themselves.</span>
+</div>
+<div style="overflow-x: auto; padding: 0 18px">
+<div style="width: 1356px; position: relative">
+<svg width="1356" height="150" viewBox="0 0 1356 150" aria-hidden="true">
+<path d="M0 30h1356M0 75h1356M0 120h1356" stroke="#23262e" stroke-width="1"></path>
+<path d="M69 115 C156 115 156 102 243 102 S330 88 417 88 S504 72 591 72 S678 52 765 52 S852 36 939 36 S1026 46 1113 46 S1200 84 1287 84" fill="none" stroke="#e8e9ed" stroke-width="2.5" stroke-dasharray="7 6"></path>
+<circle cx="69" cy="117" r="6" fill="#9a9ead"></circle>
+<circle cx="243" cy="99" r="6" fill="#9a9ead"></circle>
+<circle cx="417" cy="92" r="6" fill="#9a9ead"></circle>
+<circle cx="591" cy="68" r="6" fill="#9a9ead"></circle>
+<circle cx="765" cy="26" r="7" fill="#ffc46b"></circle>
+<path d="M765 33v16" stroke="#ffc46b" stroke-width="2" stroke-dasharray="3 3"></path>
+<circle cx="939" cy="40" r="6" fill="#9a9ead"></circle>
+<circle cx="1113" cy="46" r="7" fill="none" stroke="#9a9ead" stroke-width="2" stroke-dasharray="3 3"></circle>
+<circle cx="1287" cy="86" r="6" fill="#9a9ead"></circle>
+</svg>
+<div style="position: absolute; left: 790px; top: 8px; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #1b1d23; padding: 2px 6px; border-radius: 6px"><span style="color: #ffc46b; font-weight: 700">Above your arc</span><span class="muted">Lantern Haze peaks earlier than you planned</span></div>
+<div class="mono muted" style="position: absolute; left: 0; bottom: -2px; width: 1356px; display: flex; font-size: 11px">
+<span style="position: absolute; left: 50px">23:00</span><span style="position: absolute; left: 572px">23:35</span><span style="position: absolute; left: 1094px">00:10</span><span style="position: absolute; left: 1262px">00:30</span>
+</div>
+</div>
+
+<div style="width: 1356px; display: flex; align-items: stretch; margin-top: 14px">
+
+<div class="card" style="width: 138px; flex: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; background: #20232a">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 11px; font-weight: 700">01</span><span class="av av-l" title="Lena's track">L</span></div>
+<div style="font-size: 14px; font-weight: 700; line-height: 1.2">Saltwater Hymn</div>
+<div class="muted" style="font-size: 12px">Oda Lind</div>
+<div style="display: flex; gap: 1px" aria-hidden="true"><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 3; background: #e8e9ed"></span><span class="seg" style="flex: 1; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #3a3e4a"></span></div>
+<div class="mono" style="font-size: 12px">120 · 8A</div>
+<span class="fn">OPEN</span>
+</div>
+
+<div style="width: 36px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+<a href="Lab.dc.html" aria-label="Transition 1 to 2, agreed by both" style="width: 30px; height: 30px; border-radius: 15px; background: #e8e9ed; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111216" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l4 4 8-9M11 16l1 1 9-10"></path></svg></a>
+<span style="font-size: 10px; font-weight: 700; color: #c9ccd5">L›A</span>
+</div>
+
+<div class="card" style="width: 138px; flex: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 11px; font-weight: 700">02</span><span class="av av-a" title="Andrei's track">A</span></div>
+<div style="font-size: 14px; font-weight: 700; line-height: 1.2">Deep Current</div>
+<div class="muted" style="font-size: 12px">Marlo Vey</div>
+<div style="display: flex; gap: 1px" aria-hidden="true"><span class="seg" style="flex: 1; background: #3a3e4a"></span><span class="seg" style="flex: 3; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 1; background: #3a3e4a"></span></div>
+<div class="mono" style="font-size: 12px">122 · 8A</div>
+<span class="fn">HOLD</span>
+</div>
+
+<div style="width: 36px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+<a href="Lab.dc.html" aria-label="Transition 2 to 3, agreed by both" style="width: 30px; height: 30px; border-radius: 15px; background: #e8e9ed; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111216" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l4 4 8-9M11 16l1 1 9-10"></path></svg></a>
+<span style="font-size: 10px; font-weight: 700; color: #c9ccd5">A›L</span>
+</div>
+
+<div class="card" style="width: 138px; flex: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 11px; font-weight: 700">03</span><span class="av av-l" title="Lena's track">L</span></div>
+<div style="font-size: 14px; font-weight: 700; line-height: 1.2">Night Ferry</div>
+<div class="muted" style="font-size: 12px">Kaito Rowe</div>
+<div style="display: flex; gap: 1px" aria-hidden="true"><span class="seg" style="flex: 1; background: #3a3e4a"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span></div>
+<div class="mono" style="font-size: 12px">123 · 9A</div>
+<span class="fn">BUILD</span>
+</div>
+
+<div style="width: 36px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+<a href="Decide.dc.html" aria-label="Transition 3 to 4: two versions, undecided, 3 comments" style="width: 30px; height: 30px; border-radius: 15px; border: 2px solid #cbbcff; background: #2b2645; color: #cbbcff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; text-decoration: none; box-sizing: border-box">2</a>
+<span style="font-size: 10px; font-weight: 700; color: #cbbcff">L›A</span>
+</div>
+
+<div style="width: 138px; flex: none; display: flex; flex-direction: column; gap: 6px">
+<div class="card" style="padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; border: 2px solid #e8e9ed">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 11px; font-weight: 700">04</span><span class="av av-a" title="Andrei's track">A</span></div>
+<div style="font-size: 14px; font-weight: 700; line-height: 1.2">Glass Orchard</div>
+<div class="muted" style="font-size: 12px">Irena Moss</div>
+<div style="display: flex; gap: 1px" aria-hidden="true"><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 1; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #3a3e4a"></span></div>
+<div class="mono" style="font-size: 12px">124 · 9A</div>
+<span class="fn">HOLD</span>
+</div>
+<button type="button" class="btn" style="min-height: 32px; font-size: 12px; padding: 0 8px; border-style: dashed">+2 alternatives</button>
+</div>
+
+<div style="width: 36px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+<a href="Lab.dc.html" aria-label="Transition 4 to 5: tried, one version" style="width: 30px; height: 30px; border-radius: 15px; border: 2px dashed #9a9ead; display: flex; align-items: center; justify-content: center; box-sizing: border-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="#c9ccd5" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg></a>
+<span style="font-size: 10px; font-weight: 700; color: #c9ccd5">A›L</span>
+</div>
+
+<div class="card" style="width: 138px; flex: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 11px; font-weight: 700">05</span><span class="av av-l" title="Lena's track">L</span></div>
+<div style="font-size: 14px; font-weight: 700; line-height: 1.2">Lantern Haze</div>
+<div class="muted" style="font-size: 12px">Sable &amp; Finch</div>
+<div style="display: flex; gap: 1px" aria-hidden="true"><span class="seg" style="flex: 1; background: #3a3e4a"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 1; background: #e8e9ed"></span><span class="seg" style="flex: 3; background: #e8e9ed"></span></div>
+<div class="mono" style="font-size: 12px">125 · 10A</div>
+<span class="fn">RELEASE</span>
+</div>
+
+<div style="width: 36px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+<a href="Lab.dc.html" aria-label="Transition 5 to 6: not tried yet" style="width: 30px; height: 30px; border-radius: 15px; border: 2px dotted #5b6070; box-sizing: border-box"></a>
+<span style="font-size: 10px; font-weight: 700; color: #9a9ead">L›A</span>
+</div>
+
+<div class="card" style="width: 138px; flex: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 11px; font-weight: 700">06</span><span class="av av-a" title="Andrei's track">A</span></div>
+<div style="font-size: 14px; font-weight: 700; line-height: 1.2">Afterglow Lines</div>
+<div class="muted" style="font-size: 12px">Tomas Reyes</div>
+<div style="display: flex; gap: 1px" aria-hidden="true"><span class="seg" style="flex: 1; background: #3a3e4a"></span><span class="seg" style="flex: 3; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 1; background: #3a3e4a"></span></div>
+<div class="mono" style="font-size: 12px">126 · 10A</div>
+<span class="fn">HOLD</span>
+</div>
+
+<div style="width: 36px; flex: none"></div>
+
+<a href="Library.dc.html" style="width: 138px; flex: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; border: 2px dashed #3a3e4a; border-radius: 14px; color: #e8e9ed; text-decoration: none">
+<span class="mono muted" style="font-size: 11px; font-weight: 700">07 · open slot</span>
+<span style="font-size: 13px; font-weight: 600; line-height: 1.35">A track that eases from 126 back toward 122</span>
+<span class="fn">RELEASE</span>
+<span style="font-size: 12px; color: #4fb3ff; font-weight: 600; margin-top: auto">Find in the crate</span>
+</a>
+
+<div style="width: 36px; flex: none"></div>
+
+<div class="card" style="width: 138px; flex: none; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: center"><span class="mono muted" style="font-size: 11px; font-weight: 700">08</span><span class="av av-l" title="Lena's track">L</span></div>
+<div style="font-size: 14px; font-weight: 700; line-height: 1.2">Low Tide Club</div>
+<div class="muted" style="font-size: 12px">Ines Harrow</div>
+<div style="display: flex; gap: 1px" aria-hidden="true"><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span><span class="seg" style="flex: 2; background: #e8e9ed"></span></div>
+<div class="mono" style="font-size: 12px">122 · 8B</div>
+<span class="fn">RESOLVE</span>
+</div>
+
+</div>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 12px 18px 0; font-size: 12px; align-items: center" class="muted">
+<span class="lbl">Transitions</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 7px; background: #e8e9ed"></span>Both agreed</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 7px; border: 2px solid #cbbcff; background: #2b2645; box-sizing: border-box"></span>Versions to choose between</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 7px; border: 2px dashed #9a9ead; box-sizing: border-box"></span>Tried, not decided</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 7px; border: 2px dotted #5b6070; box-sizing: border-box"></span>Not tried</span>
+<span>L›A: from Lena's track to Andrei's; the DJ bringing the next track in mixes it</span>
+<span>Structure bar: bright = the part of the track you plan to play</span>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+
+<section class="card" aria-label="Open decisions" style="flex: 1 1 400px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 8px"><h2 style="margin: 0; font-size: 16px">Open decisions</h2><span class="chip l-action">3</span></div>
+<a href="Decide.dc.html" style="display: flex; gap: 12px; align-items: flex-start; padding: 10px; border-radius: 10px; background: #23262e; color: #e8e9ed; text-decoration: none">
+<span style="width: 26px; height: 26px; border-radius: 13px; border: 2px solid #cbbcff; background: #2b2645; color: #cbbcff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex: none; box-sizing: border-box">2</span>
+<span style="display: flex; flex-direction: column; gap: 3px; font-size: 13px; line-height: 1.4"><strong>Night Ferry → Glass Orchard</strong><span class="muted">Lena's long blend or Andrei's loop-in. You agree on where the bass swaps, not on whether the vocal overlaps.</span></span>
+</a>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 10px; border-radius: 10px; background: #23262e">
+<span style="width: 26px; height: 26px; border-radius: 13px; border: 2px dashed #9a9ead; flex: none; box-sizing: border-box"></span>
+<span style="display: flex; flex-direction: column; gap: 3px; font-size: 13px; line-height: 1.4"><strong>Slot 4: Glass Orchard, Copper Sun or Northern Room</strong><span class="muted">Each holds the groove differently before the peak. Hear each one against slot 3's outro.</span></span>
+</div>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 10px; border-radius: 10px; background: #23262e">
+<span style="width: 26px; height: 26px; border-radius: 13px; border: 2px dashed #3a3e4a; flex: none; box-sizing: border-box"></span>
+<span style="display: flex; flex-direction: column; gap: 3px; font-size: 13px; line-height: 1.4"><strong>Slot 7 is empty</strong><span class="muted">The set needs a RELEASE between Afterglow Lines and the closer.</span></span>
+</div>
+</section>
+
+<section class="card" aria-label="Alternatives for slot 4" style="flex: 1 1 400px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 8px"><h2 style="margin: 0; font-size: 16px">Slot 4 · three candidates</h2><span class="muted" style="font-size: 12px">one is in the set, two wait beside it</span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 2px solid #e8e9ed">
+<span class="av av-a">A</span>
+<span style="flex: 1; display: flex; flex-direction: column; font-size: 13px"><strong>Glass Orchard</strong><span class="muted">124 · 9A · in the set</span></span>
+<span class="fn">HOLD</span>
+<span class="muted" style="font-size: 12px; width: 92px">steady pads, no vocal</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: #23262e">
+<span class="av av-l">L</span>
+<span style="flex: 1; display: flex; flex-direction: column; font-size: 13px"><strong>Copper Sun</strong><span class="muted">124 · 4A</span></span>
+<span class="fn">BUILD</span>
+<span class="muted" style="font-size: 12px; width: 92px">vocal hook early</span>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: #23262e">
+<span class="av av-a">A</span>
+<span style="flex: 1; display: flex; flex-direction: column; font-size: 13px"><strong>Northern Room</strong><span class="muted">123 · 9B</span></span>
+<span class="fn">HOLD</span>
+<span class="muted" style="font-size: 12px; width: 92px">darker, hypnotic</span>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<a class="btn" href="Lab.dc.html">Hear each after Night Ferry</a>
+<button class="btn" type="button">Swap into the set</button>
+</div>
+</section>
+
+<section class="card" aria-label="Since you last looked" style="flex: 1 1 300px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px">Since you last looked</h2>
+<div style="display: flex; gap: 10px; font-size: 13px; line-height: 1.4"><span class="av av-l">L</span><span>Added her version of <strong>Night Ferry → Glass Orchard</strong> and two comments on it.</span></div>
+<div style="display: flex; gap: 10px; font-size: 13px; line-height: 1.4"><span class="av av-l">L</span><span>Agreed to <strong>Deep Current → Night Ferry</strong> as a phrase cut.</span></div>
+<div style="display: flex; gap: 10px; font-size: 13px; line-height: 1.4"><span class="av av-l">L</span><span>Proposed <strong>Copper Sun</strong> for slot 4: "the hook could be our lift".</span></div>
+<div class="muted" style="font-size: 12px; margin-top: auto">Plans travel between you as a set file. Audio stays on each computer.</div>
+</section>
+
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
