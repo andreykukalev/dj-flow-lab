@@ -177,3 +177,89 @@ test('a take on a knob plays back, and undo, redo and reset bring everything bac
   await page.locator('body').press('ControlOrMeta+Shift+z')
   expect(await page.evaluate(() => window.poc!.history.takes.length)).toBe(1)
 })
+
+// #29: the whole-track view finds where the music changes and proposes likely sections.
+
+/** A mono 16-bit WAV of an arrangement at 120 BPM: parts with or without kick, bass and hats. */
+function arrangementWav(
+  parts: { bars: number; kick: boolean; bass: boolean; hats: boolean }[],
+  sampleRate = 11025,
+): Buffer {
+  const beat = 0.5
+  const bars = parts.reduce((n, p) => n + p.bars, 0)
+  const n = Math.ceil((bars * 4 * beat + 0.5) * sampleRate)
+  const data = Buffer.alloc(44 + 2 * n)
+  data.write('RIFF', 0)
+  data.writeUInt32LE(36 + 2 * n, 4)
+  data.write('WAVEfmt ', 8)
+  data.writeUInt32LE(16, 16)
+  data.writeUInt16LE(1, 20)
+  data.writeUInt16LE(1, 22)
+  data.writeUInt32LE(sampleRate, 24)
+  data.writeUInt32LE(2 * sampleRate, 28)
+  data.writeUInt16LE(2, 32)
+  data.writeUInt16LE(16, 34)
+  data.write('data', 36)
+  data.writeUInt32LE(2 * n, 40)
+  let seed = 7
+  let bar0 = 0
+  for (const part of parts) {
+    const start = Math.round(bar0 * 4 * beat * sampleRate)
+    const end = Math.min(n, Math.round((bar0 + part.bars) * 4 * beat * sampleRate))
+    for (let i = start; i < end; i++) {
+      const t = i / sampleRate
+      const inBeat = t % beat
+      let v = 0.05 * Math.sin(2 * Math.PI * 330 * t)
+      if (part.kick) v += 0.5 * Math.sin(2 * Math.PI * 55 * inBeat) * Math.exp(-inBeat / 0.15)
+      const off = (t + beat / 2) % beat
+      if (part.bass) v += 0.3 * Math.sin(2 * Math.PI * 45 * off) * Math.exp(-off / 0.2)
+      seed = (Math.imul(seed, 1664525) + 1013904223) | 0
+      if (part.hats) v += 0.1 * (seed / 2147483648) * Math.exp(-(t % (beat / 2)) / 0.02)
+      data.writeInt16LE(Math.round(Math.max(-1, Math.min(1, v)) * 32767), 44 + 2 * i)
+    }
+    bar0 += part.bars
+  }
+  return data
+}
+
+test('shows the whole track with changes, phrase check and likely sections', async ({ page }) => {
+  const full = { kick: true, bass: true, hats: true }
+  const none = { kick: false, bass: false, hats: false }
+  await page.getByTestId('file-A').setInputFiles({
+    name: 'arranged-120.wav',
+    mimeType: 'audio/wav',
+    buffer: arrangementWav([
+      { bars: 16, kick: true, bass: false, hats: false },
+      { bars: 16, ...full },
+      { bars: 16, ...none },
+      { bars: 16, ...full },
+      { bars: 8, kick: true, bass: false, hats: false },
+    ]),
+  })
+  const deckA = page.locator('[data-track="A"]')
+  await expect(deckA).toContainText('arranged-120.wav')
+  await deckA.getByLabel('BPM').fill('120')
+  await deckA.getByLabel('BPM').press('Enter')
+
+  const sections = page.getByRole('list', { name: 'Deck A likely sections' })
+  await expect(sections.getByRole('listitem')).toHaveText([
+    /^INTRO 1–16/,
+    /^GROOVE 17–32/,
+    /^BREAKDOWN 33–48/,
+    /^DROP 49–56/,
+    /^GROOVE 57–64/,
+    /^OUTRO 65–72/,
+  ])
+  const check = page.getByTestId('phrase-check-A')
+  await expect(check).toHaveText('4 of 4 changes fall on a phrase line.')
+
+  // Moved off the music, the phrase lines get a suggestion that puts them back.
+  await page.getByRole('button', { name: 'Deck A phrase lines one bar later' }).click()
+  await expect(check).toContainText('0 of 4 changes fall on a phrase line.')
+  await expect(check).toContainText(
+    'Most fall 1 bar before the lines: the phrases may start at bar 1',
+  )
+  await page.getByRole('button', { name: 'Start phrases at bar 1' }).click()
+  await expect(check).toHaveText('4 of 4 changes fall on a phrase line.')
+  expect(await page.evaluate(() => window.poc!.decks.A.grid.phraseOffsetBars)).toBe(0)
+})
