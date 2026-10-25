@@ -123,3 +123,8 @@ export function formatDuration(sec: number): string {
   const s = Math.floor(sec - m * 60)
   return `${m}:${String(s).padStart(2, '0')}`
 }
+
+/** "124.00 BPM · key 8A · 6:12" */
+export function trackFacts(t: TrackProfile): string {
+  return `${t.grid.bpm.toFixed(2)} BPM · ${t.key ? `key ${t.key}` : 'key —'} · ${formatDuration(t.durationSec)}`
+}

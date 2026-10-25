@@ -16,55 +16,11 @@ body {
   background: var(--bg);
 }
 
-.app {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 16px;
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.app-header p {
-  margin: 4px 0 0;
-  color: var(--text-muted);
-}
-
-.decks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.deck {
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
-.deck h2 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.deck[aria-label='Deck A'] h2 {
-  color: var(--deck-a);
-}
-
-.deck[aria-label='Deck B'] h2 {
-  color: var(--deck-b);
-}
-
-.deck p {
-  margin: 4px 0 0;
-  color: var(--text-muted);
-}
-
-.deck-empty {
-  margin-top: 16px !important;
-  font-style: italic;
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

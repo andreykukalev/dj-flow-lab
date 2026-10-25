@@ -1,0 +1,327 @@
+/* Set planning screens (#87), in the language of the mockups: dark cards, deck colours
+   for the two DJs, knowledge-layer chips. Buttons, chips and fields come from poc.css. */
+
+.set-app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+}
+
+.set-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 64px;
+}
+
+.set-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.set-header nav {
+  display: flex;
+  gap: 6px;
+}
+
+.set-step-on {
+  background: var(--surface-selected);
+  border-color: var(--text-muted);
+}
+
+.set-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.set-screen-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+}
+
+.set-screen-head p {
+  margin: 0 0 8px;
+  max-width: 70ch;
+}
+
+.set-screen h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+
+.set-not-measured {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--layer-likely-border);
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.set-not-measured strong {
+  color: var(--text);
+}
+
+.set-djs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: 16px;
+}
+
+.set-dj {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.set-dj-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.set-dj-name {
+  width: 200px;
+  font-weight: 600;
+}
+
+.set-rows,
+.set-observations,
+.set-readings,
+.set-spine,
+.set-why,
+.set-sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.set-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.set-row {
+  padding: 8px;
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.set-row-head,
+.set-row-fields,
+.set-card-head,
+.set-hear,
+.set-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.set-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.set-bpm {
+  width: 76px;
+}
+
+.set-key {
+  width: 56px;
+}
+
+.set-icon {
+  padding: 0;
+}
+
+.set-shape {
+  display: block;
+  width: 100%;
+  height: 28px;
+  fill: var(--text-muted);
+}
+
+.set-sections li {
+  font-size: 13px;
+  padding: 2px 0;
+}
+
+.set-layer-likely {
+  border-style: dashed;
+  border-color: var(--layer-likely-border);
+  color: var(--text-muted);
+}
+
+.set-layer-interpretation {
+  border-color: transparent;
+  background: var(--layer-interpretation-bg);
+  color: var(--layer-interpretation-text);
+}
+
+.set-layer-yours {
+  border-color: var(--text);
+}
+
+.set-owner {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.set-owner-dj1 {
+  color: var(--deck-a);
+}
+
+.set-owner-dj2 {
+  color: var(--deck-b);
+}
+
+.set-observations,
+.set-readings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+}
+
+.set-observation,
+.set-reading {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.set-observation p,
+.set-reading p {
+  margin: 0;
+}
+
+.set-card-head {
+  justify-content: space-between;
+}
+
+.set-card-head h3 {
+  margin: 0;
+}
+
+.set-reading .btn-primary {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.set-words {
+  color: var(--explain);
+  font-weight: 600;
+}
+
+.set-function {
+  border-color: var(--explain);
+  color: var(--explain);
+}
+
+.set-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.set-why li {
+  font-size: 14px;
+  padding: 2px 0;
+}
+
+.set-why a {
+  color: var(--deck-a-soft);
+}
+
+.set-tracks {
+  font-size: 13px;
+}
+
+.set-spine {
+  display: flex;
+  flex-direction: column;
+}
+
+.set-card {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.set-card p {
+  margin: 0;
+}
+
+.set-slot-number {
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 2ch;
+}
+
+.set-role {
+  display: inline-flex;
+  gap: 6px;
+  margin-right: auto;
+}
+
+.set-card-tools {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.set-transition {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 24px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.set-transition-line {
+  width: 2px;
+  align-self: stretch;
+  background: var(--blend-mark);
+}
+
+.set-transition[data-status='tried'] strong {
+  color: var(--blend-mark);
+}
+
+.set-actions select {
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+}
+
+.set-lab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 14px;
+}

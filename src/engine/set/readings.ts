@@ -26,6 +26,8 @@ export interface Reading {
   /** The function the reading gives each slot of the order. */
   roles: MusicalFunction[]
   uses: Record<DjId, number>
+  /** How the order was made, in words. */
+  orderedBy: string
   layer: 'interpretation'
 }
 
@@ -218,6 +220,9 @@ function build(
     order,
     roles: rolesFor(a.functions, order.length),
     uses,
+    orderedBy: a.alternate
+      ? 'the two DJs in turns, each in tempo order'
+      : 'tempo and how much of each runs at its full groove',
     layer: 'interpretation',
   }
 }
