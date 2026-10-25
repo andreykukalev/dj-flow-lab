@@ -180,6 +180,12 @@ describe('validate: errors', () => {
     expect(errorCodes({ ...base(), points: { exitBarA: 65, exitBeatA: 3, entryBarB: 1 } })).toEqual(
       [],
     )
+    expect(
+      errorCodes({ ...base(), points: { exitBarA: 65, entryBarB: 1, entryBeatB: 4 } }),
+    ).toEqual([])
+    expect(
+      errorCodes({ ...base(), points: { exitBarA: 65, entryBarB: 1, entryBeatB: 0 } }),
+    ).toEqual(['point-outside-track'])
     for (const exitBeatA of [0, 5, 2.5])
       expect(errorCodes({ ...base(), points: { exitBarA: 65, exitBeatA, entryBarB: 1 } })).toEqual([
         'point-outside-track',

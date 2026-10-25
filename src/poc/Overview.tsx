@@ -12,10 +12,11 @@ import type { PocSession } from './session'
 // reasons are shown so the user can check them by ear. The phrase check says whether
 // the phrase lines match the changes, and offers to move them when they clearly do not.
 //
-// Deck A's view is also where the transition is chosen (#75). Clicking the track moves
-// the playback cursor; the blend lane under it sets the blend start (click or drag) and
-// sizes the transition area (drag its edges). A phrase number puts the blend start on
-// that phrase line, and a section becomes the area. All of them change the session's one
+// Each deck's view is also where the transition is chosen (#75). Clicking a track moves
+// the playback cursor; the blend lane under it sets that deck's side of the blend start
+// (click or drag: A's blend start, or the beat of B lined up with it) and sizes the
+// transition area (drag its edges). A phrase number puts that side of the blend start on
+// the phrase line, and a section becomes the area. All of them change the session's one
 // blend start and area, so the numbers above, the mixing line and the plan follow.
 
 const RANGE_DB = 36
@@ -84,11 +85,12 @@ function DeckOverview({
     session.setGrid(deck, setPhraseOffset(grid, (((bar - 1) % 8) + 8) % 8))
 
   const isA = deck === 'A'
+  const mark = session.markBeat(deck)
   const area = session.areaBeats
   const areaFrom = deckBar(session, deck, area.from)
   const areaTo = deckBar(session, deck, area.to)
   const markBar = deckBar(session, deck, 0)
-  const markText = formatBarBeat(toBarBeat(grid, transitionBeatToDeckBeat(session.timing, deck, 0)))
+  const markText = formatBarBeat(toBarBeat(grid, mark))
 
   /** Track beat of this deck under the pointer, on the nearest beat. */
   const beatAt = (e: React.PointerEvent<HTMLElement>, el: HTMLElement) => {
@@ -98,19 +100,20 @@ function DeckOverview({
   }
 
   const seekTrack = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isA || (e.target as Element).closest('button')) return
-    onSeek(beatAt(e, e.currentTarget) - session.blendStartBeat)
+    if ((e.target as Element).closest('button')) return
+    onSeek(beatAt(e, e.currentTarget) - mark)
   }
 
   const dragTo = (e: React.PointerEvent<HTMLDivElement>) => {
     const d = drag.current
     if (!d) return
     const beat = beatAt(e, e.currentTarget)
+    const markNow = session.markBeat(deck)
     if (d.kind === 'start') {
-      if (beat !== session.blendStartBeat) session.setBlendStart(beat)
+      if (beat !== markNow) session.setMark(deck, beat)
       return
     }
-    const bars = Math.round(Math.abs(beat - session.blendStartBeat) / 4)
+    const bars = Math.round(Math.abs(beat - markNow) / 4)
     const current = d.edge === 'before' ? session.area.beforeBars : session.area.afterBars
     if (bars !== current) session.setArea(moveEdge(session.area, d.edge, bars))
   }
@@ -140,33 +143,19 @@ function DeckOverview({
         data-testid={`overview-track-${deck}`}
       >
         <div className="ov-sections">
-          {s.sections.map((sec) => {
-            const style = { left: x(sec.fromBar), width: x(sec.toBar - sec.fromBar + 2) }
-            const title = `${sec.term}, bars ${sec.fromBar}–${sec.toBar} (likely): ${sec.reasons.join(', ')}`
-            return isA ? (
-              <button
-                key={sec.fromBar}
-                className="ov-section ov-pick"
-                data-term={sec.term}
-                style={style}
-                title={`${title}. Click to blend across this section.`}
-                aria-label={`Blend across ${sec.term} ${sec.fromBar}–${sec.toBar}`}
-                onClick={() => session.useSection(sec.fromBar, sec.toBar)}
-              >
-                {sec.term}
-              </button>
-            ) : (
-              <div
-                key={sec.fromBar}
-                className="ov-section"
-                data-term={sec.term}
-                style={style}
-                title={title}
-              >
-                {sec.term}
-              </div>
-            )
-          })}
+          {s.sections.map((sec) => (
+            <button
+              key={sec.fromBar}
+              className="ov-section ov-pick"
+              data-term={sec.term}
+              style={{ left: x(sec.fromBar), width: x(sec.toBar - sec.fromBar + 2) }}
+              title={`${sec.term}, bars ${sec.fromBar}–${sec.toBar} (likely): ${sec.reasons.join(', ')}. Click to blend across this section.`}
+              aria-label={`Blend across ${isA ? '' : "B's "}${sec.term} ${sec.fromBar}–${sec.toBar}`}
+              onClick={() => session.useSection(deck, sec.fromBar, sec.toBar)}
+            >
+              {sec.term}
+            </button>
+          ))}
         </div>
         <svg
           className="ov-bars"
@@ -200,18 +189,19 @@ function DeckOverview({
         />
         {phrases.map((bar, k) => (
           <div key={bar} className="ov-phrase" style={{ left: x(bar) }}>
-            {k % labelEvery === 0 &&
-              (isA ? (
-                <button
-                  className="ov-phrase-pick"
-                  onClick={() => session.setBlendStart(barToBeat(grid, bar))}
-                  aria-label={`Blend start on the phrase line at bar ${bar}`}
-                >
-                  {bar}
-                </button>
-              ) : (
-                <span>{bar}</span>
-              ))}
+            {k % labelEvery === 0 && (
+              <button
+                className="ov-phrase-pick"
+                onClick={() => session.setMark(deck, barToBeat(grid, bar))}
+                aria-label={
+                  isA
+                    ? `Blend start on the phrase line at bar ${bar}`
+                    : `Line up B's phrase line at bar ${bar} with the blend start`
+                }
+              >
+                {bar}
+              </button>
+            )}
           </div>
         ))}
         {s.changes.map((c) => (
@@ -232,28 +222,38 @@ function DeckOverview({
         />
         <div className="ov-playhead" ref={playhead} hidden title="Playback cursor" />
       </div>
-      {isA && (
+      <div
+        className="ov-lane"
+        onPointerDown={grab}
+        onPointerMove={dragTo}
+        onPointerUp={release}
+        onPointerCancel={release}
+        data-testid={isA ? 'blend-lane' : 'blend-lane-B'}
+        title={
+          isA
+            ? 'Click or drag to set the blend start; drag an edge to size the transition area'
+            : 'Click or drag to choose the beat of B that lines up with the blend start; drag an edge to size the transition area'
+        }
+      >
         <div
-          className="ov-lane"
-          onPointerDown={grab}
-          onPointerMove={dragTo}
-          onPointerUp={release}
-          onPointerCancel={release}
-          data-testid="blend-lane"
-          title="Click or drag to set the blend start; drag an edge to size the transition area"
+          className="ov-lane-area"
+          style={{ left: x(areaFrom), width: x(areaTo - areaFrom + 1) }}
         >
-          <div
-            className="ov-lane-area"
-            style={{ left: x(areaFrom), width: x(areaTo - areaFrom + 1) }}
-          >
-            <span className="ov-handle" data-edge="before" aria-label="Transition area start" />
-            <span className="ov-handle" data-edge="after" aria-label="Transition area end" />
-          </div>
-          <span className="ov-flag" style={{ left: x(markBar) }}>
-            Blend start {markText}
-          </span>
+          <span
+            className="ov-handle"
+            data-edge="before"
+            aria-label={`Deck ${deck} transition area start`}
+          />
+          <span
+            className="ov-handle"
+            data-edge="after"
+            aria-label={`Deck ${deck} transition area end`}
+          />
         </div>
-      )}
+        <span className="ov-flag" style={{ left: x(markBar) }}>
+          {isA ? 'Blend start' : 'B at blend start'} {markText}
+        </span>
+      </div>
       <div className="ov-notes">
         <span className="chip chip-likely">likely</span>
         <span data-testid={`phrase-check-${deck}`}>{phraseNote(s, startBar)}</span>

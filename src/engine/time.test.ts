@@ -134,6 +134,7 @@ describe('transition timeline', () => {
     const offBeat = { ...timing, exitBeatA: 3 }
     expect(transitionBeatToDeckBeat(offBeat, 'A', 0)).toBe(386)
     expect(transitionBeatToDeckBeat(offBeat, 'B', 0)).toBe(0)
+    expect(transitionBeatToDeckBeat({ ...timing, entryBeatB: 4 }, 'B', 0)).toBe(3)
     expect(
       deckSecToTransitionBeat(offBeat, 'A', transitionBeatToDeckSec(offBeat, 'A', 5)),
     ).toBeCloseTo(5, 10)

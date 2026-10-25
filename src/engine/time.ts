@@ -109,7 +109,7 @@ function deckGrid(timing: TransitionTiming, deck: DeckId): BeatGrid {
 function deckEntryBeat(timing: TransitionTiming, deck: DeckId): number {
   return deck === 'A'
     ? barToBeat(timing.gridA, timing.exitBarA) + (timing.exitBeatA ?? 1) - 1
-    : barToBeat(timing.gridB, timing.entryBarB)
+    : barToBeat(timing.gridB, timing.entryBarB) + (timing.entryBeatB ?? 1) - 1
 }
 
 /** Playback rate of deck B. Deck A is the tempo master at rate 1. */

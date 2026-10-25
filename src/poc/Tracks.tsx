@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { nudgeBpm, nudgeGrid, setBpm, setDownbeatAt, twoPointGrid } from '../engine/grid'
 import type { BeatGrid, DeckId } from '../engine/model'
-import { barToBeat, formatBarBeat, parseBarBeat, toBarBeat } from '../engine/time'
+import { formatBarBeat, parseBarBeat, toBarBeat } from '../engine/time'
 import { decodeFile, type PocSession } from './session'
 
 // Track and grid controls of the proof of concept (#46): load a local file on each
@@ -192,18 +192,18 @@ function beatsText(beats: number): string {
 }
 
 function BlendControls({ session }: { session: PocSession }) {
-  const { points, area, fitted, decks, timing } = session
+  const { area, fitted, decks } = session
   const gridA = decks.A.grid
-  const bars = (deck: DeckId, beat: number) =>
-    toBarBeat(deck === 'A' ? timing.gridA : timing.gridB, beat).bar
+  const gridB = decks.B.grid
   const startA = session.blendStartBeat
-  const entryB = barToBeat(timing.gridB, points.entryBarB)
-  const fromA = formatBarBeat(toBarBeat(gridA, startA - fitted.beforeBeats))
-  const toA = formatBarBeat(toBarBeat(gridA, startA + fitted.afterBeats))
+  const entryB = session.markBeat('B')
+  const at = (grid: BeatGrid, beat: number) => formatBarBeat(toBarBeat(grid, beat))
+  const fromA = at(gridA, startA - fitted.beforeBeats)
+  const toA = at(gridA, startA + fitted.afterBeats)
   const handoff = session.plan.annotations.find((a) => a.id === 'bass-swap')?.atBeat ?? 0
-  const swapA = formatBarBeat(toBarBeat(gridA, startA + handoff))
-  const fromB = bars('B', entryB - fitted.beforeBeats)
-  const toB = bars('B', entryB + fitted.afterBeats)
+  const swapA = at(gridA, startA + handoff)
+  const fromB = at(gridB, entryB - fitted.beforeBeats)
+  const toB = at(gridB, entryB + fitted.afterBeats)
   const setBars = (edge: 'before' | 'after' | 'both', v: number) => {
     const value = Math.max(0, Math.round(v))
     session.setArea(
@@ -228,12 +228,11 @@ function BlendControls({ session }: { session: PocSession }) {
         >
           Blend start at cursor
         </button>
-        <NumberField
-          label="lined up with B bar"
-          value={points.entryBarB}
-          step={1}
-          digits={0}
-          onCommit={(v) => session.setPoints({ ...points, entryBarB: Math.round(v) })}
+        <PositionField
+          label="lined up with B at"
+          grid={gridB}
+          beat={entryB}
+          onCommit={(beat) => session.setMark('B', beat)}
         />
       </div>
       <div className="poc-deck-row">
@@ -281,7 +280,7 @@ function BlendControls({ session }: { session: PocSession }) {
         </label>
       </div>
       <p className="poc-blend-summary" data-testid="blend-summary">
-        From A {fromA} to A {toA}, A blends with B bars {fromB}–{toB - 1}. B comes in over{' '}
+        From A {fromA} to A {toA}, A blends with B from {fromB} to {toB}. B comes in over{' '}
         {beatsText(handoff + fitted.beforeBeats)}, the bass swaps at A {swapA}
         {handoff === 0 ? ' (the blend start)' : ''}, and A is gone at A {toA}.
         {fitted.trimmed.length > 0 && (
