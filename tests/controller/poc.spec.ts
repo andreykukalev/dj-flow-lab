@@ -582,3 +582,76 @@ test('track B has its own blend lane for the beat lined up with the blend start'
   await page.getByLabel('lined up with B at').press('Enter')
   expect((await poc(page)).points).toEqual({ exitBarA: 25, entryBarB: 5, entryBeatB: 2 })
 })
+
+// #77: Auto puts a suggested blend start and area in place, says why, and keeps the
+// user's own choice to compare with.
+
+test('Auto suggests a blend start with its reasons, and the user can go back', async ({ page }) => {
+  const full = { kick: true, bass: true, hats: true }
+  const intro = { kick: true, bass: false, hats: false }
+  const quiet = { kick: false, bass: false, hats: false }
+  const tracks = {
+    A: [
+      { bars: 16, ...intro },
+      { bars: 32, ...full },
+      { bars: 16, ...quiet },
+      { bars: 32, ...full },
+      { bars: 16, ...intro },
+    ],
+    B: [
+      { bars: 16, ...intro },
+      { bars: 32, ...full },
+      { bars: 8, ...quiet },
+      { bars: 16, ...full },
+    ],
+  }
+  for (const deck of ['A', 'B'] as const) {
+    await page.getByTestId(`file-${deck}`).setInputFiles({
+      name: `arranged-${deck}.wav`,
+      mimeType: 'audio/wav',
+      buffer: arrangementWav(tracks[deck]),
+    })
+    const panel = page.locator(`[data-track="${deck}"]`)
+    // Decoding is asynchronous: the grid is set on the loaded track.
+    await expect(panel.locator('.poc-deck-name')).toHaveText(`arranged-${deck}.wav`)
+    await panel.getByLabel('BPM').fill('120')
+    await panel.getByLabel('BPM').press('Enter')
+  }
+  await page.getByLabel('Blend start at A').fill('30')
+  await page.getByLabel('Blend start at A').press('Enter')
+  const yours = await poc(page)
+
+  await page.getByRole('button', { name: 'Auto', exact: true }).click()
+  const result = page.getByTestId('auto-result')
+  await expect(result).toContainText(
+    'Idea 1 of 3: A bar 97 with B bar 17, 16 bars before, 16 after',
+  )
+  await expect(result).toContainText("A's bars 97–112 (likely OUTRO) are sparser")
+  await expect(result).toContainText('does not hear vocals, key or melody')
+  const auto = await poc(page)
+  expect(auto).toMatchObject({ points: { exitBarA: 97, entryBarB: 17 }, before: 64, after: 64 })
+  // Cued at the pre-roll, ready to hear.
+  expect(auto.cursor).toBe(auto.span.startBeat)
+
+  await page.getByRole('button', { name: 'Next idea' }).click()
+  await expect(result).toContainText('Idea 2 of 3')
+  expect((await poc(page)).points.exitBarA).not.toBe(97)
+
+  await page.getByRole('button', { name: 'Back to yours' }).click()
+  expect(await poc(page)).toMatchObject({ points: yours.points, area: yours.area })
+  await expect(result).toContainText('now playing your version')
+  await page.getByRole('button', { name: "Auto's idea" }).click()
+  await expect(result).toContainText('Idea 2 of 3')
+
+  // A preference: a short blend that lifts the energy into B.
+  await page.getByText('Preferences').click()
+  await page.getByLabel('Short, 4 bars').check()
+  await page.getByLabel('Lift into B').check()
+  await page.getByRole('button', { name: 'Auto', exact: true }).click()
+  await expect(result).toContainText('Idea 1 of 3')
+  await expect(result).toContainText('4 bars before, 4 after')
+  expect(await poc(page)).toMatchObject({ area: { beforeBars: 4, afterBars: 4 } })
+  // Auto again from an idea keeps the version from before the first Auto to go back to.
+  await page.getByRole('button', { name: 'Back to yours' }).click()
+  expect(await poc(page)).toMatchObject({ points: yours.points, area: yours.area })
+})

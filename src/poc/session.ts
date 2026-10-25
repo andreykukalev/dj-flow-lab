@@ -1,4 +1,9 @@
 import { decodeAiff, isAiff } from '../audio/aiff'
+import {
+  suggestBlendStarts,
+  type AutoCandidate,
+  type AutoPreferences,
+} from '../engine/analysis/autoPoint'
 import { MixerGraph } from '../audio/mixerGraph'
 import {
   analyseStructure,
@@ -44,11 +49,23 @@ import { DEMO_TRACKS, renderDemoTrack } from './demoTracks'
 // The blend start and the transition area around it (#75) are kept here once: the
 // cursor, timeline clicks and drags, phrase and section picks and the numeric fields
 // all change these, and the plan is generated for the area that fits both tracks.
+// Auto (#77) proposes blend starts from both tracks' structure and sets the same two
+// values; the user's own choice is kept so the two can be compared.
 
 export interface DeckSource {
   name: string
   buffer: AudioBuffer
   grid: BeatGrid
+}
+
+/** Auto's ideas, and the user's blend start and area from before Auto, to compare with. */
+export interface AutoState {
+  prefs: AutoPreferences
+  /** Best first. */
+  candidates: AutoCandidate[]
+  /** The idea last put in place. */
+  index: number
+  yours: { points: TransitionPoints; area: AreaRequest }
 }
 
 /** A's bar 25 with B's bar 17, ±16 bars: A bars 9–41 blended with B bars 1–33. */
@@ -146,6 +163,8 @@ export class PocSession {
   /** The version not playing, while there are takes to compare it with; null otherwise. */
   compared: CompiledPlan | null = null
   timing!: TransitionTiming
+  /** Auto's ideas since the last Auto click, or null. */
+  auto: AutoState | null = null
   /** Errors of the last change that was refused; the previous plan stays loaded. */
   errors: string[] = []
   /** Changes on every accepted or refused change, for React. */
@@ -200,6 +219,7 @@ export class PocSession {
 
   /** A new track on a deck, with a starting grid for the user to correct. */
   setDeck(deck: DeckId, source: DeckSource): void {
+    this.auto = null
     const decks = { ...this.decks, [deck]: source }
     const points =
       deck === 'A'
@@ -209,6 +229,7 @@ export class PocSession {
   }
 
   setGrid(deck: DeckId, grid: BeatGrid): void {
+    this.auto = null
     this.change({ ...this.decks, [deck]: { ...this.decks[deck], grid } }, this.points)
   }
 
@@ -257,6 +278,73 @@ export class PocSession {
     const grid = this.decks[deck].grid
     const points = { ...this.points, ...pointsAt(deck, grid, barToBeat(grid, fromBar + before)) }
     this.change(this.decks, tidy(points), area, true)
+  }
+
+  /**
+   * Auto: ranks blend starts on both tracks' phrase lines and puts the best one in
+   * place, cued at its pre-roll. The user's current choice is kept to go back to.
+   */
+  suggestBlend(prefs: AutoPreferences = {}): void {
+    const track = (deck: DeckId) => {
+      const source = this.decks[deck]
+      return {
+        structure: this.structure(deck),
+        grid: source.grid,
+        beats: secToBeat(source.grid, source.buffer.duration),
+      }
+    }
+    const candidates = suggestBlendStarts(track('A'), track('B'), this.area, prefs)
+    if (candidates.length === 0) {
+      this.errors = ['Auto found no place where both tracks have a bar of music to blend']
+      this.notify()
+      return
+    }
+    const yours =
+      this.auto && this.autoShowing ? this.auto.yours : { points: this.points, area: this.area }
+    this.auto = { prefs, candidates, index: 0, yours }
+    this.showIdea(0)
+  }
+
+  /** Puts one of Auto's ideas in place, cued at its pre-roll. */
+  showIdea(index: number): void {
+    const auto = this.auto
+    const c = auto?.candidates[index]
+    if (!auto || !c) return
+    auto.index = index
+    this.change(this.decks, { exitBarA: c.exitBarA, entryBarB: c.entryBarB }, c.area)
+    this.cueStart()
+  }
+
+  /** The user's blend start and area from before Auto, cued at the pre-roll. */
+  backToYours(): void {
+    if (!this.auto) return
+    const { points, area } = this.auto.yours
+    this.change(this.decks, points, area)
+    this.cueStart()
+  }
+
+  /** Whether the blend start and area are Auto's idea, unchanged. */
+  get autoShowing(): boolean {
+    const c = this.auto?.candidates[this.auto.index]
+    if (!c) return false
+    const p = this.points
+    return (
+      p.exitBarA === c.exitBarA &&
+      (p.exitBeatA ?? 1) === 1 &&
+      p.entryBarB === c.entryBarB &&
+      (p.entryBeatB ?? 1) === 1 &&
+      this.area.beforeBars === c.area.beforeBars &&
+      this.area.afterBars === c.area.afterBars &&
+      this.area.linked === c.area.linked
+    )
+  }
+
+  /** Where replay starts: the pre-roll; playing goes on from there. */
+  private cueStart(): void {
+    if (this.errors.length > 0) return
+    const at = this.compiled.span.startBeat
+    if (this.transport.state.kind === 'playing') this.transport.startAt(at)
+    else this.transport.cue(at)
   }
 
   /** The fitted area in transition beats. */

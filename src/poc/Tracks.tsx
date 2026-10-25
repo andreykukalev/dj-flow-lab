@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { nudgeBpm, nudgeGrid, setBpm, setDownbeatAt, twoPointGrid } from '../engine/grid'
 import type { BeatGrid, DeckId } from '../engine/model'
 import { formatBarBeat, parseBarBeat, toBarBeat } from '../engine/time'
+import { AutoPanel } from './AutoPanel'
 import { decodeFile, type PocSession } from './session'
 
 // Track and grid controls of the proof of concept (#46): load a local file on each
@@ -297,6 +298,7 @@ export function Tracks({ session }: { session: PocSession }) {
       <DeckPanel session={session} deck="A" />
       <DeckPanel session={session} deck="B" />
       <BlendControls session={session} />
+      <AutoPanel session={session} />
       {session.errors.length > 0 && (
         <p className="poc-error" role="alert">
           Not applied: {session.errors.join('; ')}
