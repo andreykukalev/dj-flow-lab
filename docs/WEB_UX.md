@@ -15,6 +15,7 @@ The mockups show every screen fully loaded, which is the right reference for wha
 
 - **The first screen is Try at the Hear level.** After two tracks are loaded, or with the demo pair, the app opens the transition with one pairing already chosen and a large Play. Nothing else needs a click first.
 - **More appears in three ways:** a "More" control on each panel; the task needing it (the grid tools open by themselves when the beat grid fits poorly, D-10, and say why); and the guided first transition introducing it (#34). What a user has opened stays open for them, stored with their settings.
+- **Every change can be undone.** Undo and Redo sit in the transport bar on every screen; Reset (back to the strategy's plan, itself undoable) sits next to them while a take exists.
 - **Hidden is never lost.** A level never removes information the user turned on, and every hidden control keeps working through the plan; the mixer shows the filter moving at the Hear level when a strategy uses it, it just has no handle yet.
 
 ## 1. What carries over unchanged

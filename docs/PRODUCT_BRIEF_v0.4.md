@@ -75,13 +75,14 @@ The product, the code, and the explanations use the same words:
 | **Overlap** | The span, in bars, during which both tracks are audible. |
 | **Handoff** | The moment the musical lead moves from A to B. Often a bass swap, sometimes a cut. |
 | **Phrase** | A musically complete unit, typically 8, 16, or 32 bars in the target genres. |
-| **Section** | A larger arrangement block: intro, groove, breakdown, build, drop, outro. |
+| **Section** | A larger arrangement block: intro, groove, breakdown, build, drop, outro. _(v0.4)_ Named with the structure terms of [MUSICAL_LANGUAGE.md](MUSICAL_LANGUAGE.md). |
 | **Strategy** | A reusable transition approach (for example, long blend with bass swap), with parameters. |
 | **Transition plan** | A concrete strategy applied to two specific tracks and points: timed control changes plus their explanations. |
 | **Variant** | One of several plans for the same pair of tracks, kept side by side for comparison. |
 | **Beat grid** _(v0.3)_ | A track's BPM plus one known downbeat ("the 1"). Every bar line is computed from these two numbers. |
 | **Phrase grid** _(v0.3)_ | Phrase lines every 8, 16, or 32 bars, counted from a chosen bar. Arithmetic on the beat grid, not detection. |
 | **Section change** _(v0.3)_ | A point where the analysis thinks the arrangement changes. Always a hypothesis the user can move or delete. |
+| **Musical function** _(v0.4)_ | What the music is doing at a moment: OPEN, BUILD, HOLD, RELEASE, HANDOFF, TRANSFORM, RESOLVE. Not the same as a section: a BREAKDOWN can be a RELEASE in one track and a BUILD in another. Defined in [MUSICAL_LANGUAGE.md](MUSICAL_LANGUAGE.md). |
 | **Moment** _(v0.4)_ | A bar in one track that the user considers for a transition: a hot cue, a phrase line, or a suggestion. |
 | **Hot cue** _(v0.4)_ | A marked moment in a track, snapped to a bar, that playback can jump to. Stored per track. |
 | **Jump** _(v0.4)_ | Moving the playhead, or a chosen moment, by a fixed amount: 1 beat, or 1, 4, 8, 16 or 32 bars. |
@@ -134,6 +135,7 @@ In practice:
 - **One musical action first.** After loading two tracks (or opening the demo pair), the screen offers one thing to do: hear a transition between a moment in A and a moment in B. The first result plays with one click.
 - **Three levels of detail.** _Hear_: both tracks with their phrase lines, the two moments, play, the mixer's faders, EQ and crossfader moving with the sound, and the outcome in one sentence. _Explore_: hot cues, jumps, other pairings, other approaches, why each control moves, and comparing variants. Taking over one control while the transition plays is part of _Explore_. _Shape_: beat-grid tools, plan lanes and editing the recorded script, trim and filter, the latency offset. [WEB_UX.md](WEB_UX.md) maps each screen element to a level.
 - **When more appears.** A control appears when the user asks for it, when the task needs it (grid tools when the beat grid fits poorly, D-10), or when the guided first transition introduces it (#34). Once shown, it stays shown for that user.
+- **Nothing is irreversible.** Experimenting must be safe. Every change (a take on a knob, a moved point, a grid correction) can be undone and redone, and **Reset** returns the mix to the strategy's plan in one click. Reset can itself be undone. Nothing is deleted without a way back.
 - **Every element answers a question the user has now.** A control or a number with no musical question behind it at that level is hidden at that level (§12, "Too much information").
 
 ## 6. Core Value Proposition
@@ -223,6 +225,8 @@ _(v0.4)_ **The mixing toolset stays minimal:** 3-band EQ, channel faders, crossf
 - Support play, pause, seeking, and replay.
 - Explain the musical purpose of key actions in the transition.
 - Allow users to compare at least two transition approaches.
+- _(v0.4)_ A whole-track view of each track: its overall shape, bar and phrase lines, and likely sections from the analysis of its features, so the user can judge its structure and whether its phrases are where the grid says.
+- _(v0.4)_ Undo, Redo and Reset for every change to the mix (§5b).
 - _(v0.4)_ Hot cues on each track: set, move, delete, and jump to while listening.
 - _(v0.4)_ Jumps by 1 beat and by 1, 4, 8, 16 and 32 bars, on a playing deck and on a chosen moment.
 - _(v0.4)_ Hear any pairing of an A moment and a B moment in one action, including pairings that do not line up.
@@ -344,6 +348,8 @@ Execution instructions are validated against the capabilities of the audio engin
 The product communicates uncertainty where appropriate. Audio analysis can suggest musical opportunities, but it cannot guarantee that a transition will feel right.
 
 _(v0.2)_ **These layers are part of the data model, not only the copy.** Every piece of information shown to the user carries its layer and, where relevant, a confidence. The interface labels each layer consistently (for example: _measured_, _likely_, _interpretation_, _your choice_, _action_), and anything below "measured" can be corrected or overridden by the user. A language model may produce interpretations and preferences; it never produces execution instructions directly. It chooses and configures a strategy, and the engine turns that into validated instructions.
+
+_(v0.4)_ **A shared musical language.** Explanations, outcomes and intentions use the vocabulary in [MUSICAL_LANGUAGE.md](MUSICAL_LANGUAGE.md). It answers three separate questions: where are we in the track (structure: _likely_ or _your choice_), what is the music doing now (function: _interpretation_, with the features it rests on), and what role this moment can play between two tracks (the outcome of a pairing).
 
 _(v0.4)_ **AI as the explainer.** Beginners often do not realise what they have created, or why something did not quite work. The AI's first job is to be the "brain" that explains a played pairing. It receives the pairing's outcome facts (beat and phrase grids, which sections meet, energy per bar, the plan's actions, tempo and pitch change, the user's intention and note) and explains in plain words what the listener experiences and why, suggests what to try next as a pairing or strategy (which the engine turns into a plan), and answers follow-up questions. Its text is labelled _interpretation_ and names the facts it rests on, so a wrong grid or section can be corrected at the source. It never receives audio and never writes control events. The authored explanations come first and remain the baseline and the offline fallback.
 

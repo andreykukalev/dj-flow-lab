@@ -14,6 +14,7 @@ The first product is the **Transition Builder**: load two of your own tracks, ch
 - [Technical risks](docs/RISKS.md)
 - [MVP backlog](docs/backlog.md) and [architecture proposal](docs/architecture.md) (v0.2)
 - [UX concept](design/ios/README.md) (iOS mockups) and [web adaptation](docs/WEB_UX.md)
+- [Musical language](docs/MUSICAL_LANGUAGE.md): musical functions and track structure terms
 
 ## Development
 
