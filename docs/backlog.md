@@ -1,7 +1,7 @@
 # DJ Flow Lab — MVP Backlog
 
 - **Status:** Created as GitHub issues on 2026-10-24, re-cut for brief v0.4 on 2026-10-25. The issues are the source of truth; this page is the overview.
-- **Based on:** [product brief v0.4](PRODUCT_BRIEF_v0.4.md), [technical decisions](TECHNICAL_DECISIONS.md) and [implementation plan](MVP_IMPLEMENTATION_PLAN.md). Issues #4, #7, #9–#13, #16–#19 and #29 were updated for v0.3 on 2026-10-24. On 2026-10-25 the backlog was refined for the UX concept in [WEB_UX.md](WEB_UX.md): #55 and #56 were added, and #7, #8, #10, #12, #15, #19–#21, #24, #25, #36 and #45 now name the screen and mockup they build. On 2026-10-25, after the proof of concept, the backlog was re-cut for [brief v0.4](PRODUCT_BRIEF_v0.4.md): choosing the moment is the centre of the product. M2 became "Find the moment" with hot cues (#59), jumps (#60) and pairings (#61); M3 gained the outcome of a pairing (#62, #63); the AI explainer became M5 (#58: #64, #65, #66) and the pilot moved to M6. #10, #15, #16, #34 and #55 carry a "v0.4 refinement" section.
+- **Based on:** [product brief v0.4](PRODUCT_BRIEF_v0.4.md), [technical decisions](TECHNICAL_DECISIONS.md) and [implementation plan](MVP_IMPLEMENTATION_PLAN.md). Issues #4, #7, #9–#13, #16–#19 and #29 were updated for v0.3 on 2026-10-24. On 2026-10-25 the backlog was refined for the UX concept in [WEB_UX.md](WEB_UX.md): #55 and #56 were added, and #7, #8, #10, #12, #15, #19–#21, #24, #25, #36 and #45 now name the screen and mockup they build. On 2026-10-25, after the proof of concept, the backlog was re-cut for [brief v0.4](PRODUCT_BRIEF_v0.4.md): choosing the moment is the centre of the product. M2 became "Find the moment" with hot cues (#59), jumps (#60) and pairings (#61); M3 gained the outcome of a pairing (#62, #63); the AI explainer became M5 (#58: #64, #65, #66) and the pilot moved to M6. #10, #15, #16, #27, #34 and #55 carry a "v0.4 refinement" section. Andrei then decided that the app performs and the user can take over, with their moves recorded as an editable script (#68).
 
 Each milestone ends with something you can open in a browser and try. Each milestone is a tracking issue with the `milestone` label, and its work items are attached as sub-issues in build order.
 
@@ -73,6 +73,7 @@ Understand what each pairing did and why, and hear two ways of making the same t
 - #63 Explain what happened in a pairing · `mvp:must`
 - #23 Strategy: phrase-boundary cut · `mvp:must`
 - #24 Keep variants and switch between them while listening · `mvp:must`
+- #68 Take over a control and record it as an editable script · `mvp:must`
 - #56 Intend: choose what the transition should do and pick approaches · `mvp:should`
 - #25 Compare two variants side by side · `mvp:must`
 - #26 Adjust transition duration and strategy parameters · `mvp:should`
