@@ -100,6 +100,8 @@ export class PocSession {
   /** Which version plays: the user's take or the strategy's original. */
   listening: 'take' | 'original' = 'take'
   compiled!: CompiledPlan
+  /** The version not playing, while there are takes to compare it with; null otherwise. */
+  compared: CompiledPlan | null = null
   timing!: TransitionTiming
   /** Errors of the last change that was refused; the previous plan stays loaded. */
   errors: string[] = []
@@ -217,8 +219,21 @@ export class PocSession {
     } catch (e) {
       this.errors = [e instanceof Error ? e.message : String(e)]
     }
+    this.compared = this.compileCompared()
     this.loop.setPlan(this.compiled, this.barAt)
     this.notify()
+  }
+
+  /** The version that is not playing: the original under the take, or the take under the original. */
+  private compileCompared(): CompiledPlan | null {
+    if (this.history.takes.length === 0) return null
+    try {
+      return compile(
+        this.listening === 'take' ? this.basePlan : applyTakes(this.basePlan, this.history.takes),
+      )
+    } catch {
+      return null
+    }
   }
 
   private notify(): void {
@@ -282,6 +297,7 @@ export class PocSession {
     this.basePlan = plan
     this.plan = playing
     this.compiled = compile(playing)
+    this.compared = this.compileCompared()
     this.timing = timingOf(plan)
     return true
   }

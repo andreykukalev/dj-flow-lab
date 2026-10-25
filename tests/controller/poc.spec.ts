@@ -178,6 +178,70 @@ test('a take on a knob plays back, and undo, redo and reset bring everything bac
   expect(await page.evaluate(() => window.poc!.history.takes.length)).toBe(1)
 })
 
+// The mixing line shows every control the plan moves, not just the faders: each EQ band
+// and the filter get a lane drawn from the compiled plan, with the value each move
+// reaches; with a take, the lanes it changed are marked and the other version is dashed.
+
+test('the mixing line shows EQ and filter moves and what a take changed', async ({ page }) => {
+  const lane = (key: string) => page.locator(`[data-lane="${key}"]`)
+
+  for (const key of [
+    'A.eqHigh',
+    'A.eqMid',
+    'A.eqLow',
+    'A.filter',
+    'B.eqHigh',
+    'B.eqMid',
+    'B.eqLow',
+  ])
+    await expect(lane(key)).toHaveAttribute('data-changed', 'true')
+  await expect(lane('B.filter')).toHaveAttribute('data-changed', 'false')
+  await expect(lane('B.filter')).toContainText('no change')
+  await expect(lane('A.trim')).toHaveCount(0)
+
+  await expect(lane('A.eqLow')).toContainText('▼ kill')
+  await expect(lane('A.eqLow')).toHaveAttribute('title', /down to kill at A bar 25/)
+  await expect(lane('A.filter')).toContainText('▲ HP 60 Hz')
+  await expect(lane('B.eqHigh')).toContainText('−12 dB')
+  await expect(lane('B.eqHigh')).toContainText('▲ 0 dB')
+  await expect(lane('A.fader')).toContainText('▼ off')
+
+  // The readouts follow the beat on screen.
+  await page.evaluate(() => window.poc!.transport.cue(100))
+  await expect(lane('A.eqLow').locator('.timeline-readout')).toHaveText('kill')
+  await expect(lane('A.filter').locator('.timeline-readout')).toHaveText('HP 60 Hz')
+  await expect(lane('B.eqLow').locator('.timeline-readout')).toHaveText('0 dB')
+
+  await page.evaluate(() =>
+    window.poc!.addTake({
+      id: 'lp',
+      control: 'B.filter',
+      points: [
+        { beat: 80, value: 0 },
+        { beat: 100, value: -0.6 },
+        { beat: 120, value: 0 },
+      ],
+    }),
+  )
+  await expect(lane('B.filter')).toHaveAttribute('data-changed', 'true')
+  await expect(lane('B.filter')).toHaveAttribute('data-differs', 'true')
+  await expect(lane('B.filter')).toContainText('▼ LP')
+  await expect(lane('B.filter')).toContainText('▲ off')
+  await expect(lane('B.filter').locator('.timeline-ghost')).toHaveCount(1)
+  await expect(lane('A.eqLow')).toHaveAttribute('data-differs', 'false')
+  await expect(page.getByTestId('timeline').locator('..')).toContainText(
+    'Solid: Your take · dashed: Original',
+  )
+
+  // Listening to the original shows the original, with the take dashed.
+  await page.getByRole('button', { name: 'Original' }).click()
+  await expect(lane('B.filter')).toHaveAttribute('data-changed', 'false')
+  await expect(lane('B.filter')).toHaveAttribute('data-differs', 'true')
+  await expect(page.getByTestId('timeline').locator('..')).toContainText(
+    'Solid: Original · dashed: Your take',
+  )
+})
+
 // #29: the whole-track view finds where the music changes and proposes likely sections.
 
 /** A mono 16-bit WAV of an arrangement at 120 BPM: parts with or without kick, bass and hats. */

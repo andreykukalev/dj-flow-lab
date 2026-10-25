@@ -54,29 +54,27 @@
 }
 
 .timeline {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr);
-  column-gap: 8px;
-  padding: 10px 12px 8px;
+  /* The left gutter holds each lane's label. */
+  padding: 8px 12px 8px 84px;
 }
 
-.timeline-decks {
+.timeline-legend {
   display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  padding: 22px 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 16px;
+  min-height: 14px;
+  font-size: 10px;
+  color: var(--text-muted);
 }
 
-.timeline-deck {
-  display: flex;
-  flex-direction: column;
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.timeline-deck strong {
-  font-size: 20px;
-  font-weight: 800;
+.timeline-legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 8px;
+  border-radius: 2px;
+  background: #ffffff1f;
+  vertical-align: -1px;
 }
 
 .timeline-body {
@@ -105,6 +103,42 @@
   flex-direction: column;
 }
 
+.timeline-row {
+  position: relative;
+}
+
+/* Lane labels sit in the gutter; clicks there do not seek. */
+.timeline-label {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(100% + 8px);
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.timeline-readout {
+  color: var(--text-muted);
+}
+
+.timeline-deck {
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.timeline-deck strong {
+  font-size: 20px;
+  line-height: 22px;
+  font-weight: 800;
+}
+
 .timeline-lane {
   display: block;
   width: 100%;
@@ -117,6 +151,131 @@
 
 .lane-b {
   fill: var(--deck-b);
+}
+
+/* EQ, filter, trim and crossfader lanes: neutral in the middle, up is the knob turned
+   right (boost, high-pass), down is turned left (cut, low-pass). */
+.timeline-curve {
+  display: block;
+  width: 100%;
+  height: 32px;
+}
+
+.timeline-control + .timeline-control {
+  border-top: 1px solid #ffffff08;
+}
+
+.timeline-control.deck-x {
+  color: var(--explain);
+}
+
+.timeline-move {
+  fill: currentColor;
+  opacity: 0.1;
+}
+
+.timeline-neutral {
+  stroke: var(--text-muted);
+  stroke-opacity: 0.35;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.timeline-area {
+  fill: currentColor;
+  opacity: 0.35;
+}
+
+.timeline-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.timeline-ghost {
+  fill: none;
+  stroke: var(--text);
+  stroke-opacity: 0.7;
+  stroke-width: 1.25;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+
+/* A control that does not move: flat, dimmed and shorter. */
+.timeline-control[data-changed='false'][data-differs='false'] {
+  opacity: 0.45;
+}
+
+.timeline-control[data-changed='false'][data-differs='false'] .timeline-curve {
+  height: 12px;
+}
+
+.timeline-control[data-changed='false'][data-differs='false'] .timeline-line {
+  stroke-width: 1;
+  stroke-dasharray: 1 3;
+}
+
+.timeline-control[data-changed='false'][data-differs='false'] .timeline-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.timeline-static {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  font-size: 9px;
+  line-height: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* The value a move reaches, placed on the side away from the curve. */
+.timeline-value {
+  position: absolute;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  font-size: 10px;
+  line-height: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.timeline-value[data-side='top'] {
+  top: 0;
+}
+
+.timeline-value[data-side='bottom'] {
+  bottom: 0;
+}
+
+.timeline-value[data-anchor='end'] {
+  transform: translateX(-100%);
+}
+
+.timeline-fader .timeline-value[data-side='top'] {
+  top: 2px;
+}
+
+/* A lane where the version not playing differs. */
+.timeline-diff-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: var(--explain);
+  vertical-align: 2px;
+}
+
+.timeline-deck .timeline-diff-dot {
+  vertical-align: 6px;
 }
 
 .timeline-overlap {
