@@ -639,7 +639,10 @@ function loopOnsets(r: EngineRender, plan: TransitionPlanV1, deck: DeckId, fromB
     const deckBeat = transitionBeatToDeckBeat(timing, deck, beat)
     // The resampler's tempo error builds up from the start of each run's source.
     const run = runs.find((x) => beat < x.to)!
-    const runStart = anchorTimeOf(anchor, Math.max(run.from, anchor.beat))
+    // A run whose audio starts later than its first beat waits for it, as in the transport.
+    const from = Math.max(run.from, anchor.beat)
+    const offset = transitionBeatToDeckSec(timing, deck, from)
+    const runStart = anchorTimeOf(anchor, from) + Math.max(0, -offset / (deck === 'B' ? RATE_B : 1))
     // Pulses differ in level, so time them by their peak (refined on a parabola), not
     // by where they cross the onset threshold.
     const s = Math.round(t * SR)
