@@ -231,7 +231,9 @@ export class Transport {
       if (runs.length === 1) {
         source.connect(input)
       } else {
-        const seam = new GainNode(this.ctx, { gain: 1 })
+        // Silent until the fade-in, in case the engine starts a resampled source a
+        // sample early (found on Firefox).
+        const seam = new GainNode(this.ctx, { gain: seamIn ? 0 : 1 })
         if (seamIn) {
           seam.gain.setValueAtTime(0, t0)
           seam.gain.linearRampToValueAtTime(1, anchorTimeOf(anchor, run.from))
