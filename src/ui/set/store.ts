@@ -15,12 +15,26 @@ import {
   markTried,
   moveTrack,
   planFromReading,
+  addAlternative,
+  pairKey,
+  removeAlternative,
   removeTrack,
   setArc,
+  setWork,
+  swapIn,
   type SetPlan,
 } from '../../engine/set/spine'
+import {
+  addComment,
+  addVersion,
+  emptyWork,
+  pick,
+  removeVersion,
+  type Pick,
+  type TransitionWork,
+} from '../../engine/set/versions'
 import { barToBeat, beatToSec, secondsPerBar } from '../../engine/time'
-import { createSession, decodeFile, type PocSession } from '../../poc/session'
+import { createSession, decodeFile, deckPosition, type PocSession } from '../../poc/session'
 
 // The state of set planning (#87, slice 1): the two DJs and their tracks, the set
 // being explored, and the screen. Every file stays on this device: it is decoded and
@@ -62,6 +76,8 @@ export class SetStore {
   labError: string | null = null
   /** What "Hear it" or "Hear the idea" is playing: the list, and the moment in it. */
   hearing: { key: string; trackId: string; bar: number; index: number; total: number } | null = null
+  /** Which of the two DJs is at the screen: the author of versions, comments and picks. */
+  me: DjId = 'dj1'
   /** Observations the DJs said do not sound like that. */
   dismissed: ReadonlySet<string> = new Set()
   version = 0
@@ -266,6 +282,86 @@ export class SetStore {
     if (!this.plan) return
     this.plan = moveTrack(this.plan, index, delta)
     this.notify()
+  }
+
+  setMe(dj: DjId): void {
+    this.me = dj
+    this.notify()
+  }
+
+  addAlternative(index: number, id: string): void {
+    if (!this.plan) return
+    this.plan = addAlternative(this.plan, index, id)
+    this.notify()
+  }
+
+  removeAlternative(index: number, id: string): void {
+    if (!this.plan) return
+    this.plan = removeAlternative(this.plan, index, id)
+    this.notify()
+  }
+
+  swapIn(index: number, id: string): void {
+    if (!this.plan) return
+    this.plan = swapIn(this.plan, index, id)
+    this.notify()
+  }
+
+  /** The versions, comments and picks of the transition open in the Lab. */
+  get labWork(): TransitionWork {
+    const key = this.lab && pairKey(this.lab.from, this.lab.to)
+    return (key && this.plan?.work[key]) || emptyWork()
+  }
+
+  private changeWork(change: (work: TransitionWork) => TransitionWork): void {
+    if (!this.plan || !this.lab) return
+    const key = pairKey(this.lab.from, this.lab.to)
+    this.plan = setWork(this.plan, key, change(this.labWork))
+    this.notify()
+  }
+
+  /** "Save as a version": what is playing in the Lab, by the DJ at the screen. */
+  saveVersion(name: string): void {
+    const id = `v${this.nextId++}`
+    const mine = this.labWork.versions.filter((v) => v.author === this.me).length
+    const label = name.trim() || `${this.djName(this.me)}’s version ${mine + 1}`
+    const state = this.audio.snapshot()
+    this.changeWork((w) => addVersion(w, { id, name: label, author: this.me, state }))
+  }
+
+  loadVersion(id: string): void {
+    const version = this.labWork.versions.find((v) => v.id === id)
+    if (version) this.audio.restore(version.state)
+  }
+
+  removeVersion(id: string): void {
+    this.changeWork((w) => removeVersion(w, id))
+  }
+
+  /** The bar of the outgoing track at the cursor. */
+  get cursorBar(): number {
+    const session = this.audio
+    const state = session.transport.state
+    const beat =
+      state.kind === 'playing'
+        ? session.transport.beatAt()
+        : state.kind === 'paused'
+          ? state.beat
+          : 0
+    return deckPosition(session.timing, 'A', beat).bar
+  }
+
+  /** A comment pinned to the bar of the outgoing track at the cursor. */
+  comment(text: string): void {
+    const t = text.trim()
+    if (!t) return
+    const comment = { id: `c${this.nextId++}`, author: this.me, bar: this.cursorBar, text: t }
+    this.changeWork((w) => addComment(w, comment))
+  }
+
+  /** The DJ at the screen picks a version, keeps both, or (null) takes their pick back. */
+  pick(value: Pick | null): void {
+    this.changeWork((w) => pick(w, this.me, value))
   }
 
   remove(index: number): void {

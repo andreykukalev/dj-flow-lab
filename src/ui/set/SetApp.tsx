@@ -43,6 +43,19 @@ export function SetApp({ store: given }: { store?: SetStore }) {
             </span>
           )}
         </nav>
+        <div className="set-me" role="group" aria-label="Who is at the screen">
+          <span className="muted">You are</span>
+          {(['dj1', 'dj2'] as const).map((dj) => (
+            <button
+              key={dj}
+              className={`btn btn-small set-step ${store.me === dj ? 'set-step-on' : ''}`}
+              aria-pressed={store.me === dj}
+              onClick={() => store.setMe(dj)}
+            >
+              {store.djName(dj)}
+            </button>
+          ))}
+        </div>
       </header>
       {store.screen === 'music' && <YourMusic store={store} />}
       {store.screen === 'concepts' && <ConceptExplorer store={store} />}

@@ -1,12 +1,16 @@
 import type { DjId, TrackProfile } from './profile'
 import type { MusicalFunction, Reading } from './readings'
+import { workStatus, type TransitionWork, type WorkStatus } from './versions'
 
 // The set spine (#91): an order of tracks with a transition between each pair. A
 // reading's functions belong to the slots, so they stay in place when tracks move. What
 // happened to a transition is kept by its pair of tracks, so moving a track keeps each
 // pair's history and a pair that comes back finds it again.
 
-export type TransitionStatus = 'not tried' | 'tried'
+export type TransitionStatus = WorkStatus
+
+/** A slot holds its track and at most this many candidates waiting beside it. */
+export const MAX_ALTERNATIVES = 2
 
 export interface SetPlan {
   readingId: string | null
@@ -16,8 +20,12 @@ export interface SetPlan {
   /** How full each slot should be, 0..1: the reading's arc, or the DJs' once edited. */
   arc: number[]
   arcEdited: boolean
+  /** Candidates waiting beside each slot's track, to swap in. */
+  alternatives: string[][]
   /** Pairs someone has listened to in the Lab, by `pairKey`. */
   tried: Record<string, true>
+  /** Versions, comments and picks of each pair, by `pairKey`. */
+  work: Record<string, TransitionWork>
 }
 
 export interface SpineTransition {
@@ -38,7 +46,9 @@ export function planFromReading(reading: Reading): SetPlan {
     roles: [...reading.roles],
     arc: [...reading.arc],
     arcEdited: false,
+    alternatives: reading.order.map(() => []),
     tried: {},
+    work: {},
   }
 }
 
@@ -60,18 +70,57 @@ export function removeTrack(plan: SetPlan, index: number): SetPlan {
     order: plan.order.filter((_, k) => k !== index),
     roles: plan.roles.filter((_, k) => k !== index),
     arc: plan.arc.filter((_, k) => k !== index),
+    alternatives: plan.alternatives.filter((_, k) => k !== index),
   }
 }
 
 /** Adds a track from the collection at the end, in a slot without a function. */
 export function addTrack(plan: SetPlan, id: string): SetPlan {
-  if (plan.order.includes(id)) return plan
+  if (unused(plan, [id]).length === 0) return plan
   return {
     ...plan,
     order: [...plan.order, id],
     roles: [...plan.roles, null],
     arc: [...plan.arc, plan.arc.at(-1) ?? 0.5],
+    alternatives: [...plan.alternatives, []],
   }
+}
+
+/** Tracks the set does not use, in a slot or waiting beside one. */
+export function unused(plan: SetPlan, ids: readonly string[]): string[] {
+  const used = new Set([...plan.order, ...plan.alternatives.flat()])
+  return ids.filter((id) => !used.has(id))
+}
+
+/** Puts a track beside a slot's track, as a candidate to swap in. */
+export function addAlternative(plan: SetPlan, index: number, id: string): SetPlan {
+  const alts = plan.alternatives[index]
+  if (!alts || alts.length >= MAX_ALTERNATIVES || unused(plan, [id]).length === 0) return plan
+  const alternatives = plan.alternatives.map((a, k) => (k === index ? [...a, id] : a))
+  return { ...plan, alternatives }
+}
+
+export function removeAlternative(plan: SetPlan, index: number, id: string): SetPlan {
+  const alternatives = plan.alternatives.map((a, k) =>
+    k === index ? a.filter((x) => x !== id) : a,
+  )
+  return { ...plan, alternatives }
+}
+
+/** Swaps a waiting candidate into its slot; the track it replaces waits beside it. */
+export function swapIn(plan: SetPlan, index: number, id: string): SetPlan {
+  const alts = plan.alternatives[index]
+  const current = plan.order[index]
+  if (!alts?.includes(id) || current === undefined) return plan
+  const order = plan.order.map((x, k) => (k === index ? id : x))
+  const alternatives = plan.alternatives.map((a, k) =>
+    k === index ? a.map((x) => (x === id ? current : x)) : a,
+  )
+  return { ...plan, order, alternatives }
+}
+
+export function setWork(plan: SetPlan, key: string, work: TransitionWork): SetPlan {
+  return { ...plan, work: { ...plan.work, [key]: work } }
 }
 
 /** The DJs' own arc at one slot, 0..1. */
@@ -96,7 +145,7 @@ export function transitions(plan: SetPlan, tracks: readonly TrackProfile[]): Spi
       key,
       from,
       to,
-      status: plan.tried[key] ? 'tried' : 'not tried',
+      status: workStatus(plan.work[key], plan.tried[key] === true),
       mixedBy: owner.get(to) ?? 'dj1',
     }
   })

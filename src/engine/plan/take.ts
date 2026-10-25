@@ -190,6 +190,11 @@ export class TakeHistory {
     if (this.takes.length > 0) this.push([])
   }
 
+  /** Puts a saved list of takes in place, as a step that undo takes back. */
+  load(takes: readonly Take[]): void {
+    this.push([...takes])
+  }
+
   undo(): void {
     if (this.canUndo) this.index--
   }
