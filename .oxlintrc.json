@@ -3,11 +3,16 @@
   "plugins": ["react", "typescript", "oxc"],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ]
   },
   "overrides": [
     {
-      "files": ["src/engine/**"],
+      "files": ["src/engine/*"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -19,6 +24,41 @@
                   "../audio/*",
                   "../store/*",
                   "../analysis/*",
+                  "../poc/*",
+                  "react",
+                  "react-dom"
+                ],
+                "message": "src/engine is pure: it imports nothing from the browser or other src folders."
+              }
+            ]
+          }
+        ],
+        "no-restricted-globals": [
+          "error",
+          "window",
+          "document",
+          "navigator",
+          "AudioContext",
+          "OfflineAudioContext",
+          "requestAnimationFrame",
+          "performance"
+        ]
+      }
+    },
+    {
+      "files": ["src/engine/*/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "../../ui/*",
+                  "../../audio/*",
+                  "../../store/*",
+                  "../../analysis/*",
+                  "../../poc/*",
                   "react",
                   "react-dom"
                 ],
