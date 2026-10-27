@@ -25,11 +25,11 @@ export function Shape({ profile, points = 48 }: { profile: TrackProfile; points?
   )
 }
 
-/** What the analysis does not hear yet, said where it matters. */
-export function NotMeasured() {
+/** What the analysis does not hear yet, said where it matters; `compact` is one line. */
+export function NotMeasured({ compact = false }: { compact?: boolean }) {
   const t = useT()
   return (
-    <p className="set-not-measured" role="note">
+    <p className={`set-not-measured ${compact ? 'set-not-measured-line' : ''}`} role="note">
       <strong>{t('music.notMeasured')}</strong> {t('music.notMeasuredRest')}
     </p>
   )

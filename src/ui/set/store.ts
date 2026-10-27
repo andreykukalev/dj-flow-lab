@@ -460,7 +460,7 @@ export class SetStore {
   /** "Explore the concept": the reading's order becomes the set. */
   choose(reading: Reading): void {
     this.reading = reading
-    this.plan = planFromReading(reading)
+    this.plan = planFromReading(reading, this.plan ?? undefined)
     this.go('set')
   }
 

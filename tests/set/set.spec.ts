@@ -51,7 +51,6 @@ test('two DJs explore their tracks and open a transition in the Lab', async ({ p
 
   // Check a reading by ear: a claim that does not sound right takes its readings away.
   const unknown = page.getByRole('listitem', { name: 'Into the Unknown' })
-  await unknown.getByRole('button', { name: 'Check it by ear' }).click()
   const claims = unknown.getByTestId('claim')
   await expect(claims).toHaveCount(2)
   await claims

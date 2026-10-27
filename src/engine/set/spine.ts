@@ -39,7 +39,12 @@ export interface SpineTransition {
 
 export const pairKey = (from: string, to: string) => `${from}→${to}`
 
-export function planFromReading(reading: Reading): SetPlan {
+/**
+ * A reading's order as a plan. What the DJs did on a pair of tracks in a previous plan
+ * (tried, versions, comments, picks) is keyed by the pair, so it comes along: switching
+ * concepts and coming back loses nothing.
+ */
+export function planFromReading(reading: Reading, previous?: SetPlan): SetPlan {
   return {
     readingId: reading.id,
     order: [...reading.order],
@@ -47,8 +52,8 @@ export function planFromReading(reading: Reading): SetPlan {
     arc: [...reading.arc],
     arcEdited: false,
     alternatives: reading.order.map(() => []),
-    tried: {},
-    work: {},
+    tried: { ...previous?.tried },
+    work: { ...previous?.work },
   }
 }
 

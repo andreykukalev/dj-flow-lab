@@ -715,3 +715,130 @@
   background: var(--surface-raised);
   color: var(--deck-b-soft);
 }
+
+/* Your music and Concepts (stage 3): the track list as lines with one state each, the
+   step's action in the heading, observations as a compact strip, readings in three
+   fixed layers. */
+.set-screen-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.set-screen-head-row > div:first-child {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.set-screen-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.set-not-measured-line {
+  padding: 0;
+  border: 0;
+}
+
+.set-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin-bottom: 8px;
+}
+
+.set-section-head h3 {
+  margin: 0;
+}
+
+.set-row {
+  border-left: 3px solid var(--border);
+}
+
+.set-row[data-owner='dj1'] {
+  border-left-color: var(--deck-a);
+}
+
+.set-row[data-owner='dj2'] {
+  border-left-color: var(--deck-b);
+}
+
+.set-row .set-shape {
+  height: 18px;
+}
+
+.set-row-length {
+  font-variant-numeric: tabular-nums;
+}
+
+.set-state {
+  border-style: dashed;
+  color: var(--text-muted);
+}
+
+.set-state[data-state='failed'],
+.set-state[data-state='missing'] {
+  border-color: var(--deck-b-soft);
+  color: var(--deck-b-soft);
+}
+
+.set-fold {
+  flex-basis: 100%;
+  font-size: 13px;
+}
+
+.set-fold > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.set-fold > summary:hover {
+  color: var(--text);
+}
+
+.set-observation {
+  padding: 10px;
+  font-size: 13px;
+}
+
+.set-observation .set-tracks {
+  font-size: 12px;
+}
+
+.set-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.set-why li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.set-why li p {
+  margin: 0;
+}
+
+.set-why .set-hear {
+  gap: 4px;
+}
+
+.set-why .set-hear .btn {
+  font-size: 12px;
+  min-height: 30px;
+}
+
+.set-dismiss {
+  color: var(--text-muted);
+}

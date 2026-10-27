@@ -213,3 +213,20 @@ describe('the set spine', () => {
     expect(moveTrack(plan, 0, -1)).toBe(plan)
   })
 })
+
+describe('planFromReading', () => {
+  it('carries the work on each pair over from the previous plan', () => {
+    const profiles = COLLECTION
+    const obs = observe(profiles, NAMES)
+    const [first, second] = readings(profiles, obs)
+    const a = planFromReading(first!)
+    const [x, y] = a.order
+    const tried = markTried(a, x!, y!)
+    const key = pairKey(x!, y!)
+    const b = planFromReading(second!, tried)
+    expect(b.readingId).toBe(second!.id)
+    expect(b.tried[key]).toBe(true)
+    expect(planFromReading(first!, b).tried[key]).toBe(true)
+    expect(planFromReading(first!).tried).toEqual({})
+  })
+})
