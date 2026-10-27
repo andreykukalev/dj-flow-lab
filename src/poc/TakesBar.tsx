@@ -1,56 +1,49 @@
 import type { ControlKey } from '../engine/mixer'
+import type { Translate } from '../i18n'
+import { useT } from '../i18n/react'
 import type { PocSession } from './session'
 
 // Your take (#68): what the user changed by grabbing controls while it played, which
 // version plays, and Undo, Redo and Reset (brief v0.4 §5b: nothing is irreversible).
 
-const CONTROL_NAMES: Record<string, string> = {
-  eqHigh: 'high EQ',
-  trim: 'trim',
-  eqMid: 'mid EQ',
-  filter: 'filter',
-  eqLow: 'low EQ',
-  fader: 'fader',
-}
-
-function controlName(key: ControlKey): string {
-  if (key === 'mixer.crossfader') return 'crossfader'
+/** "A high EQ", "crossfader": a control's name in the DJs' language. */
+export function controlName(key: ControlKey, t: Translate): string {
+  if (key === 'mixer.crossfader') return t('poc.ctl.crossfader')
   const [deck, control] = key.split('.') as [string, string]
-  return `${deck} ${CONTROL_NAMES[control] ?? control}`
+  return `${deck} ${t(`poc.ctl.${control}`)}`
 }
 
-function summary(session: PocSession): string {
+function summary(session: PocSession, t: Translate): string {
   const { takes } = session.history
-  if (takes.length === 0)
-    return 'Grab any knob or fader while it plays. Your moves are recorded and play back from then on.'
-  const controls = [...new Set(takes.map((t) => controlName(t.control)))]
-  const moves = takes.length === 1 ? '1 move' : `${takes.length} moves`
-  return `${moves} on ${controls.join(', ')}. Replay to hear it, or switch to Original to compare.`
+  if (takes.length === 0) return t('poc.takes.empty')
+  const controls = [...new Set(takes.map((x) => controlName(x.control, t)))]
+  return t('poc.takes.summary', { n: takes.length, controls: controls.join(', ') })
 }
 
 export function TakesBar({ session, hint }: { session: PocSession; hint: string | null }) {
+  const t = useT()
   const { history, listening } = session
   const hasTakes = history.takes.length > 0
   return (
-    <section className="card poc-takes" aria-label="Your take">
+    <section className="card poc-takes" aria-label={t('poc.yourTake')}>
       <div className="poc-takes-text">
-        <strong>Your take</strong>
+        <strong>{t('poc.yourTake')}</strong>
         <span
           className={hint ? 'poc-hint' : 'muted'}
           data-testid="takes-summary"
           aria-live="polite"
         >
-          {hint ?? summary(session)}
+          {hint ?? summary(session, t)}
         </span>
       </div>
-      <div className="poc-segmented" role="group" aria-label="Listen to">
+      <div className="poc-segmented" role="group" aria-label={t('poc.listenTo')}>
         <button
           className="btn btn-small"
           aria-pressed={listening === 'original' || !hasTakes}
           onClick={() => session.listenTo('original')}
           disabled={!hasTakes}
         >
-          Original
+          {t('poc.original')}
         </button>
         <button
           className="btn btn-small"
@@ -58,7 +51,7 @@ export function TakesBar({ session, hint }: { session: PocSession; hint: string 
           onClick={() => session.listenTo('take')}
           disabled={!hasTakes}
         >
-          Your take
+          {t('poc.yourTake')}
         </button>
       </div>
       <div className="poc-takes-actions">
@@ -66,25 +59,25 @@ export function TakesBar({ session, hint }: { session: PocSession; hint: string 
           className="btn btn-small"
           onClick={() => session.undo()}
           disabled={!history.canUndo}
-          title="Undo (Ctrl+Z)"
+          title={t('poc.undoHint')}
         >
-          Undo
+          {t('poc.undo')}
         </button>
         <button
           className="btn btn-small"
           onClick={() => session.redo()}
           disabled={!history.canRedo}
-          title="Redo (Shift+Ctrl+Z)"
+          title={t('poc.redoHint')}
         >
-          Redo
+          {t('poc.redo')}
         </button>
         <button
           className="btn btn-small"
           onClick={() => session.reset()}
           disabled={!hasTakes}
-          title="Back to the app's plan. Undo brings your moves back."
+          title={t('poc.resetHint')}
         >
-          Reset
+          {t('poc.reset')}
         </button>
       </div>
     </section>

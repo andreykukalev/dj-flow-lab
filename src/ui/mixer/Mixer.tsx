@@ -1,20 +1,22 @@
 import { useCallback } from 'react'
 import type { ControlKey, DeckControl } from '../../engine/mixer'
 import type { DeckId } from '../../engine/model'
+import { useT } from '../../i18n/react'
 import { CROSSFADER_CAP, CROSSFADER_WIDTH, FADER_LENGTH, KNOB_SIZE, KNOB_TRACK } from './geometry'
 import { MixerRenderer } from './renderer'
 import './mixer.css'
 
 // The Try screen's virtual mixer (mockup iPad 4): two strips with high, trim, mid,
 // filter and low knobs and a fader, and the crossfader between them. React renders
-// the structure once; a MixerRenderer moves it every frame.
+// the structure once; a MixerRenderer moves it every frame. The knobs keep the names
+// printed on a controller in every language; the decks and faders are translated.
 
-const KNOBS: { control: DeckControl; label: string; name: string }[] = [
-  { control: 'eqHigh', label: 'High', name: 'high EQ' },
-  { control: 'trim', label: 'Trim', name: 'trim' },
-  { control: 'eqMid', label: 'Mid', name: 'mid EQ' },
-  { control: 'filter', label: 'Filter', name: 'filter' },
-  { control: 'eqLow', label: 'Low', name: 'low EQ' },
+const KNOBS: { control: DeckControl; label: string }[] = [
+  { control: 'eqHigh', label: 'High' },
+  { control: 'trim', label: 'Trim' },
+  { control: 'eqMid', label: 'Mid' },
+  { control: 'filter', label: 'Filter' },
+  { control: 'eqLow', label: 'Low' },
 ]
 
 function Knob({ control, label, name }: { control: ControlKey; label: string; name: string }) {
@@ -26,7 +28,7 @@ function Knob({ control, label, name }: { control: ControlKey; label: string; na
         height={KNOB_SIZE}
         viewBox={`0 0 ${KNOB_SIZE} ${KNOB_SIZE}`}
         role="img"
-        aria-label={`Deck ${control[0]} ${name}`}
+        aria-label={name}
       >
         <circle className="knob-ring" cx={c} cy={c} r={22.5} />
         <circle className="knob-body" cx={c} cy={c} r={14} />
@@ -42,31 +44,38 @@ function Knob({ control, label, name }: { control: ControlKey; label: string; na
 }
 
 function Fader({ deck }: { deck: DeckId }) {
+  const t = useT()
   return (
     <div className="fader" data-control={`${deck}.fader`} data-kind="fader">
       <div
         className="fader-track"
         style={{ height: FADER_LENGTH }}
         role="img"
-        aria-label={`Deck ${deck} fader`}
+        aria-label={t('poc.laneTitle', { deck, name: t('poc.ctl.fader') })}
       >
         <div className="fader-fill" data-part="fill" />
         <div className="fader-cap" data-part="cap" />
       </div>
-      <span className="control-label">Fader</span>
+      <span className="control-label">{t('poc.fader')}</span>
       <span className="control-caption" data-part="caption" />
     </div>
   )
 }
 
 function Strip({ deck }: { deck: DeckId }) {
+  const t = useT()
   return (
     <div className="mixer-strip" data-deck={deck}>
       <div className="mixer-knobs">
-        <div className="mixer-deck-label">Deck {deck}</div>
+        <div className="mixer-deck-label">{t('poc.deck', { deck })}</div>
         <div className="mixer-knob-grid">
           {KNOBS.map((k) => (
-            <Knob key={k.control} control={`${deck}.${k.control}`} label={k.label} name={k.name} />
+            <Knob
+              key={k.control}
+              control={`${deck}.${k.control}`}
+              label={k.label}
+              name={t('poc.laneTitle', { deck, name: t(`poc.ctl.${k.control}`) })}
+            />
           ))}
         </div>
       </div>
@@ -83,6 +92,7 @@ export interface MixerProps {
 }
 
 export function Mixer({ onRenderer, note }: MixerProps) {
+  const t = useT()
   const ref = useCallback(
     (el: HTMLElement | null) => {
       if (!el) return
@@ -92,7 +102,7 @@ export function Mixer({ onRenderer, note }: MixerProps) {
     [onRenderer],
   )
   return (
-    <section className="card mixer" aria-label="Virtual mixer" ref={ref}>
+    <section className="card mixer" aria-label={t('poc.mixerAria')} ref={ref}>
       <Strip deck="A" />
       <div className="mixer-divider" />
       <div className="mixer-centre">
@@ -102,13 +112,15 @@ export function Mixer({ onRenderer, note }: MixerProps) {
           data-control="mixer.crossfader"
           data-kind="crossfader"
           role="img"
-          aria-label="Crossfader"
+          aria-label={t('poc.crossfaderName')}
         >
           <div className="crossfader-track" style={{ width: CROSSFADER_WIDTH }}>
             <div className="crossfader-cap" data-part="cap" style={{ width: CROSSFADER_CAP }} />
           </div>
           <div className="control-label crossfader-label">
-            <span className="deck-a">A</span>Crossfader<span className="deck-b">B</span>
+            <span className="deck-a">A</span>
+            {t('poc.crossfaderName')}
+            <span className="deck-b">B</span>
           </div>
           <span className="control-caption" data-part="caption" />
         </div>

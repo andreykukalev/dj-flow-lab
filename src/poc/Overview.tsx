@@ -11,6 +11,8 @@ import {
   toBarBeat,
   transitionBeatToDeckBeat,
 } from '../engine/time'
+import type { Translate } from '../i18n'
+import { useT } from '../i18n/react'
 import type { PocSession } from './session'
 
 // The whole of each track (#29): level per bar, low end, 8-bar phrase lines, the bars
@@ -33,21 +35,30 @@ function deckBar(session: PocSession, deck: DeckId, beat: number): number {
   return transitionBeatToDeckBeat(session.timing, deck, beat) / 4 + 1
 }
 
-function phraseNote(s: TrackStructure, startBar: number): string {
+/** The phrase check in words: how many changes fall on a phrase line, and where the rest fall. */
+export function phraseNote(s: TrackStructure, startBar: number, t: Translate): string {
   const { changes, onLines, suggestedOffsetBars } = s.phraseCheck
-  if (changes < 2)
-    return 'No clear changes found, so the phrase lines cannot be checked from the music. Listen for where parts come and go.'
-  const fit = `${onLines} of ${changes} changes fall on a phrase line.`
+  if (changes < 2) return t('poc.phrase.none')
+  const fit = t('poc.phrase.fit', { on: onLines, changes })
   if (suggestedOffsetBars === undefined) return fit
   const later = (((suggestedOffsetBars + 1 - startBar) % 8) + 8) % 8
   const by = later <= 4 ? later : 8 - later
-  const where = `${by} bar${by === 1 ? '' : 's'} ${later <= 4 ? 'after' : 'before'} the lines`
-  return `${fit} Most fall ${where}: the phrases may start at bar ${suggestedOffsetBars + 1}.`
+  return t(later <= 4 ? 'poc.phrase.mostAfter' : 'poc.phrase.mostBefore', {
+    fit,
+    by,
+    bar: suggestedOffsetBars + 1,
+  })
+}
+
+/** Whether the phrase lines clearly miss the changes: the grid wants a look. */
+export function gridFitsBadly(s: TrackStructure): boolean {
+  const { changes, onLines } = s.phraseCheck
+  return changes >= 2 && onLines / changes < 0.5
 }
 
 type Drag = { kind: 'start' } | { kind: 'edge'; edge: 'before' | 'after' }
 
-function DeckOverview({
+export function DeckOverview({
   session,
   deck,
   onSeek,
@@ -56,6 +67,7 @@ function DeckOverview({
   deck: DeckId
   onSeek: (beat: number) => void
 }) {
+  const t = useT()
   const source = session.decks[deck]
   const { grid } = source
   const s = session.structure(deck)
@@ -142,9 +154,9 @@ function DeckOverview({
   return (
     <div className="ov-deck" data-overview={deck}>
       <div className="ov-head">
-        <strong className={`deck-${lower}`}>Deck {deck}</strong>
+        <strong className={`deck-${lower}`}>{t('poc.deck', { deck })}</strong>
         <span className="poc-deck-name">{source.name}</span>
-        <span className="muted">{n} bars</span>
+        <span className="muted">{t('poc.bars', { n })}</span>
       </div>
       <div
         className={`ov-track ov-${lower}`}
@@ -158,8 +170,17 @@ function DeckOverview({
               className="ov-section ov-pick"
               data-term={sec.term}
               style={{ left: x(sec.fromBar), width: x(sec.toBar - sec.fromBar + 2) }}
-              title={`${sec.term}, bars ${sec.fromBar}–${sec.toBar} (likely): ${sec.reasons.join(', ')}. Click to blend across this section.`}
-              aria-label={`Blend across ${isA ? '' : "B's "}${sec.term} ${sec.fromBar}–${sec.toBar}`}
+              title={t('poc.sectionHint', {
+                term: sec.term,
+                from: sec.fromBar,
+                to: sec.toBar,
+                reasons: sec.reasons.join(', '),
+              })}
+              aria-label={t(isA ? 'poc.blendAcross' : 'poc.blendAcrossB', {
+                term: sec.term,
+                from: sec.fromBar,
+                to: sec.toBar,
+              })}
               onClick={() => session.useSection(deck, sec.fromBar, sec.toBar)}
             >
               {sec.term}
@@ -170,7 +191,7 @@ function DeckOverview({
           className="ov-bars"
           viewBox={`0 0 ${n} 48`}
           preserveAspectRatio="none"
-          aria-label={`Deck ${deck} level and low end per bar`}
+          aria-label={t('poc.levelAria', { deck })}
           role="img"
         >
           {s.bars.map((b, k) => {
@@ -193,7 +214,11 @@ function DeckOverview({
         <div
           className="ov-area"
           style={{ left: x(areaFrom), width: x(areaTo - areaFrom + 1) }}
-          title={`The transition area: deck ${deck} bars ${Math.floor(areaFrom)}–${Math.ceil(areaTo) - 1} are blended`}
+          title={t('poc.areaHint', {
+            deck,
+            from: Math.floor(areaFrom),
+            to: Math.ceil(areaTo) - 1,
+          })}
           data-testid={`area-${deck}`}
         />
         {looped && (
@@ -203,7 +228,11 @@ function DeckOverview({
               left: x(looped.startBeat / 4 + 1),
               width: x(looped.lengthBeats / 4 + 1),
             }}
-            title={`Loop: bars ${looped.startBeat / 4 + 1}–${(looped.startBeat + looped.lengthBeats) / 4} play ${looped.passes} times`}
+            title={t('poc.loopHint', {
+              from: looped.startBeat / 4 + 1,
+              to: (looped.startBeat + looped.lengthBeats) / 4,
+              passes: looped.passes,
+            })}
             data-testid={`overview-loop-${deck}`}
           >
             ⟲ ×{looped.passes}
@@ -215,11 +244,7 @@ function DeckOverview({
               <button
                 className="ov-phrase-pick"
                 onClick={() => session.setMark(deck, barToBeat(grid, bar))}
-                aria-label={
-                  isA
-                    ? `Blend start on the phrase line at bar ${bar}`
-                    : `Line up B's phrase line at bar ${bar} with the blend start`
-                }
+                aria-label={t(isA ? 'poc.phrasePickA' : 'poc.phrasePickB', { bar })}
               >
                 {bar}
               </button>
@@ -231,18 +256,16 @@ function DeckOverview({
             key={c.bar}
             className="ov-change"
             style={{ left: x(c.bar) }}
-            title={`The music changes at bar ${c.bar}`}
+            title={t('poc.changeAt', { bar: c.bar })}
           />
         ))}
         <div
           className="ov-mark"
           style={{ left: x(markBar) }}
-          title={
-            isA ? `Blend start: A ${markText}` : `Lined up with the blend start: B ${markText}`
-          }
+          title={t(isA ? 'poc.markA' : 'poc.markB', { at: markText })}
           data-testid={`mark-${deck}`}
         />
-        <div className="ov-playhead" ref={playhead} hidden title="Playback cursor" />
+        <div className="ov-playhead" ref={playhead} hidden title={t('poc.cursor')} />
       </div>
       <div
         className="ov-lane"
@@ -251,11 +274,7 @@ function DeckOverview({
         onPointerUp={release}
         onPointerCancel={release}
         data-testid={isA ? 'blend-lane' : 'blend-lane-B'}
-        title={
-          isA
-            ? 'Click or drag to set the blend start; drag an edge to size the transition area'
-            : 'Click or drag to choose the beat of B that lines up with the blend start; drag an edge to size the transition area'
-        }
+        title={t(isA ? 'poc.laneHintA' : 'poc.laneHintB')}
       >
         <div
           className="ov-lane-area"
@@ -264,48 +283,44 @@ function DeckOverview({
           <span
             className="ov-handle"
             data-edge="before"
-            aria-label={`Deck ${deck} transition area start`}
+            aria-label={t('poc.areaStart', { deck })}
           />
-          <span
-            className="ov-handle"
-            data-edge="after"
-            aria-label={`Deck ${deck} transition area end`}
-          />
+          <span className="ov-handle" data-edge="after" aria-label={t('poc.areaEnd', { deck })} />
         </div>
         <span className="ov-flag" style={{ left: x(markBar) }}>
-          {isA ? 'Blend start' : 'B at blend start'} {markText}
+          {t(isA ? 'poc.flagA' : 'poc.flagB')} {markText}
         </span>
       </div>
       <div className="ov-notes">
-        <span className="chip chip-likely">likely</span>
-        <span data-testid={`phrase-check-${deck}`}>{phraseNote(s, startBar)}</span>
+        <span className="chip chip-likely">{t('poc.likely')}</span>
+        <span data-testid={`phrase-check-${deck}`}>{phraseNote(s, startBar, t)}</span>
         {s.phraseCheck.suggestedOffsetBars !== undefined && (
           <button
             className="btn btn-small"
             onClick={() => setStart(s.phraseCheck.suggestedOffsetBars! + 1)}
           >
-            Start phrases at bar {s.phraseCheck.suggestedOffsetBars + 1}
+            {t('poc.startPhrases', { bar: s.phraseCheck.suggestedOffsetBars + 1 })}
           </button>
         )}
         <span className="ov-offset">
-          Phrase lines from bar {startBar}
+          {t('poc.phraseFrom', { bar: startBar })}
           <button
             className="btn btn-small"
             onClick={() => setStart(startBar - 1)}
-            aria-label={`Deck ${deck} phrase lines one bar earlier`}
+            aria-label={t('poc.phraseEarlier', { deck })}
           >
             −1
           </button>
           <button
             className="btn btn-small"
             onClick={() => setStart(startBar + 1)}
-            aria-label={`Deck ${deck} phrase lines one bar later`}
+            aria-label={t('poc.phraseLater', { deck })}
           >
             +1
           </button>
         </span>
       </div>
-      <ul className="ov-legend" aria-label={`Deck ${deck} likely sections`}>
+      <ul className="ov-legend" aria-label={t('poc.sectionsAria', { deck })}>
         {s.sections.map((sec) => (
           <li key={sec.fromBar} data-term={sec.term}>
             <strong>{sec.term}</strong> {sec.fromBar}–{sec.toBar}
@@ -317,6 +332,18 @@ function DeckOverview({
   )
 }
 
+/** How to read and use the whole-track view, in one short paragraph. */
+export function OverviewHow() {
+  const t = useT()
+  return (
+    <span className="muted ov-how">
+      <span className="ov-key ov-key-cursor" /> {t('poc.ovHow.cursor')}{' '}
+      <span className="ov-key ov-key-mark" /> {t('poc.ovHow.mark')}{' '}
+      <span className="ov-key ov-key-area" /> {t('poc.ovHow.area')}
+    </span>
+  )
+}
+
 export function Overview({
   session,
   onSeek,
@@ -324,22 +351,13 @@ export function Overview({
   session: PocSession
   onSeek: (beat: number) => void
 }) {
+  const t = useT()
   return (
-    <section className="card poc-overview" aria-label="Whole tracks">
+    <section className="card poc-overview" aria-label={t('poc.wholeTracks')}>
       <div className="ov-intro">
-        <strong>Whole tracks</strong>
-        <span className="muted">
-          Level per bar, low end below it, 8-bar phrase lines, and ▼ where the music changes. The
-          sections are a guess from those features: check them by ear. Bars come from the grid
-          above, so correct the grid first.
-        </span>
-        <span className="muted ov-how">
-          <span className="ov-key ov-key-cursor" /> playback cursor: click track A to move it.{' '}
-          <span className="ov-key ov-key-mark" /> blend start: click or drag in the lane under track
-          A, or press B to put it at the cursor. The shaded <span className="ov-key ov-key-area" />{' '}
-          transition area is the music that is blended: drag its edges. A phrase number or a section
-          is a quick starting point.
-        </span>
+        <strong>{t('poc.wholeTracks')}</strong>
+        <span className="muted">{t('poc.ovIntro')}</span>
+        <OverviewHow />
       </div>
       <DeckOverview session={session} deck="A" onSeek={onSeek} />
       <DeckOverview session={session} deck="B" onSeek={onSeek} />

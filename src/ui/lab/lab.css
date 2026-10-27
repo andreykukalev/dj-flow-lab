@@ -1,0 +1,200 @@
+/* The Lab: the mixing line and the mixer first, the transport pinned to the bottom of the
+   window, the moment and the work on the transition below. Built on the proof of
+   concept's own styles (poc.css); only the layout is the Lab's. */
+
+.lab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+}
+
+/* The strip: back, the pair, where it is in the set, previous/next. */
+.lab-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.lab-strip-main {
+  flex: 1 1 320px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lab-strip-main .poc-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lab-strip-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.lab-strip-nav .btn {
+  min-width: 36px;
+  padding: 0 10px;
+  font-size: 18px;
+}
+
+.lab-strip .poc-flash {
+  width: 32px;
+  height: 32px;
+}
+
+/* The hero: the mixing line full width, then the mixer with "Your take" beside it. */
+.lab-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lab-desk {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+@media (min-width: 1000px) {
+  .lab-desk {
+    grid-template-columns: auto minmax(280px, 1fr);
+  }
+}
+
+/* The moment and the work side by side when there is room. */
+.lab-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+@media (min-width: 1000px) {
+  .lab-columns {
+    grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
+  }
+}
+
+.lab .set-work {
+  margin-bottom: 0;
+}
+
+.lab-moment {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  font-size: 13px;
+}
+
+.lab-moment-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lab-moment-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.lab-moment-head p {
+  margin: 0;
+  max-width: 70ch;
+}
+
+/* Grid fields, folded unless the phrase lines miss the music. */
+.lab-grid {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+.lab-grid > summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.lab-grid > summary::before {
+  content: '▸ ';
+  color: var(--text-muted);
+}
+
+.lab-grid[open] > summary::before {
+  content: '▾ ';
+}
+
+.lab-grid[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* The transport stays in reach while the page scrolls. */
+.lab-transport {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin: 0 -12px -12px;
+  padding: 10px 16px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+/* Tempo, output and timing settings open upward from the transport. */
+.lab-sync {
+  position: relative;
+}
+
+.lab-sync > summary {
+  list-style: none;
+}
+
+.lab-sync > summary::-webkit-details-marker {
+  display: none;
+}
+
+.lab-sync[open] > summary {
+  background: var(--surface-selected);
+}
+
+.lab-sync-body {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  width: max-content;
+  max-width: min(92vw, 420px);
+  padding: 10px 12px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 8px 24px #00000066;
+}
+
+@media (max-width: 700px) {
+  .lab-transport {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .lab-columns,
+  .lab-desk {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media print {
+  .lab-transport,
+  .lab-strip-nav,
+  .lab-sync {
+    display: none;
+  }
+}

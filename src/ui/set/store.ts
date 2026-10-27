@@ -108,6 +108,8 @@ export class SetStore {
   lang: Lang = loadLang()
   /** The transition the Lab opened last, so the Lab step can take the DJs back to it. */
   lastLab = 0
+  /** The Lab is decoding a transition's two tracks. */
+  labLoading = false
   /** Observations the DJs said do not sound like that. */
   dismissed: ReadonlySet<string> = new Set()
   version = 0
@@ -680,6 +682,7 @@ export class SetStore {
     this.labError = null
     this.lab = { from, to, index }
     this.lastLab = index
+    this.labLoading = true
     this.notify()
     const session = this.audio
     try {
@@ -695,7 +698,9 @@ export class SetStore {
       session.suggestBlend()
     } catch (e) {
       this.lab = null
+      this.labLoading = false
       this.labError = e instanceof Error ? e.message : String(e)
+      this.screen = 'set'
       this.notify()
       return
     }
@@ -707,7 +712,16 @@ export class SetStore {
       this.notify()
     })
     this.screen = 'lab'
+    this.labLoading = false
     this.notify()
+  }
+
+  /** From one transition in the Lab to another: the previous one is left as `go` leaves it. */
+  async goToTransition(index: number): Promise<void> {
+    const plan = this.plan
+    if (!plan || index < 0 || index >= plan.order.length - 1 || this.labLoading) return
+    if (this.screen === 'lab') this.leaveLab()
+    await this.openLab(index)
   }
 
   /** Leaves the Lab; a grid corrected there becomes the track's own. */

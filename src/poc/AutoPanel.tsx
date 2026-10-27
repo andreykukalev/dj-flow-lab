@@ -5,6 +5,7 @@ import {
   type AutoEnergy,
   type AutoLength,
 } from '../engine/analysis/autoPoint'
+import { useT } from '../i18n/react'
 import type { PocSession } from './session'
 
 // Auto (#77): one click puts a suggested blend start and area in place, cued at its
@@ -17,20 +18,11 @@ import type { PocSession } from './session'
 // bars back (#81), "With a loop" switches to that form of the same pairing, with what the
 // loop changes. The straight form always comes first.
 
-const LENGTHS: { value: AutoLength | undefined; label: string }[] = [
-  { value: undefined, label: 'Your area' },
-  ...(['short', 'medium', 'long'] as const).map((value) => ({
-    value,
-    label: `${value[0]!.toUpperCase()}${value.slice(1)}, ${LENGTH_BARS[value]} bars`,
-  })),
-]
-
-const ENERGIES: { value: AutoEnergy; label: string }[] = [
-  { value: 'steady', label: 'Keep it steady' },
-  { value: 'lift', label: 'Lift into B' },
-]
+const LENGTHS: (AutoLength | undefined)[] = [undefined, 'short', 'medium', 'long']
+const ENERGIES: AutoEnergy[] = ['steady', 'lift']
 
 export function AutoPanel({ session }: { session: PocSession }) {
+  const t = useT()
   const { auto } = session
   const [length, setLength] = useState<AutoLength | undefined>(auto?.prefs.length)
   const [energy, setEnergy] = useState<AutoEnergy>(auto?.prefs.energy ?? 'steady')
@@ -38,6 +30,8 @@ export function AutoPanel({ session }: { session: PocSession }) {
   const showing = session.autoShowing
   const alt = idea?.alternative
   const looped = showing && auto?.withLoop && alt !== undefined
+  const lengthLabel = (value: AutoLength | undefined) =>
+    value ? t(`poc.len.${value}`, { bars: LENGTH_BARS[value] }) : t('poc.yourArea')
 
   return (
     <div className="poc-auto" data-testid="auto">
@@ -45,9 +39,9 @@ export function AutoPanel({ session }: { session: PocSession }) {
         <button
           className="btn btn-small btn-primary"
           onClick={() => session.suggestBlend({ length, energy })}
-          title="Find a blend start from both tracks' phrase lines, level and low end"
+          title={t('poc.autoHint')}
         >
-          Auto
+          {t('poc.auto')}
         </button>
         {auto && auto.candidates.length > 1 && (
           <button
@@ -56,103 +50,107 @@ export function AutoPanel({ session }: { session: PocSession }) {
               session.showIdea((auto.index + 1) % auto.candidates.length, auto.withLoop)
             }
           >
-            Next idea
+            {t('poc.nextIdea')}
           </button>
         )}
         {auto &&
           (showing ? (
             <button className="btn btn-small" onClick={() => session.backToYours()}>
-              Back to yours
+              {t('poc.backToYours')}
             </button>
           ) : (
             <button
               className="btn btn-small"
               onClick={() => session.showIdea(auto.index, auto.withLoop)}
             >
-              Auto&apos;s idea
+              {t('poc.autosIdea')}
             </button>
           ))}
         <details className="poc-auto-prefs">
-          <summary>Preferences</summary>
-          <div className="poc-deck-row" role="radiogroup" aria-label="Length">
-            <span className="muted">Length</span>
-            {LENGTHS.map((o) => (
-              <label key={o.label} className="poc-field">
+          <summary>{t('poc.prefs')}</summary>
+          <div className="poc-deck-row" role="radiogroup" aria-label={t('poc.length')}>
+            <span className="muted">{t('poc.length')}</span>
+            {LENGTHS.map((value) => (
+              <label key={value ?? 'yours'} className="poc-field">
                 <input
                   type="radio"
                   name="auto-length"
-                  checked={length === o.value}
-                  onChange={() => setLength(o.value)}
+                  checked={length === value}
+                  onChange={() => setLength(value)}
                 />
-                {o.label}
+                {lengthLabel(value)}
               </label>
             ))}
           </div>
-          <div className="poc-deck-row" role="radiogroup" aria-label="Energy">
-            <span className="muted">Energy at the swap</span>
-            {ENERGIES.map((o) => (
-              <label key={o.value} className="poc-field">
+          <div className="poc-deck-row" role="radiogroup" aria-label={t('poc.energyAria')}>
+            <span className="muted">{t('poc.energy')}</span>
+            {ENERGIES.map((value) => (
+              <label key={value} className="poc-field">
                 <input
                   type="radio"
                   name="auto-energy"
-                  checked={energy === o.value}
-                  onChange={() => setEnergy(o.value)}
+                  checked={energy === value}
+                  onChange={() => setEnergy(value)}
                 />
-                {o.label}
+                {t(`poc.energy.${value}`)}
               </label>
             ))}
           </div>
-          <p className="muted poc-auto-note">
-            Not offered yet: a gradual bass handoff, and dramatic or contrasting transitions. The
-            long blend always swaps the bass on the blend start and has no cuts or effects. A loop
-            is offered only where it gives back bars a track does not have.
-          </p>
+          <p className="muted poc-auto-note">{t('poc.autoNote')}</p>
         </details>
       </div>
       {auto && idea && (
         <div className="poc-auto-result" data-testid="auto-result">
           <p>
-            <span className="chip chip-likely">suggestion</span>{' '}
+            <span className="chip chip-likely">{t('poc.suggestion')}</span>{' '}
             <strong>
-              Idea {auto.index + 1} of {auto.candidates.length}: A bar {idea.exitBarA} with B bar{' '}
-              {idea.entryBarB}, {areaText(idea.area)}
-              {looped && `, with a loop on ${alt.loop.deck}`}
+              {t(looped ? 'poc.ideaWithLoop' : 'poc.idea', {
+                n: auto.index + 1,
+                total: auto.candidates.length,
+                a: idea.exitBarA,
+                b: idea.entryBarB,
+                before: idea.area.beforeBars,
+                after: idea.area.afterBars,
+                deck: alt?.loop.deck ?? '',
+              })}
             </strong>
-            {showing ? (
-              <span className="muted"> · cued at its pre-roll, press play to hear it</span>
-            ) : (
-              <span className="muted">
-                {' '}
-                · now playing your version; &quot;Auto&apos;s idea&quot; brings this one back
-              </span>
-            )}
+            <span className="muted"> {t(showing ? 'poc.cued' : 'poc.nowYours')}</span>
           </p>
           {alt && (
             <div className="poc-deck-row" data-testid="auto-strategy">
-              <div className="poc-segmented" role="group" aria-label="Transition">
+              <div className="poc-segmented" role="group" aria-label={t('poc.transition')}>
                 <button
                   className="btn btn-small"
                   aria-pressed={showing && !auto.withLoop}
                   onClick={() => session.showIdea(auto.index, false)}
                 >
-                  Straight
+                  {t('poc.straight')}
                 </button>
                 <button
                   className="btn btn-small"
                   aria-pressed={looped}
                   onClick={() => session.showIdea(auto.index, true)}
                 >
-                  With a loop
+                  {t('poc.withLoop')}
                 </button>
               </div>
               <span className="muted">
                 {looped
-                  ? 'Compare with Straight: same pairing, both tracks playing through.'
-                  : `This area is trimmed. A loop on ${alt.loop.deck} gives back ${Math.round((alt.fitted.beforeBeats + alt.fitted.afterBeats - idea.fitted.beforeBeats - idea.fitted.afterBeats) / 4)} bars.`}
+                  ? t('poc.compareStraight')
+                  : t('poc.trimmedLoop', {
+                      deck: alt.loop.deck,
+                      bars: Math.round(
+                        (alt.fitted.beforeBeats +
+                          alt.fitted.afterBeats -
+                          idea.fitted.beforeBeats -
+                          idea.fitted.afterBeats) /
+                          4,
+                      ),
+                    })}
               </span>
             </div>
           )}
-          <ul className="poc-auto-why" aria-label="Why it may work">
+          <ul className="poc-auto-why" aria-label={t('poc.whyWork')}>
             {(looped
               ? // The straight form's bar ranges do not hold with the loop.
                 [...alt.reasons, ...idea.reasons.filter((r) => !r.startsWith('It blends'))]
@@ -162,7 +160,7 @@ export function AutoPanel({ session }: { session: PocSession }) {
             ))}
           </ul>
           {(looped ? alt.cautions : idea.cautions).length > 0 && (
-            <ul className="poc-auto-cautions" aria-label="Listen for">
+            <ul className="poc-auto-cautions" aria-label={t('poc.listenFor')}>
               {(looped
                 ? [
                     ...alt.cautions,
@@ -179,8 +177,4 @@ export function AutoPanel({ session }: { session: PocSession }) {
       )}
     </div>
   )
-}
-
-function areaText(area: { beforeBars: number; afterBars: number }): string {
-  return `${area.beforeBars} bars before, ${area.afterBars} after`
 }

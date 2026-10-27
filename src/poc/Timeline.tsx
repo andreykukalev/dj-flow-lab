@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { ControlKey, DeckControl } from '../engine/mixer'
 import type { DeckId } from '../engine/model'
 import { valueAt, type CompiledPlan, type Segment } from '../engine/plan/compile'
+import { useT } from '../i18n/react'
 import {
   areaPath,
   curvePoints,
@@ -14,7 +15,12 @@ import {
   sameCurve,
   type Move,
 } from './lanes'
-import { loopSchedule, transitionBeatToDeckBeat } from '../engine/time'
+import {
+  barToBeat,
+  deckBeatToTransitionBeat,
+  loopSchedule,
+  transitionBeatToDeckBeat,
+} from '../engine/time'
 import type { PocSession } from './session'
 import { deckPosition } from './session'
 
@@ -27,21 +33,23 @@ import { deckPosition } from './session'
 // lane where it differs. The transition area is shaded (#75), the blend start is marked
 // and the handoff dashed, and the playhead and the readouts next to each lane are moved
 // by the controller loop. A loop (#81) gets a row next to its deck, one box per pass;
-// the deck's ruler numbers follow it. #20 builds the full timeline.
+// the deck's ruler numbers follow it. The Lab adds the DJs' comments as marks on the
+// ruler. #20 builds the full timeline.
 
-const MARKERS: { id: string; label: string }[] = [
-  { id: 'bring-in', label: 'B in, no bass' },
-  { id: 'thin-out', label: 'A thins out' },
-  { id: 'bass-swap', label: 'Bass swap' },
-  { id: 'fade-out', label: 'A fades' },
+const MARKERS: { id: string; key: string }[] = [
+  { id: 'bring-in', key: 'poc.marker.bringIn' },
+  { id: 'thin-out', key: 'poc.marker.thinOut' },
+  { id: 'bass-swap', key: 'poc.marker.bassSwap' },
+  { id: 'fade-out', key: 'poc.marker.fadeOut' },
 ]
 
-const LANES: { control: DeckControl; label: string; name: string; always: boolean }[] = [
-  { control: 'eqHigh', label: 'High', name: 'high EQ', always: true },
-  { control: 'eqMid', label: 'Mid', name: 'mid EQ', always: true },
-  { control: 'eqLow', label: 'Low', name: 'low EQ', always: true },
-  { control: 'filter', label: 'Filter', name: 'filter', always: true },
-  { control: 'trim', label: 'Trim', name: 'trim', always: false },
+/** The lanes keep the names printed on a controller; the full names are translated. */
+const LANES: { control: DeckControl; label: string; always: boolean }[] = [
+  { control: 'eqHigh', label: 'High', always: true },
+  { control: 'eqMid', label: 'Mid', always: true },
+  { control: 'eqLow', label: 'Low', always: true },
+  { control: 'filter', label: 'Filter', always: true },
+  { control: 'trim', label: 'Trim', always: false },
 ]
 
 const FADER_HEIGHT = 64
@@ -56,6 +64,13 @@ interface LaneLabel {
   side: 'top' | 'bottom'
 }
 
+/** A mark the DJs made on the mixing line: a comment pinned to a bar of track A. */
+export interface TimelineMark {
+  /** The bar of track A it is pinned to. */
+  bar: number
+  label: string
+}
+
 /** Which controls change, and whether the version not playing differs, for one lane. */
 function laneInfo(key: ControlKey, compiled: CompiledPlan, compared: CompiledPlan | null) {
   const segments = compiled.controls[key]
@@ -68,10 +83,13 @@ function laneInfo(key: ControlKey, compiled: CompiledPlan, compared: CompiledPla
 export function Timeline({
   session,
   onSeek,
+  marks = [],
 }: {
   session: PocSession
   onSeek: (beat: number) => void
+  marks?: readonly TimelineMark[]
 }) {
+  const t = useT()
   const { compiled, compared, timing, plan, loop, listening } = session
   const { startBeat, endBeat } = compiled.span
   const span = endBeat - startBeat
@@ -99,22 +117,24 @@ export function Timeline({
   }
 
   const barOf = (beat: number) => deckPosition(timing, 'A', beat).bar
-  const versions = { take: 'Your take', original: 'Original' }
+  const versions = { take: t('poc.yourTake'), original: t('poc.original') }
   const playingName = versions[listening]
   const comparedName = versions[listening === 'take' ? 'original' : 'take']
+  const controlName = (control: string) => t(`poc.ctl.${control}`)
 
   /** "down to kill at A bar 25; ...", for the lane's title. */
   const describe = (key: ControlKey, moves: Move[]) =>
     moves.length === 0
-      ? `stays at ${formatValue(key, valueAt(compiled.controls[key], startBeat), sampleRate)}`
+      ? t('poc.staysAt', {
+          value: formatValue(key, valueAt(compiled.controls[key], startBeat), sampleRate),
+        })
       : moves
           .map((m) => {
-            const verb = ['down to', 'back to', 'up to'][direction(m) + 1]
-            const when =
-              m.b1 > m.b0
-                ? `over A bars ${barOf(m.b0)}–${barOf(m.b1 - 1e-6)}`
-                : `at A bar ${barOf(m.b0)}`
-            return `${verb} ${formatValue(key, m.to, sampleRate)} ${when}`
+            const verb = t(['poc.verb.down', 'poc.verb.back', 'poc.verb.up'][direction(m) + 1]!)
+            const value = formatValue(key, m.to, sampleRate)
+            return m.b1 > m.b0
+              ? t('poc.moveOver', { verb, value, from: barOf(m.b0), to: barOf(m.b1 - 1e-6) })
+              : t('poc.moveAt', { verb, value, bar: barOf(m.b0) })
           })
           .join('; ')
 
@@ -158,7 +178,8 @@ export function Timeline({
 
   const ghostLegend = compared !== null && (
     <span className="timeline-legend-ghost">
-      Solid: {playingName} · dashed: {comparedName} · <span className="timeline-diff-dot" /> differs
+      {t('poc.legendGhost', { playing: playingName, compared: comparedName })}{' '}
+      <span className="timeline-diff-dot" /> {t('poc.differs')}
     </span>
   )
 
@@ -173,7 +194,7 @@ export function Timeline({
         data-lane={key}
         data-changed={moves.length > 0}
         data-differs={differs}
-        title={`Deck ${deck} fader: ${describe(key, moves)}`}
+        title={`${t('poc.laneTitle', { deck, name: controlName('fader') })}: ${describe(key, moves)}`}
       >
         <div className="timeline-label timeline-deck">
           <strong>
@@ -278,7 +299,7 @@ export function Timeline({
         {changed || differs ? (
           valueLabels(labelsOf(key, segments, moves))
         ) : (
-          <span className="timeline-static">no change</span>
+          <span className="timeline-static">{t('poc.noChange')}</span>
         )}
       </div>
     )
@@ -286,11 +307,16 @@ export function Timeline({
 
   /** A deck's EQ and filter lanes; trim only when a version moves it. */
   const controlLanes = (deck: DeckId) =>
-    LANES.map(({ control, label, name, always }) => {
+    LANES.map(({ control, label, always }) => {
       const key: ControlKey = `${deck}.${control}`
       const { moves, differs } = laneInfo(key, compiled, compared)
       if (!always && moves.length === 0 && !differs) return null
-      return controlLane(key, label, `Deck ${deck} ${name}`, deck.toLowerCase())
+      return controlLane(
+        key,
+        label,
+        t('poc.laneTitle', { deck, name: controlName(control) }),
+        deck.toLowerCase(),
+      )
     })
 
   const crossfader = laneInfo('mixer.crossfader', compiled, compared)
@@ -305,10 +331,15 @@ export function Timeline({
       <div
         className={`timeline-row timeline-loop deck-${deck.toLowerCase()}`}
         data-testid="timeline-loop"
-        title={`Deck ${deck} loops bars ${firstBar}–${lastBar}, ${deckLoop.passes} passes`}
+        title={t('poc.loopRowTitle', {
+          deck,
+          from: firstBar,
+          to: lastBar,
+          passes: deckLoop.passes,
+        })}
       >
         <div className="timeline-label">
-          <span className="timeline-label-name">Loop</span>
+          <span className="timeline-label-name">{t('poc.loop')}</span>
         </div>
         {Array.from({ length: deckLoop.passes }, (_, k) => {
           const b0 = Math.max(startBeat, deckLoop.from + k * deckLoop.lengthBeats)
@@ -337,6 +368,13 @@ export function Timeline({
   const area = session.areaBeats
   const handoff = plan.annotations.find((a) => a.id === 'bass-swap')?.atBeat
 
+  // The DJs' marks, where their bar of A falls inside the plan.
+  const beatOfBar = (bar: number) =>
+    deckBeatToTransitionBeat(timing, 'A', barToBeat(timing.gridA, bar))
+  const shownMarks = marks
+    .map((m) => ({ ...m, beat: beatOfBar(m.bar) }))
+    .filter((m) => m.beat >= startBeat && m.beat < endBeat)
+
   const seek = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const beat = startBeat + ((e.clientX - rect.left) / rect.width) * span
@@ -344,10 +382,10 @@ export function Timeline({
   }
 
   return (
-    <section className="card timeline" aria-label="Transition timeline">
+    <section className="card timeline" aria-label={t('poc.timelineAria')}>
       <div className="timeline-legend" aria-hidden="true">
         <span>
-          <span className="timeline-legend-swatch" /> moving · ▲ up ▼ down, to the value shown
+          <span className="timeline-legend-swatch" /> {t('poc.legend')}
         </span>
         {ghostLegend}
       </div>
@@ -360,6 +398,15 @@ export function Timeline({
             </span>
           ))}
         </div>
+        {shownMarks.length > 0 && (
+          <div className="timeline-marks" data-testid="timeline-marks">
+            {shownMarks.map((m, k) => (
+              <span key={k} className="timeline-mark" style={{ left: pct(m.beat) }} title={m.label}>
+                {m.label}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="timeline-track">
           <div
             className="timeline-overlap"
@@ -378,21 +425,21 @@ export function Timeline({
               return (
                 a && (
                   <span key={m.id} className="timeline-marker" style={{ left: pct(a.atBeat) }}>
-                    {m.label}
+                    {t(m.key)}
                   </span>
                 )
               )
             })}
           </div>
           {(crossfader.moves.length > 0 || crossfader.differs) &&
-            controlLane('mixer.crossfader', 'X-fader', 'Crossfader', 'x')}
+            controlLane('mixer.crossfader', 'X-fader', t('poc.ctl.crossfader'), 'x')}
           {controlLanes('B')}
           {loopRow('B')}
           {faderLane('B')}
           {handoff !== undefined && (
             <div className="timeline-handoff" style={{ left: pct(handoff) }} />
           )}
-          <div className="timeline-blendstart" style={{ left: pct(0) }} title="Blend start" />
+          <div className="timeline-blendstart" style={{ left: pct(0) }} title={t('poc.flagA')} />
           <div className="timeline-playhead" ref={playhead} />
         </div>
         <div className="timeline-ruler">
