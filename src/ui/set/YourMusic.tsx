@@ -1,21 +1,43 @@
-import { useState } from 'react'
 import { DJ_IDS, formatDuration, type DjId } from '../../engine/set/profile'
 import { useT } from '../../i18n/react'
 import { CommitField, ConfirmButton, Layer, NotMeasured, Shape } from './Bits'
 import type { CollectionTrack, SetStore } from './store'
 
-// "Your music" (#88): the shared collection of a set, one column per DJ.
+// "Your music" (#88): the shared collection of a set, one column per DJ. Each track is a
+// line: its name, one state while it is not ready (analysing, file needed, could not
+// decode), its length, then its shape and the tempo with how sure the estimate is. The
+// sections stay folded; the step's action sits in the heading.
+
+function TrackState({ track }: { track: CollectionTrack }) {
+  const t = useT()
+  const text = {
+    waiting: t('music.waiting'),
+    analysing: t('music.analysing'),
+    missing: t('music.state.missing'),
+    failed: t('music.state.failed'),
+    ready: '',
+  }[track.status]
+  if (!text) return null
+  return (
+    <span className="chip set-state" data-state={track.status}>
+      {text}
+    </span>
+  )
+}
 
 function TrackRow({ store, track }: { store: SetStore; track: CollectionTrack }) {
   const t = useT()
-  const [sections, setSections] = useState(false)
   const p = track.profile
   return (
-    <li className="set-row" data-testid="collection-track" data-status={track.status}>
+    <li
+      className="set-row"
+      data-testid="collection-track"
+      data-status={track.status}
+      data-owner={track.owner}
+    >
       <div className="set-row-head">
         <span className="set-row-name">{track.fileName}</span>
-        {track.status === 'waiting' && <span className="muted">{t('music.waiting')}</span>}
-        {track.status === 'analysing' && <span className="muted">{t('music.analysing')}</span>}
+        <TrackState track={track} />
         {track.status === 'missing' && (
           <label className="btn btn-small" title={t('music.selectFileHint')}>
             {t('music.selectFile')}
@@ -40,7 +62,7 @@ function TrackRow({ store, track }: { store: SetStore; track: CollectionTrack })
             })}
           </span>
         )}
-        {p && <span className="muted">{formatDuration(p.durationSec)}</span>}
+        {p && <span className="muted set-row-length">{formatDuration(p.durationSec)}</span>}
         <ConfirmButton
           label={t('music.remove', { name: track.fileName })}
           title={t('music.removeHint')}
@@ -50,6 +72,7 @@ function TrackRow({ store, track }: { store: SetStore; track: CollectionTrack })
       {track.error && <p className="poc-error">{track.error}</p>}
       {p && (
         <>
+          <Shape profile={p} />
           <div className="set-row-fields">
             <label className="poc-field">
               {t('music.bpm')}
@@ -81,27 +104,20 @@ function TrackRow({ store, track }: { store: SetStore; track: CollectionTrack })
                 onCommit={(v) => store.setKey(track.id, v)}
               />
             </label>
-            <button
-              className="btn btn-small"
-              aria-expanded={sections}
-              onClick={() => setSections(!sections)}
-            >
-              {t('music.sections')}
-            </button>
+            <details className="set-fold">
+              <summary>{t('music.sections')}</summary>
+              <ol className="set-sections">
+                {p.structure.sections.map((s) => (
+                  <li key={s.fromBar} title={s.reasons.join(', ')}>
+                    <strong>{s.term}</strong>{' '}
+                    {t('music.sectionBars', { from: s.fromBar, to: s.toBar })}
+                    <span className="muted"> · {s.reasons.join(', ')}</span>
+                  </li>
+                ))}
+                <li className="muted">{t('music.sectionsNote')}</li>
+              </ol>
+            </details>
           </div>
-          <Shape profile={p} />
-          {sections && (
-            <ol className="set-sections">
-              {p.structure.sections.map((s) => (
-                <li key={s.fromBar} title={s.reasons.join(', ')}>
-                  <strong>{s.term}</strong>{' '}
-                  {t('music.sectionBars', { from: s.fromBar, to: s.toBar })}
-                  <span className="muted"> · {s.reasons.join(', ')}</span>
-                </li>
-              ))}
-              <li className="muted">{t('music.sectionsNote')}</li>
-            </ol>
-          )}
         </>
       )}
     </li>
@@ -120,7 +136,7 @@ function DjColumn({ store, dj }: { store: SetStore; dj: DjId }) {
           <CommitField
             label={t('music.djName', { dj: placeholder })}
             placeholder={t('music.djNamePlaceholder', { dj: placeholder })}
-            className="set-dj-name"
+            className={`set-dj-name set-owner-${dj}`}
             value={store.djs[dj].name}
             onCommit={(v) => store.setDjName(dj, v)}
           />
@@ -159,31 +175,33 @@ export function YourMusic({ store }: { store: SetStore }) {
   const ready = store.profiles.length
   return (
     <div className="set-screen">
-      <header className="set-screen-head">
-        <h2>{t('music.title')}</h2>
-        <p className="muted">{t('music.lead')}</p>
+      <header className="set-screen-head set-screen-head-row">
+        <div>
+          <h2>{t('music.title')}</h2>
+          <p className="muted">{t('music.lead')}</p>
+          <NotMeasured compact />
+        </div>
+        <div className="set-screen-action">
+          <button
+            className="btn btn-primary"
+            disabled={ready < 2 || store.busy}
+            onClick={() => store.go('concepts')}
+          >
+            {t('music.explore')}
+          </button>
+          <span className="muted">
+            {store.busy
+              ? t('music.analysing')
+              : ready < 2
+                ? t('music.needTwo')
+                : t('music.ready', { n: ready })}
+          </span>
+        </div>
       </header>
-      <NotMeasured />
       <div className="set-djs">
         {DJ_IDS.map((dj) => (
           <DjColumn key={dj} store={store} dj={dj} />
         ))}
-      </div>
-      <div className="set-actions">
-        <button
-          className="btn btn-primary"
-          disabled={ready < 2 || store.busy}
-          onClick={() => store.go('concepts')}
-        >
-          {t('music.explore')}
-        </button>
-        <span className="muted">
-          {store.busy
-            ? t('music.analysing')
-            : ready < 2
-              ? t('music.needTwo')
-              : t('music.ready', { n: ready })}
-        </span>
       </div>
     </div>
   )
