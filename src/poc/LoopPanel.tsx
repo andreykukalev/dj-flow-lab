@@ -1,4 +1,5 @@
 import { LOOP_BARS, MAX_PASSES, type LoopRequest } from '../engine/plan/loop'
+import { useT } from '../i18n/react'
 import { LOOP_KINDS, describeLoop, loopName, practiceLoop } from './loopText'
 import type { PocSession } from './session'
 
@@ -15,6 +16,7 @@ function newLoop(session: PocSession, deck: 'A' | 'B', side: 'before' | 'after')
 }
 
 export function LoopPanel({ session }: { session: PocSession }) {
+  const t = useT()
   const request = session.loopRequest
   const kind = request ? `${request.deck}-${request.side}` : 'off'
   const set = (change: Partial<LoopRequest>) =>
@@ -30,31 +32,28 @@ export function LoopPanel({ session }: { session: PocSession }) {
   return (
     <details className="poc-loop" open={request !== null || undefined} data-testid="loop">
       <summary>
-        <strong>Loop</strong>
+        <strong>{t('poc.loop')}</strong>
         <span data-testid="loop-summary">
-          {request ? loopName(request, session.timing) : 'off'}
+          {request ? loopName(request, session.timing, t) : t('poc.loopOff')}
         </span>
-        {!request && <span className="muted">repeat 2, 4 or 8 bars of A or B</span>}
+        {!request && <span className="muted">{t('poc.loopRepeat')}</span>}
       </summary>
-      <p className="muted poc-loop-note">
-        A loop repeats a few bars of one track, so it can hold on longer or come in earlier while
-        the other track plays on. Your blend start and area stay where they are.
-      </p>
+      <p className="muted poc-loop-note">{t('poc.loopNote')}</p>
       <div className="poc-deck-row">
         <label className="poc-field">
-          Loop
+          {t('poc.loop')}
           <select
             value={kind}
             onChange={(e) => {
               const k = LOOP_KINDS.find((o) => o.id === e.target.value)
               session.setLoop(k ? newLoop(session, k.deck, k.side) : null)
             }}
-            aria-label="What to loop"
+            aria-label={t('poc.whatToLoop')}
           >
-            <option value="off">Off: both tracks play straight</option>
+            <option value="off">{t('poc.loopOffOption')}</option>
             {LOOP_KINDS.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.label}
+                {t(`poc.loopKind.${o.id}`)}
               </option>
             ))}
           </select>
@@ -63,7 +62,7 @@ export function LoopPanel({ session }: { session: PocSession }) {
       {request && (
         <>
           <div className="poc-deck-row">
-            <div className="poc-segmented" role="group" aria-label="Loop length">
+            <div className="poc-segmented" role="group" aria-label={t('poc.loopLength')}>
               {LOOP_BARS.map((bars) => (
                 <button
                   key={bars}
@@ -71,17 +70,17 @@ export function LoopPanel({ session }: { session: PocSession }) {
                   aria-pressed={request.bars === bars}
                   onClick={() => set({ bars })}
                 >
-                  {bars} bars
+                  {t('poc.bars', { n: bars })}
                 </button>
               ))}
             </div>
             <span className="poc-field">
-              Plays
+              {t('poc.plays')}
               <button
                 className="btn btn-small"
                 onClick={() => set({ passes: request.passes - 1 })}
                 disabled={request.passes <= 2}
-                aria-label="Play the loop fewer times"
+                aria-label={t('poc.fewer')}
               >
                 −
               </button>
@@ -90,30 +89,30 @@ export function LoopPanel({ session }: { session: PocSession }) {
                 className="btn btn-small"
                 onClick={() => set({ passes: request.passes + 1 })}
                 disabled={request.passes >= MAX_PASSES}
-                aria-label="Play the loop more times"
+                aria-label={t('poc.more')}
               >
                 +
               </button>
             </span>
             <span className="poc-field">
-              Move
+              {t('poc.move')}
               <button
                 className="btn btn-small"
                 onClick={() => move(-1)}
-                aria-label="Loop one bar earlier"
+                aria-label={t('poc.loopEarlier')}
               >
-                ‹ bar
+                {t('poc.barBack')}
               </button>
               <button
                 className="btn btn-small"
                 onClick={() => move(1)}
-                aria-label="Loop one bar later"
+                aria-label={t('poc.loopLater')}
               >
-                bar ›
+                {t('poc.barFwd')}
               </button>
             </span>
             <button className="btn btn-small" onClick={() => session.setLoop(null)}>
-              Play straight
+              {t('poc.playStraight')}
             </button>
           </div>
           {text && (

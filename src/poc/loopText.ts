@@ -1,4 +1,5 @@
 import type { DeckId } from '../engine/model'
+import { english, type Translate } from '../i18n'
 import type { LoopRequest } from '../engine/plan/loop'
 import {
   deckRuns,
@@ -73,10 +74,24 @@ export function practiceLoop(timing: TransitionTiming): string | null {
 }
 
 /** "B bars 1–4 × 3", for the folded loop section. */
-export function loopName(request: LoopRequest, timing: TransitionTiming): string {
+export function loopName(
+  request: LoopRequest,
+  timing: TransitionTiming,
+  t: Translate = english,
+): string {
   const loop = loopSchedule(timing)
-  if (!loop) return `${request.deck}, ${request.bars} bars × ${request.passes}`
+  if (!loop)
+    return t('poc.loopNameRequest', {
+      deck: request.deck,
+      bars: request.bars,
+      passes: request.passes,
+    })
   const per = loop.deck === 'A' ? timing.gridA.beatsPerBar : timing.gridB.beatsPerBar
   const from = loop.startBeat / per + 1
-  return `${loop.deck} bars ${from}–${from + request.bars - 1} × ${loop.passes}`
+  return t('poc.loopName', {
+    deck: loop.deck,
+    from,
+    to: from + request.bars - 1,
+    passes: loop.passes,
+  })
 }

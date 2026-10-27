@@ -310,6 +310,30 @@
   color: var(--explain);
 }
 
+/* The DJs' comments pinned to a bar of A (#94), as marks between the ruler and the lanes. */
+.timeline-marks {
+  position: relative;
+  height: 22px;
+  overflow: hidden;
+}
+
+/* The left edge of each mark is its bar; the text runs to the right of it. */
+.timeline-mark {
+  position: absolute;
+  top: 2px;
+  max-width: 180px;
+  padding: 0 6px 0 5px;
+  border-radius: var(--radius-chip);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--blend-mark);
+  background: var(--surface-raised);
+  font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .timeline-handoff {
   position: absolute;
   top: 0;

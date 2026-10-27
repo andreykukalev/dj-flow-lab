@@ -2,29 +2,16 @@ import { useState } from 'react'
 import { arcPoints, type ArcPoint } from '../../engine/set/arc'
 import { trackFacts } from '../../engine/set/profile'
 import { readingName, readingWords } from '../../engine/set/readings'
-import {
-  MAX_ALTERNATIVES,
-  transitions,
-  unused,
-  type SetPlan,
-  type TransitionStatus,
-} from '../../engine/set/spine'
+import { MAX_ALTERNATIVES, transitions, unused, type SetPlan } from '../../engine/set/spine'
 import { useT } from '../../i18n/react'
 import { Layer, Shape } from './Bits'
+import { STATUS_KEY } from './status'
 import { HearIdea } from './Idea'
 import type { SetStore } from './store'
 
 // The set spine (#91): the tracks in order with a transition between each pair. Each
 // transition opens in the Lab, the Transition Builder, with the two real tracks. Above
 // it, the reading's energy arc against what each track measures (#92).
-
-/** The status of a transition as data, and its key in the dictionary. */
-const STATUS_KEY: Record<TransitionStatus, string> = {
-  'not tried': 'status.notTried',
-  tried: 'status.tried',
-  'versions to choose between': 'status.versions',
-  'agreed by both': 'status.agreed',
-}
 
 /** The arc as a line and each track's drive as a dot, both as order over the set. */
 function ArcChart({ plan, points }: { plan: SetPlan; points: ArcPoint[] }) {

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { nudgeBpm, nudgeGrid, setBpm, setDownbeatAt, twoPointGrid } from '../engine/grid'
 import type { BeatGrid, DeckId } from '../engine/model'
 import { formatBarBeat, parseBarBeat, toBarBeat, transitionBeatToDeckBeat } from '../engine/time'
+import type { Translate } from '../i18n'
+import { useT } from '../i18n/react'
 import { AutoPanel } from './AutoPanel'
 import { LoopPanel } from './LoopPanel'
 import { decodeFile, type PocSession } from './session'
@@ -12,6 +14,7 @@ import { decodeFile, type PocSession } from './session'
 // around it (#75). Changes apply while playing. The same blend start and area are set
 // from the whole-track view; these fields always show the session's values. When the area
 // is trimmed because a track runs out, a loop that gives the bars back is offered (#81).
+// The Lab composes the same pieces in its own layout.
 
 function NumberField({
   label,
@@ -60,6 +63,7 @@ function PositionField({
   beat: number
   onCommit: (trackBeat: number) => void
 }) {
+  const t = useT()
   const [draft, setDraft] = useState<string | null>(null)
   const commit = () => {
     if (draft === null) return
@@ -77,13 +81,14 @@ function PositionField({
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => e.key === 'Enter' && commit()}
-        title="Bar, or bar.beat for a beat inside the bar"
+        title={t('poc.positionHint')}
       />
     </label>
   )
 }
 
-function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
+export function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
+  const t = useT()
   const source = session.decks[deck]
   const { grid } = source
   const [loading, setLoading] = useState(false)
@@ -99,7 +104,12 @@ function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
       const buffer = await decodeFile(session.ctx, file)
       session.setDeck(deck, { name: file.name, buffer, grid: { ...grid, anchorSec: 0 } })
     } catch (e) {
-      setLoadError(`Could not decode ${file.name}: ${e instanceof Error ? e.message : String(e)}`)
+      setLoadError(
+        t('poc.decodeError', {
+          name: file.name,
+          error: e instanceof Error ? e.message : String(e),
+        }),
+      )
     } finally {
       setLoading(false)
     }
@@ -117,11 +127,11 @@ function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
   return (
     <div className={`poc-deck deck-${deck.toLowerCase()}-panel`} data-track={deck}>
       <div className="poc-deck-head">
-        <strong className={`deck-${deck.toLowerCase()}`}>Deck {deck}</strong>
+        <strong className={`deck-${deck.toLowerCase()}`}>{t('poc.deck', { deck })}</strong>
         <span className="poc-deck-name">{source.name}</span>
         <span className="muted">{source.buffer.duration.toFixed(1)} s</span>
         <label className="btn btn-small">
-          {loading ? 'Decoding…' : 'Choose file'}
+          {t(loading ? 'poc.decoding' : 'poc.chooseFile')}
           <input
             type="file"
             accept="audio/*,.aif,.aiff,.aifc"
@@ -133,7 +143,7 @@ function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
       </div>
       <div className="poc-deck-row">
         <NumberField
-          label="BPM"
+          label={t('poc.bpm')}
           value={grid.bpm}
           step={0.01}
           digits={2}
@@ -146,7 +156,7 @@ function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
           +0.01
         </button>
         <NumberField
-          label="The 1 at"
+          label={t('poc.theOneAt')}
           value={grid.anchorSec}
           step={0.001}
           digits={3}
@@ -161,21 +171,21 @@ function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
         </button>
       </div>
       <div className="poc-deck-row">
-        <span className="muted">Two downbeats far apart, in seconds:</span>
+        <span className="muted">{t('poc.twoDownbeats')}</span>
         <input
           className="poc-input"
-          aria-label={`Deck ${deck} first downbeat`}
+          aria-label={t('poc.firstDownbeat', { deck })}
           value={points.first}
           onChange={(e) => setPointsDraft({ ...points, first: e.target.value })}
         />
         <input
           className="poc-input"
-          aria-label={`Deck ${deck} second downbeat`}
+          aria-label={t('poc.secondDownbeat', { deck })}
           value={points.second}
           onChange={(e) => setPointsDraft({ ...points, second: e.target.value })}
         />
         <button className="btn btn-small" onClick={twoPoint}>
-          Set BPM from two points
+          {t('poc.setBpmTwo')}
         </button>
       </div>
       {loadError && <p className="poc-error">{loadError}</p>}
@@ -184,17 +194,18 @@ function DeckPanel({ session, deck }: { session: PocSession; deck: DeckId }) {
 }
 
 /** "16 bars", "1 bar 2 beats", for the area that fits. */
-function beatsText(beats: number): string {
+function beatsText(beats: number, t: Translate): string {
   const bars = Math.floor(beats / 4)
   const rest = beats - bars * 4
   const parts = [
-    bars > 0 || rest === 0 ? `${bars} bar${bars === 1 ? '' : 's'}` : '',
-    rest > 0 ? `${rest} beat${rest === 1 ? '' : 's'}` : '',
+    bars > 0 || rest === 0 ? t('poc.bars', { n: bars }) : '',
+    rest > 0 ? t('poc.beats', { n: rest }) : '',
   ]
   return parts.filter(Boolean).join(' ')
 }
 
-function BlendControls({ session }: { session: PocSession }) {
+export function BlendControls({ session }: { session: PocSession }) {
+  const t = useT()
   const { area, fitted, decks, timing } = session
   const gridA = decks.A.grid
   const gridB = decks.B.grid
@@ -224,7 +235,7 @@ function BlendControls({ session }: { session: PocSession }) {
     <>
       <div className="poc-deck-row" data-testid="blend-controls">
         <PositionField
-          label="Blend start at A"
+          label={t('poc.blendStartA')}
           grid={gridA}
           beat={startA}
           onCommit={(beat) => session.setBlendStart(beat)}
@@ -232,19 +243,19 @@ function BlendControls({ session }: { session: PocSession }) {
         <button
           className="btn btn-small"
           onClick={() => session.setBlendStartAtCursor()}
-          title="Put the blend start where the playback cursor is (B)"
+          title={t('poc.blendStartCursorHint')}
         >
-          Blend start at cursor
+          {t('poc.blendStartCursor')}
         </button>
         <PositionField
-          label="lined up with B at"
+          label={t('poc.linedUpB')}
           grid={gridB}
           beat={entryB}
           onCommit={(beat) => session.setMark('B', beat)}
         />
       </div>
       <div className="poc-deck-row">
-        <span className="muted">Transition area</span>
+        <span className="muted">{t('poc.area')}</span>
         {area.linked ? (
           <NumberField
             label="±"
@@ -256,14 +267,14 @@ function BlendControls({ session }: { session: PocSession }) {
         ) : (
           <>
             <NumberField
-              label="before"
+              label={t('poc.before')}
               value={area.beforeBars}
               step={1}
               digits={0}
               onCommit={(v) => setBars('before', v)}
             />
             <NumberField
-              label="after"
+              label={t('poc.after')}
               value={area.afterBars}
               step={1}
               digits={0}
@@ -271,7 +282,7 @@ function BlendControls({ session }: { session: PocSession }) {
             />
           </>
         )}
-        <span className="muted">bars</span>
+        <span className="muted">{t('poc.barsUnit')}</span>
         <label className="poc-field">
           <input
             type="checkbox"
@@ -284,13 +295,18 @@ function BlendControls({ session }: { session: PocSession }) {
               })
             }
           />
-          Same before and after
+          {t('poc.sameBeforeAfter')}
         </label>
       </div>
       <p className="poc-blend-summary" data-testid="blend-summary">
-        From A {fromA} to A {toA}, A blends with B from {fromB} to {toB}. B comes in over{' '}
-        {beatsText(handoff + fitted.beforeBeats)}, the bass swaps at A {swapA}
-        {handoff === 0 ? ' (the blend start)' : ''}, and A is gone at A {toA}.
+        {t(handoff === 0 ? 'poc.blendSummaryAtStart' : 'poc.blendSummary', {
+          fromA,
+          toA,
+          fromB,
+          toB,
+          over: beatsText(handoff + fitted.beforeBeats, t),
+          swapA,
+        })}
         {fitted.trimmed.length > 0 && (
           <span className="poc-trimmed"> {fitted.trimmed.join(' ')}</span>
         )}
@@ -301,9 +317,12 @@ function BlendControls({ session }: { session: PocSession }) {
               className="btn btn-small"
               onClick={() => session.setLoop(fill)}
               data-testid="fill-with-loop"
-              title={`Loop ${fill.deck === 'B' ? "B's first" : "A's"} ${fill.bars} bars ${fill.passes} times to give the area its bars back`}
+              title={t(fill.deck === 'B' ? 'poc.fillLoopHintB' : 'poc.fillLoopHintA', {
+                bars: fill.bars,
+                passes: fill.passes,
+              })}
             >
-              Fill it with a loop
+              {t('poc.fillLoop')}
             </button>
           </>
         )}
@@ -313,18 +332,26 @@ function BlendControls({ session }: { session: PocSession }) {
   )
 }
 
-export function Tracks({ session }: { session: PocSession }) {
+/** The session's errors: what the last change could not apply. */
+export function SessionErrors({ session }: { session: PocSession }) {
+  const t = useT()
+  if (session.errors.length === 0) return null
   return (
-    <section className="card poc-tracks" aria-label="Tracks and grids">
+    <p className="poc-error" role="alert">
+      {t('poc.notApplied', { errors: session.errors.join('; ') })}
+    </p>
+  )
+}
+
+export function Tracks({ session }: { session: PocSession }) {
+  const t = useT()
+  return (
+    <section className="card poc-tracks" aria-label={t('poc.tracksAria')}>
       <DeckPanel session={session} deck="A" />
       <DeckPanel session={session} deck="B" />
       <BlendControls session={session} />
       <AutoPanel session={session} />
-      {session.errors.length > 0 && (
-        <p className="poc-error" role="alert">
-          Not applied: {session.errors.join('; ')}
-        </p>
-      )}
+      <SessionErrors session={session} />
     </section>
   )
 }
