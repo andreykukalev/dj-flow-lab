@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { DjId } from '../../engine/set/profile'
 import { agreed, describeState, type Choice } from '../../engine/set/versions'
+import { useT } from '../../i18n/react'
+import { ConfirmButton } from './Bits'
 import type { SetStore } from './store'
 
 // Versions of a transition and the decision on them, beside the Transition Builder (#93,
@@ -8,6 +10,7 @@ import type { SetStore } from './store'
 // and pick. Both DJs picking the same marks the transition agreed; the app never picks.
 
 function Compare({ store }: { store: SetStore }) {
+  const t = useT()
   const versions = store.labWork.versions
   const [first, setFirst] = useState(versions[0]!.id)
   const [second, setSecond] = useState(versions[1]!.id)
@@ -29,8 +32,8 @@ function Compare({ store }: { store: SetStore }) {
     </option>
   ))
   return (
-    <div className="set-compare" aria-label="Compare two versions" role="group">
-      <strong>Compare</strong>
+    <div className="set-compare" aria-label={t('work.compareAria')} role="group">
+      <strong>{t('work.compare')}</strong>
       {!blind && (
         <>
           <label className="poc-field">
@@ -53,9 +56,9 @@ function Compare({ store }: { store: SetStore }) {
           className="btn btn-small"
           aria-pressed={hearing === n}
           onClick={() => hear(n)}
-          title="Switches at the same beat of the transition"
+          title={t('work.hearHint')}
         >
-          Hear {n}
+          {t('work.hear', { n })}
           {!hide && blind ? `: ${nameOf(ids[n - 1]!)}` : ''}
         </button>
       ))}
@@ -68,11 +71,11 @@ function Compare({ store }: { store: SetStore }) {
             setRevealed(false)
           }}
         />
-        Blind
+        {t('work.blind')}
       </label>
       {hide && (
         <button className="btn btn-small" onClick={() => setRevealed(true)}>
-          Reveal which is which
+          {t('work.reveal')}
         </button>
       )}
     </div>
@@ -80,22 +83,19 @@ function Compare({ store }: { store: SetStore }) {
 }
 
 function Decide({ store }: { store: SetStore }) {
+  const t = useT()
   const work = store.labWork
   const mine = work.picks[store.me]
   const [choice, setChoice] = useState<Choice | ''>(mine?.choice ?? '')
   const [reason, setReason] = useState(mine?.reason ?? '')
   const nameOf = (c: Choice) =>
-    c === 'both'
-      ? 'keep both, choose on the night'
-      : (work.versions.find((v) => v.id === c)?.name ?? c)
+    c === 'both' ? t('work.bothShort') : (work.versions.find((v) => v.id === c)?.name ?? c)
   const both = agreed(work)
+  const me = store.djName(store.me)
   return (
-    <div className="set-decide" role="group" aria-label="Decide">
-      <strong>Decide</strong>
-      <p className="muted">
-        Each of you picks, with a reason. It is agreed when you both pick the same; the app never
-        picks.
-      </p>
+    <div className="set-decide" role="group" aria-label={t('work.decide')}>
+      <strong>{t('work.decide')}</strong>
+      <p className="muted">{t('work.decideLead')}</p>
       {(['dj1', 'dj2'] as DjId[]).map((dj) => {
         const p = work.picks[dj]
         return (
@@ -107,37 +107,37 @@ function Decide({ store }: { store: SetStore }) {
                 {p.reason && <span className="muted"> · “{p.reason}”</span>}
               </>
             ) : (
-              <span className="muted">not picked yet</span>
+              <span className="muted">{t('work.notPicked')}</span>
             )}
           </p>
         )
       })}
       {both !== null && (
         <p className="set-agreed" role="status">
-          Agreed by both: {nameOf(both)}
+          {t('work.agreed', { name: nameOf(both) })}
         </p>
       )}
       <div className="set-actions">
         <label className="poc-field">
-          {store.djName(store.me)} picks
+          {t('work.picks', { name: me })}
           <select
             value={choice}
             onChange={(e) => setChoice(e.target.value)}
-            aria-label={`${store.djName(store.me)}'s pick`}
+            aria-label={t('work.pickAria', { name: me })}
           >
-            <option value="">Choose…</option>
+            <option value="">{t('work.choose')}</option>
             {work.versions.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.name}
               </option>
             ))}
-            <option value="both">Keep both, choose on the night</option>
+            <option value="both">{t('work.both')}</option>
           </select>
         </label>
         <input
           className="poc-input set-reason"
-          aria-label="Reason"
-          placeholder="Why"
+          aria-label={t('work.reason')}
+          placeholder={t('work.why')}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
@@ -146,11 +146,11 @@ function Decide({ store }: { store: SetStore }) {
           disabled={!choice}
           onClick={() => choice && store.pick({ choice, reason: reason.trim() })}
         >
-          Pick
+          {t('work.pick')}
         </button>
         {mine && (
           <button className="btn btn-small" onClick={() => store.pick(null)}>
-            Take my pick back
+            {t('work.takeBack')}
           </button>
         )}
       </div>
@@ -159,16 +159,17 @@ function Decide({ store }: { store: SetStore }) {
 }
 
 export function LabWork({ store }: { store: SetStore }) {
+  const t = useT()
   const work = store.labWork
   const [name, setName] = useState('')
   const [comment, setComment] = useState('')
   return (
-    <section className="card set-work" aria-label="Versions and decision">
+    <section className="card set-work" aria-label={t('work.aria')}>
       <div className="set-actions">
         <input
           className="poc-input set-version-name"
-          aria-label="Version name"
-          placeholder={`${store.djName(store.me)}’s version`}
+          aria-label={t('work.versionName')}
+          placeholder={t('work.versionPlaceholder', { name: store.djName(store.me) })}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -178,40 +179,37 @@ export function LabWork({ store }: { store: SetStore }) {
             store.saveVersion(name)
             setName('')
           }}
-          title="Keeps the blend start, area, loop and takes of what plays"
+          title={t('work.saveHint')}
         >
-          Save as a version
+          {t('work.save')}
         </button>
       </div>
       {work.versions.length > 0 && (
-        <ul className="set-versions" aria-label="Versions">
+        <ul className="set-versions" aria-label={t('work.versions')}>
           {work.versions.map((v) => (
             <li key={v.id} data-testid="version">
               <strong>{v.name}</strong>{' '}
               <span className={`set-owner set-owner-${v.author}`}>{store.djName(v.author)}</span>
-              <span className="muted"> · {describeState(v.state)}</span>{' '}
+              <span className="muted"> · {describeState(v.state, t)}</span>{' '}
               <button className="btn btn-small" onClick={() => store.loadVersion(v.id)}>
-                Load
+                {t('work.load')}
               </button>{' '}
-              <button
-                className="btn btn-small set-icon"
-                aria-label={`Remove ${v.name}`}
-                onClick={() => store.removeVersion(v.id)}
-              >
-                ✕
-              </button>
+              <ConfirmButton
+                label={t('work.removeVersion', { name: v.name })}
+                onConfirm={() => store.removeVersion(v.id)}
+              />
             </li>
           ))}
         </ul>
       )}
       {work.versions.length >= 2 && <Compare key={work.versions.length} store={store} />}
       <div className="set-comments">
-        <strong>Comments</strong>
-        {work.comments.length === 0 && <span className="muted"> none yet</span>}
+        <strong>{t('work.comments')}</strong>
+        {work.comments.length === 0 && <span className="muted"> {t('work.none')}</span>}
         <ul>
           {work.comments.map((c) => (
             <li key={c.id} data-testid="comment">
-              <span className="chip">bar {c.bar}</span>{' '}
+              <span className="chip">{t('work.bar', { bar: c.bar })}</span>{' '}
               <span className={`set-owner set-owner-${c.author}`}>{store.djName(c.author)}</span>{' '}
               {c.text}
             </li>
@@ -220,8 +218,8 @@ export function LabWork({ store }: { store: SetStore }) {
         <div className="set-actions">
           <input
             className="poc-input set-comment"
-            aria-label="Comment"
-            placeholder="A note on the bar at the cursor"
+            aria-label={t('work.comment')}
+            placeholder={t('work.commentPlaceholder')}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             onKeyDown={(e) => {
@@ -239,7 +237,7 @@ export function LabWork({ store }: { store: SetStore }) {
               setComment('')
             }}
           >
-            Pin to the bar at the cursor
+            {t('work.pin')}
           </button>
         </div>
       </div>

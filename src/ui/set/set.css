@@ -21,14 +21,176 @@
   font-size: 1.25rem;
 }
 
-.set-header nav {
+.set-header-tools {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.set-me,
+.set-lang {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.set-toggle-on {
+  background: var(--surface-selected);
+  border-color: var(--text-muted);
+}
+
+.set-toggle-on.set-owner-dj1 {
+  border-color: var(--deck-a);
+}
+
+.set-toggle-on.set-owner-dj2 {
+  border-color: var(--deck-b);
+}
+
+/* The journey: five steps, each with its number, its name and where it stands. */
+.set-journey {
+  margin: 0 0 16px;
+}
+
+.set-journey ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
+}
+
+.set-step {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: baseline;
+  text-align: left;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.set-step:disabled {
+  cursor: default;
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.set-step:not(:disabled):hover {
+  border-color: var(--text-muted);
+}
+
+.set-step:focus-visible {
+  outline: 2px solid var(--explain);
+  outline-offset: 2px;
 }
 
 .set-step-on {
   background: var(--surface-selected);
-  border-color: var(--text-muted);
+  border-color: var(--explain);
+}
+
+.set-step-n {
+  grid-row: 1 / 3;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  align-self: start;
+  padding-top: 2px;
+}
+
+.set-step-on .set-step-n {
+  color: var(--explain);
+}
+
+.set-step-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.set-step-state {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 900px) {
+  .set-journey ol {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .set-journey li {
+    flex: 0 0 auto;
+    max-width: 60vw;
+  }
+
+  .set-step-state {
+    white-space: normal;
+  }
+}
+
+/* The Set menu in the header. */
+.set-menu {
+  position: relative;
+}
+
+.set-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  width: min(420px, calc(100vw - 32px));
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+}
+
+.set-menu-panel p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.set-menu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.set-confirm {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.set-chosen {
+  color: var(--explain);
+  font-weight: 600;
+}
+
+.set-reading-chosen {
+  border-color: var(--explain);
 }
 
 .set-screen {
@@ -396,13 +558,6 @@
   color: var(--blend-mark);
 }
 
-.set-me {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-}
-
 .set-work {
   padding: 12px;
   margin-bottom: 12px;
@@ -542,6 +697,7 @@
   }
 
   .set-header,
+  .set-journey,
   .set-no-print {
     display: none;
   }
@@ -550,18 +706,6 @@
     break-inside: avoid;
     border: 1px solid #bbb;
   }
-}
-
-.set-keep {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.set-keep p {
-  margin: 0;
-  font-size: 13px;
 }
 
 .set-notice {

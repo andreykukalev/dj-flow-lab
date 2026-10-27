@@ -47,6 +47,7 @@ test('the set survives a reload and passes to the other DJ as a file', async ({
 
   // Lena gets the set as a file and opens it in her own browser.
   const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Set', exact: true }).click()
   await page.getByRole('button', { name: 'Pass the set (file)' }).click()
   const file = await download
   expect(file.suggestedFilename()).toMatch(/\.djset\.json$/)

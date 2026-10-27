@@ -1,3 +1,4 @@
+import { english, type Translate } from '../../i18n'
 import { setPhraseOffset } from '../grid'
 import type { BeatGrid } from '../model'
 import {
@@ -125,6 +126,7 @@ export function formatDuration(sec: number): string {
 }
 
 /** "124.00 BPM · key 8A · 6:12" */
-export function trackFacts(t: TrackProfile): string {
-  return `${t.grid.bpm.toFixed(2)} BPM · ${t.key ? `key ${t.key}` : 'key —'} · ${formatDuration(t.durationSec)}`
+export function trackFacts(track: TrackProfile, t: Translate = english): string {
+  const key = track.key ? t('facts.key', { key: track.key }) : t('facts.noKey')
+  return `${track.grid.bpm.toFixed(2)} BPM · ${key} · ${formatDuration(track.durationSec)}`
 }

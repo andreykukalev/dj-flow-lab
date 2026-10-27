@@ -3,6 +3,7 @@ import type { AreaRequest } from '../plan/area'
 import type { LoopRequest } from '../plan/loop'
 import type { Take } from '../plan/take'
 import type { TransitionPlanV1 } from '../plan/types'
+import { english, type Translate } from '../../i18n'
 import type { DjId } from './profile'
 
 // Versions of a transition and the decision on them (#93, #94). A version is what was
@@ -93,13 +94,16 @@ export function workStatus(work: TransitionWork | undefined, tried: boolean): Wo
 }
 
 /** "Blend start A 49.1 with B 17.1 · 16 + 16 bars · loop on B · 2 takes" */
-export function describeState(s: LabState): string {
+export function describeState(s: LabState, t: Translate = english): string {
   const at = (bar: number, beat = 1) => `${bar}.${beat}`
   const parts = [
-    `Blend start A ${at(s.points.exitBarA, s.points.exitBeatA)} with B ${at(s.points.entryBarB, s.points.entryBeatB)}`,
-    `${s.area.beforeBars} + ${s.area.afterBars} bars`,
+    t('versions.describe', {
+      a: at(s.points.exitBarA, s.points.exitBeatA),
+      b: at(s.points.entryBarB, s.points.entryBeatB),
+    }),
+    t('versions.bars', { before: s.area.beforeBars, after: s.area.afterBars }),
   ]
-  if (s.loop) parts.push(`loop on ${s.loop.deck}`)
-  if (s.takes.length > 0) parts.push(`${s.takes.length} take${s.takes.length === 1 ? '' : 's'}`)
+  if (s.loop) parts.push(t('versions.loop', { deck: s.loop.deck }))
+  if (s.takes.length > 0) parts.push(t('versions.takes', { n: s.takes.length }))
   return parts.join(' · ')
 }

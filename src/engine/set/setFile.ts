@@ -1,4 +1,5 @@
 import type { FrameFeatures } from '../analysis/structure'
+import { english, type Translate } from '../../i18n'
 import type { BeatGrid } from '../model'
 import type { DjId, TempoSource } from './profile'
 import type { Reading } from './readings'
@@ -73,28 +74,26 @@ export function decodeFrames(saved: SavedTrack['frames']): FrameFeatures {
 const isObject = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null
 
 /** Reads a set file, or says why it is not one. */
-export function parseSet(text: string): SavedSet | { error: string } {
+export function parseSet(text: string, t: Translate = english): SavedSet | { error: string } {
   let data: unknown
   try {
     data = JSON.parse(text)
   } catch {
-    return { error: 'This is not a set file: it is not JSON.' }
+    return { error: t('setFile.notJson') }
   }
-  if (!isObject(data) || data.format !== SET_FORMAT)
-    return { error: 'This is not a DJ Flow Lab set file.' }
+  if (!isObject(data) || data.format !== SET_FORMAT) return { error: t('setFile.notSet') }
   if (data.version !== SET_VERSION)
-    return { error: `This set file is version ${String(data.version)}; this app reads version 1.` }
-  if (!Array.isArray(data.tracks) || !isObject(data.djs))
-    return { error: 'This set file is damaged: it has no tracks.' }
-  for (const t of data.tracks) {
+    return { error: t('setFile.version', { version: String(data.version), reads: SET_VERSION }) }
+  if (!Array.isArray(data.tracks) || !isObject(data.djs)) return { error: t('setFile.noTracks') }
+  for (const x of data.tracks) {
     if (
-      !isObject(t) ||
-      typeof t.id !== 'string' ||
-      typeof t.fingerprint !== 'string' ||
-      !isObject(t.grid) ||
-      !isObject(t.frames)
+      !isObject(x) ||
+      typeof x.id !== 'string' ||
+      typeof x.fingerprint !== 'string' ||
+      !isObject(x.grid) ||
+      !isObject(x.frames)
     )
-      return { error: 'This set file is damaged: a track is missing its analysis.' }
+      return { error: t('setFile.damaged') }
   }
   return data as unknown as SavedSet
 }

@@ -1,4 +1,5 @@
 import { setBpm } from '../../engine/grid'
+import { loadLang, saveLang, translatorFor, type Lang, type Translate } from '../../i18n'
 import type { BeatGrid } from '../../engine/model'
 import { observe, type Observation } from '../../engine/set/observations'
 import {
@@ -103,6 +104,10 @@ export class SetStore {
   notice: string | null = null
   /** Which of the two DJs is at the screen: the author of versions, comments and picks. */
   me: DjId = 'dj1'
+  /** The language of the screens and of everything the engine says; kept in this browser. */
+  lang: Lang = loadLang()
+  /** The transition the Lab opened last, so the Lab step can take the DJs back to it. */
+  lastLab = 0
   /** Observations the DJs said do not sound like that. */
   dismissed: ReadonlySet<string> = new Set()
   version = 0
@@ -128,9 +133,22 @@ export class SetStore {
     return this.session
   }
 
+  /** The words in the DJs' language. */
+  get t(): Translate {
+    return translatorFor(this.lang)
+  }
+
+  /** Changes the language of every screen; what the engine said is said again in it. */
+  setLang(lang: Lang): void {
+    if (lang === this.lang) return
+    this.lang = lang
+    saveLang(lang)
+    this.notify()
+  }
+
   /** "Andrei", or "DJ 1" before a name is typed. */
   djName(id: DjId): string {
-    return this.djs[id].name.trim() || (id === 'dj1' ? 'DJ 1' : 'DJ 2')
+    return this.djs[id].name.trim() || this.t(id === 'dj1' ? 'dj.1' : 'dj.2')
   }
 
   get names(): Record<DjId, string> {
@@ -164,11 +182,13 @@ export class SetStore {
   get explored(): { observations: Observation[]; readings: Reading[] } {
     if (this.cache?.version !== this.version) {
       const profiles = this.profiles
-      const observations = observe(profiles, this.names).filter((o) => !this.dismissed.has(o.id))
+      const observations = observe(profiles, this.names, this.t).filter(
+        (o) => !this.dismissed.has(o.id),
+      )
       this.cache = {
         version: this.version,
         observations,
-        readings: readings(profiles, observations),
+        readings: readings(profiles, observations, this.t),
       }
     }
     return this.cache
@@ -324,7 +344,10 @@ export class SetStore {
     } catch (e) {
       this.update(id, {
         status: 'failed',
-        error: `Could not decode ${file.name}: ${e instanceof Error ? e.message : String(e)}`,
+        error: this.t('music.decodeError', {
+          name: file.name,
+          error: e instanceof Error ? e.message : String(e),
+        }),
       })
     }
   }
@@ -485,7 +508,8 @@ export class SetStore {
   saveVersion(name: string): void {
     const id = `v${this.nextId++}`
     const mine = this.labWork.versions.filter((v) => v.author === this.me).length
-    const label = name.trim() || `${this.djName(this.me)}’s version ${mine + 1}`
+    const label =
+      name.trim() || this.t('version.default', { name: this.djName(this.me), n: mine + 1 })
     const state = this.audio.snapshot()
     const plan = this.audio.plan
     this.changeWork((w) => addVersion(w, { id, name: label, author: this.me, state, plan }))
@@ -542,8 +566,8 @@ export class SetStore {
     const cached = this.decoded.get(id)
     if (cached) return cached
     const track = this.tracks.find((t) => t.id === id)
-    if (!track) throw new Error('That track is no longer in the collection')
-    if (!track.file) throw new Error(`Select the file of ${track.fileName} again to listen to it`)
+    if (!track) throw new Error(this.t('store.noTrack'))
+    if (!track.file) throw new Error(this.t('store.selectAgain', { name: track.fileName }))
     const buffer = await decodeFile(this.audio.ctx, track.file)
     this.decoded.set(id, buffer)
     while (this.decoded.size > KEEP_DECODED) this.decoded.delete(this.decoded.keys().next().value!)
@@ -655,6 +679,7 @@ export class SetStore {
     this.stopHearing()
     this.labError = null
     this.lab = { from, to, index }
+    this.lastLab = index
     this.notify()
     const session = this.audio
     try {
@@ -666,7 +691,7 @@ export class SetStore {
       // A first track can be refused next to the previous second one; it fits the new one.
       if (session.decks.A.buffer !== bufferA) session.setDeck('A', sourceA)
       if (session.decks.A.buffer !== bufferA || session.decks.B.buffer !== bufferB)
-        throw new Error(session.errors.join('; ') || 'The Lab could not load the two tracks')
+        throw new Error(session.errors.join('; ') || this.t('store.labLoad'))
       session.suggestBlend()
     } catch (e) {
       this.lab = null

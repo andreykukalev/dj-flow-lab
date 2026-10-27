@@ -1,3 +1,4 @@
+import { english, type Translate } from '../../i18n'
 import type { Observation, ObservationKind } from './observations'
 import { fullShare, type DjId, type TrackProfile } from './profile'
 
@@ -7,7 +8,8 @@ import { fullShare, type DjId, type TrackProfile } from './profile'
 // always offered. A reading proposes an order of tracks from what is measured (tempo,
 // and how much of each track runs at its full groove, never loudness between tracks),
 // and gives each slot a musical function (docs/MUSICAL_LANGUAGE.md). The DJs listen and
-// decide; the language-model version comes later (#99).
+// decide; the language-model version comes later (#99). The authored words live in the
+// dictionary under `reading.<id>.*`, so a saved set shows its concept in either language.
 
 export type MusicalFunction =
   'OPEN' | 'BUILD' | 'HOLD' | 'RELEASE' | 'HANDOFF' | 'TRANSFORM' | 'RESOLVE'
@@ -38,13 +40,9 @@ export const MAX_SLOTS = 12
 
 interface Authored {
   id: string
-  name: string
-  words: [string, string, string]
-  idea: string
   functions: MusicalFunction[]
-  question: string
   /** Every one of these must be observed; each gives a reason. */
-  needs: { kind: ObservationKind; why: string }[]
+  needs: ObservationKind[]
   /** How full each slot should be, by position 0..1 in the set. */
   curve: (x: number) => number
   /** Alternates the two DJs instead of ordering by the curve. */
@@ -54,75 +52,53 @@ interface Authored {
 const AUTHORED: Authored[] = [
   {
     id: 'into-the-unknown',
-    name: 'Into the Unknown',
-    words: ['Immersion', 'mystery', 'gradual revelation'],
-    idea:
-      'Start with space and few elements, let one groove settle long enough to forget ' +
-      'time, and reveal the full weight only near the end.',
     functions: ['OPEN', 'HOLD', 'BUILD', 'TRANSFORM', 'RESOLVE'],
-    question: 'How long can the room stay inside one state before it needs the reveal?',
-    needs: [
-      { kind: 'room-to-mix', why: 'Long sparse intros and outros give space to open slowly.' },
-      { kind: 'steady-groove', why: 'Long steady grooves can hold the state.' },
-    ],
+    needs: ['room-to-mix', 'steady-groove'],
     curve: (x) => (x < 0.8 ? x / 0.8 : 1 - (x - 0.8) * 2),
   },
   {
     id: 'hidden-euphoria',
-    name: 'Hidden Euphoria',
-    words: ['Restraint', 'anticipation', 'emotional uplift'],
-    idea:
-      'Keep the energy held back for most of the set, let breakdowns tease what is ' +
-      'coming, and open it all up in one late stretch.',
     functions: ['OPEN', 'HOLD', 'BUILD', 'RELEASE', 'RESOLVE'],
-    question: 'Which return is strong enough to carry the whole set’s release?',
-    needs: [
-      { kind: 'breakdown-return', why: 'Breakdowns with a return can tease the release.' },
-      { kind: 'late-lift', why: 'Tracks that hold their fullest part back fit a late peak.' },
-    ],
+    needs: ['breakdown-return', 'late-lift'],
     curve: (x) => (x < 0.6 ? 0.2 + 0.3 * x : x < 0.85 ? 1 : 0.55),
   },
   {
     id: 'two-rooms',
-    name: 'Two Rooms, One Night',
-    words: ['Dialogue', 'contrast', 'meeting'],
-    idea:
-      'Each DJ keeps their own colour and the set moves between the two, track by track, ' +
-      'until the two collections meet.',
     functions: ['OPEN', 'HANDOFF', 'TRANSFORM', 'HANDOFF', 'RESOLVE'],
-    question: 'Where do the two collections sound most alike, and should that be the meeting?',
-    needs: [{ kind: 'pair-across', why: 'A pair across the two collections can be the meeting.' }],
+    needs: ['pair-across'],
     curve: (x) => 0.3 + 0.6 * x,
     alternate: true,
   },
   {
     id: 'pressure-and-breath',
-    name: 'Pressure and Breath',
-    words: ['Tension', 'release', 'pulse'],
-    idea:
-      'Waves instead of one arc: hold pressure on a steady groove, let it breathe in a ' +
-      'breakdown, and come back stronger each time.',
     functions: ['BUILD', 'HOLD', 'RELEASE', 'BUILD', 'RELEASE', 'RESOLVE'],
-    question: 'How many waves does the room want before the last one?',
-    needs: [
-      { kind: 'steady-groove', why: 'Steady grooves can hold the pressure.' },
-      { kind: 'breakdown-return', why: 'Breakdowns with a return give each wave its breath.' },
-    ],
+    needs: ['steady-groove', 'breakdown-return'],
     curve: (x) => 0.5 + 0.35 * Math.sin(2 * Math.PI * 2 * x) + 0.15 * x,
   },
 ]
 
 const FALLBACK: Authored = {
   id: 'steady-climb',
-  name: 'A Steady Climb',
-  words: ['Patience', 'momentum', 'arrival'],
-  idea:
-    'The plainest story: from the slowest and sparsest tracks to the fastest and fullest, ' +
-    'one small step at a time, then a calm landing.',
   functions: ['OPEN', 'BUILD', 'HOLD', 'RESOLVE'],
-  question: 'Is a straight climb what this music wants, or does it ask for a turn?',
   needs: [],
   curve: (x) => (x < 0.9 ? x / 0.9 : 0.8),
+}
+
+/** The ids of the authored readings, whose words the dictionary holds. */
+export const READING_IDS: readonly string[] = [...AUTHORED, FALLBACK].map((a) => a.id)
+
+/** A reading's name in the given language: an authored one from the dictionary, else as saved. */
+export function readingName(reading: { id: string; name: string }, t: Translate): string {
+  if (!READING_IDS.includes(reading.id)) return reading.name
+  const name = t(`reading.${reading.id}.name`)
+  return name === `reading.${reading.id}.name` ? reading.name : name
+}
+
+/** A reading's three words in the given language. */
+export function readingWords(reading: Reading, t: Translate): [string, string, string] {
+  if (!READING_IDS.includes(reading.id)) return reading.words
+  const words = t(`reading.${reading.id}.words`).split('|')
+  return words.length === 3 ? (words as [string, string, string]) : reading.words
 }
 
 /** How far into its range a track drives: tempo and its share of full bars, 0..1 within the collection. */
@@ -210,30 +186,30 @@ function build(
   tracks: readonly TrackProfile[],
   evidence: Observation[],
   drives: Map<string, number>,
+  t: Translate,
 ): Reading {
   const used = pick(tracks, evidence, a.alternate ?? false)
   const order = a.alternate ? alternating(used) : byCurve(used, a.curve, drives)
-  const owners = new Map(tracks.map((t) => [t.id, t.owner]))
+  const owners = new Map(tracks.map((x) => [x.id, x.owner]))
   const uses: Record<DjId, number> = { dj1: 0, dj2: 0 }
   for (const id of order) uses[owners.get(id)!]++
+  const key = (part: string) => t(`reading.${a.id}.${part}`)
   return {
     id: a.id,
-    name: a.name,
-    words: a.words,
-    idea: a.idea,
+    name: key('name'),
+    words: key('words').split('|') as [string, string, string],
+    idea: key('idea'),
     functions: a.functions,
-    why: a.needs.map((n) => ({
-      text: n.why,
-      observationId: evidence.find((o) => o.kind === n.kind)!.id,
+    why: a.needs.map((kind) => ({
+      text: key(`why.${kind}`),
+      observationId: evidence.find((o) => o.kind === kind)!.id,
     })),
-    question: a.question,
+    question: key('question'),
     order,
     roles: rolesFor(a.functions, order.length),
     arc: arcFor(a.curve, order.length),
     uses,
-    orderedBy: a.alternate
-      ? 'the two DJs in turns, each in tempo order'
-      : 'tempo and how much of each runs at its full groove',
+    orderedBy: t(a.alternate ? 'reading.orderedBy.alternate' : 'reading.orderedBy.curve'),
     layer: 'interpretation',
   }
 }
@@ -242,15 +218,16 @@ function build(
 export function readings(
   tracks: readonly TrackProfile[],
   observations: readonly Observation[],
+  t: Translate = english,
 ): Reading[] {
   if (tracks.length === 0) return []
   const drives = drive(tracks)
   const out: Reading[] = []
   for (const a of AUTHORED) {
-    const evidence = a.needs.map((n) => observations.find((o) => o.kind === n.kind))
+    const evidence = a.needs.map((kind) => observations.find((o) => o.kind === kind))
     if (evidence.some((o) => o === undefined)) continue
-    out.push(build(a, tracks, evidence as Observation[], drives))
+    out.push(build(a, tracks, evidence as Observation[], drives, t))
   }
-  out.push(build(FALLBACK, tracks, [], drives))
+  out.push(build(FALLBACK, tracks, [], drives, t))
   return out
 }

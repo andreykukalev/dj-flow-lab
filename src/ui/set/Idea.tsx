@@ -1,5 +1,6 @@
 import { moments } from '../../engine/set/arc'
 import type { SetPlan } from '../../engine/set/spine'
+import { useT } from '../../i18n/react'
 import { TrackLine } from './Bits'
 import { HEAR_BARS, type SetStore } from './store'
 
@@ -15,7 +16,8 @@ export function HearIdea({
   id: string
   plan: Pick<SetPlan, 'order' | 'roles'>
 }) {
-  const list = moments(plan, store.profiles)
+  const t = useT()
+  const list = moments(plan, store.profiles, t)
   const key = `idea:${id}`
   const playing = store.isHearing(key)
   const at = playing ? store.hearing!.index : -1
@@ -25,21 +27,18 @@ export function HearIdea({
         className="btn btn-small"
         aria-pressed={playing}
         onClick={() => void store.hearIdea(id, list)}
-        title={`${HEAR_BARS} bars of each track, in order`}
+        title={t('idea.hint', { n: HEAR_BARS })}
       >
-        {playing ? `■ Stop the idea (${at + 1} of ${list.length})` : '▶ Hear the idea'}
+        {playing ? t('idea.stop', { n: at + 1, total: list.length }) : t('idea.hear')}
       </button>
       <details>
-        <summary className="muted">The idea, moment by moment</summary>
+        <summary className="muted">{t('idea.details')}</summary>
         <ol className="set-moments">
           {list.map((m, k) => (
             <li key={`${m.trackId}-${k}`} aria-current={k === at ? 'step' : undefined}>
               {m.role && <span className="chip set-function">{m.role}</span>}{' '}
               <TrackLine store={store} id={m.trackId} />
-              <span className="muted">
-                {' '}
-                · bar {m.bar}: {m.purpose}
-              </span>
+              <span className="muted"> · {t('idea.bar', { bar: m.bar, purpose: m.purpose })}</span>
             </li>
           ))}
         </ol>

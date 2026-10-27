@@ -1,4 +1,5 @@
 import { PocPage } from '../../poc/PocPage'
+import { useT } from '../../i18n/react'
 import { LabWork } from './LabWork'
 import type { SetStore } from './store'
 
@@ -6,6 +7,7 @@ import type { SetStore } from './store'
 // of one transition and Auto's suggested blend start in place.
 
 export function LabScreen({ store }: { store: SetStore }) {
+  const t = useT()
   const lab = store.lab
   const plan = store.plan
   if (!lab || !plan) return null
@@ -14,15 +16,13 @@ export function LabScreen({ store }: { store: SetStore }) {
     <div className="set-lab">
       <div className="set-lab-bar">
         <button className="btn btn-small" onClick={() => store.go('set')}>
-          ← Back to the set
+          {t('lab.back')}
         </button>
         <span>
-          Transition {lab.index + 1} of {plan.order.length - 1}
-          {to && ` · ${store.djName(to.owner)} brings it in`}
+          {t('lab.transition', { n: lab.index + 1, total: plan.order.length - 1 })}
+          {to && ` · ${t('set.bringsIn', { name: store.djName(to.owner) })}`}
         </span>
-        <span className="muted">
-          Auto’s suggested blend start is in place. A grid you correct here goes back to the track.
-        </span>
+        <span className="muted">{t('lab.autoNote')}</span>
       </div>
       <LabWork store={store} />
       <PocPage session={store.audio} />
