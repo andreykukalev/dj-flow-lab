@@ -1,3 +1,4 @@
+import { english, type Translate } from '../../i18n'
 import { sectionBars, type TrackProfile } from './profile'
 import { drive, type MusicalFunction } from './readings'
 import type { SetPlan } from './spine'
@@ -18,14 +19,18 @@ export interface Moment {
 const isFull = (term: string) => term === 'GROOVE' || term === 'DROP'
 
 /** The bar to hear in a track for a function, and why. */
-export function momentFor(t: TrackProfile, role: MusicalFunction | null): Moment {
+export function momentFor(
+  t: TrackProfile,
+  role: MusicalFunction | null,
+  words: Translate = english,
+): Moment {
   const s = t.structure.sections
   const bars = t.structure.bars.length
   const at = (bar: number, purpose: string): Moment => ({
     trackId: t.id,
     bar: Math.max(1, Math.min(bar, Math.max(1, bars - 7))),
     role,
-    purpose,
+    purpose: words(`moment.${purpose}`),
   })
   const firstFull = s.find((x) => isFull(x.term))
   const longest = s.filter((x) => isFull(x.term)).sort((a, b) => sectionBars(b) - sectionBars(a))[0]
@@ -33,44 +38,43 @@ export function momentFor(t: TrackProfile, role: MusicalFunction | null): Moment
   const outro = s.at(-1)?.term === 'OUTRO' ? s.at(-1) : undefined
   switch (role) {
     case 'OPEN':
-      return at(1, 'how it opens')
+      return at(1, 'opens')
     case 'BUILD':
-      if (breakdown) return at(breakdown.toBar - 3, 'the build back into its groove')
-      if (firstFull && firstFull.fromBar > 1)
-        return at(firstFull.fromBar - 4, 'the way into its groove')
+      if (breakdown) return at(breakdown.toBar - 3, 'buildBack')
+      if (firstFull && firstFull.fromBar > 1) return at(firstFull.fromBar - 4, 'wayIn')
       break
     case 'RELEASE':
-      if (breakdown) return at(breakdown.fromBar - 4, 'where it lets go')
-      if (outro) return at(outro.fromBar - 4, 'where it eases off')
+      if (breakdown) return at(breakdown.fromBar - 4, 'letsGo')
+      if (outro) return at(outro.fromBar - 4, 'easesOff')
       break
     case 'HANDOFF':
-      if (outro) return at(outro.fromBar, 'the outro, where it hands over')
+      if (outro) return at(outro.fromBar, 'outro')
       break
     case 'TRANSFORM': {
       const change = [...t.structure.changes].sort((a, b) => b.size - a.size)[0]
-      if (change) return at(change.bar - 4, 'where it changes most')
+      if (change) return at(change.bar - 4, 'changes')
       break
     }
     case 'RESOLVE':
-      if (outro) return at(outro.fromBar - 4, 'how it lands')
-      return at(bars - 7, 'how it ends')
+      if (outro) return at(outro.fromBar - 4, 'lands')
+      return at(bars - 7, 'ends')
     default:
       break
   }
-  if (longest)
-    return at(longest.fromBar + Math.floor(sectionBars(longest) / 2) - 4, 'the state it holds')
-  return at(1, 'how it sounds')
+  if (longest) return at(longest.fromBar + Math.floor(sectionBars(longest) / 2) - 4, 'holds')
+  return at(1, 'sounds')
 }
 
 /** One moment per slot of the set, in order. */
 export function moments(
   plan: Pick<SetPlan, 'order' | 'roles'>,
   tracks: readonly TrackProfile[],
+  words: Translate = english,
 ): Moment[] {
   const byId = new Map(tracks.map((t) => [t.id, t]))
   return plan.order.flatMap((id, k) => {
     const t = byId.get(id)
-    return t ? [momentFor(t, plan.roles[k] ?? null)] : []
+    return t ? [momentFor(t, plan.roles[k] ?? null, words)] : []
   })
 }
 

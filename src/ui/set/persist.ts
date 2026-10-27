@@ -52,7 +52,9 @@ export function keep(store: SetStore, onError: (message: string) => void): () =>
   let unsubscribe = () => {}
   const save = () => {
     if (store.busy) return // an analysis in progress saves when it ends
-    saveSet(store.toSaved()).catch((e) => onError(`Could not save the set here: ${String(e)}`))
+    saveSet(store.toSaved()).catch((e) =>
+      onError(store.t('persist.saveError', { error: String(e) })),
+    )
   }
   loadSet()
     .catch(() => null)

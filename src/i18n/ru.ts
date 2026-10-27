@@ -1,0 +1,378 @@
+import type { Key } from './index'
+
+// Russian. The two DJs are addressed together as «вы»; DJ terms (BPM, EQ, cue, LOOP IN,
+// rekordbox, the section and function names) stay as DJs say them.
+
+export const ru: Record<Key, string> = {
+  // App shell
+  'app.title': 'DJ Flow Lab',
+  'app.steps': 'Шаги',
+  'app.whoAtScreen': 'Кто за экраном',
+  'app.youAre': 'За экраном',
+  'app.youAreHint': 'Версии, комментарии и выбор подписываются именем диджея за экраном.',
+  'app.language': 'Язык',
+  'app.setMenu': 'Сет',
+  'app.ok': 'Понятно',
+  'app.lockedStep': 'Пока недоступно: {reason}',
+
+  'step.music': 'Ваша музыка',
+  'step.concepts': 'Концепции',
+  'step.set': 'Сет',
+  'step.lab': 'Лаборатория',
+  'step.perform': 'К выступлению',
+
+  'state.music.empty': 'Добавьте треки от обоих',
+  'state.music.ready': '{n} {n|трек готов|трека готовы|треков готовы}',
+  'state.music.analysing': 'Анализируем {n}…',
+  'state.music.missing': '{n} {n|ждёт файл|ждут файлы|ждут файлы}',
+  'state.concepts.locked': 'нужны два готовых трека',
+  'state.concepts.open': '{n} {n|прочтение|прочтения|прочтений} — послушайте',
+  'state.concepts.chosen': 'Выбрано: {name}',
+  'state.set.locked': 'сначала выберите концепцию',
+  'state.set.open':
+    '{tracks} {tracks|трек|трека|треков} · {transitions} {transitions|переход|перехода|переходов}',
+  'state.lab.locked': 'открывается из перехода в сете',
+  'state.lab.open': 'Переход {n} из {total}',
+  'state.lab.tried': 'Опробовано {tried} из {total}',
+  'state.perform.locked': 'нужен сет',
+  'state.perform.open': 'Согласовано {agreed} из {total}',
+  'state.perform.missing': '{n} без версии',
+
+  // Keep and pass the set
+  'keep.title': 'Сохранить и передать сет',
+  'keep.text':
+    'Сет хранится в этом браузере по ходу работы: треки, темпы и тональности, прочтение, порядок, версии, комментарии и выбор. Без аудио: после перезагрузки или на компьютере второго диджея выберите файлы заново — они подставятся к своим трекам.',
+  'keep.missing': '{n} {n|треку нужен файл|трекам нужны файлы|трекам нужны файлы}, чтобы слушать.',
+  'keep.pass': 'Передать сет (файл)',
+  'keep.open': 'Открыть файл сета',
+  'keep.new': 'Начать новый сет',
+  'keep.newWarn': 'Это очистит сет, сохранённый в этом браузере.',
+  'keep.clear': 'Очистить',
+  'keep.keep': 'Оставить',
+  'keep.file': 'сет {names}',
+  'keep.and': '{a} и {b}',
+  'keep.our': 'наш',
+
+  // Your music
+  'music.title': 'Ваша музыка',
+  'music.lead':
+    'Общая коллекция для сета — от вас обоих. Файлы декодируются и анализируются в этом браузере; ни аудио, ни данные не покидают это устройство.',
+  'music.notMeasured': 'Пока не измеряется: вокал, мелодия и тональность.',
+  'music.notMeasuredRest':
+    'Всё здесь опирается на темп и, такт за тактом, на уровень, низ и верх внутри каждого трека. Тональность — только та, что вы ввели.',
+  'music.djTracks': 'Треки: {name}',
+  'music.djName': 'Имя {dj}',
+  'music.djNamePlaceholder': '{dj}: введите имя',
+  'music.count': '{n} {n|трек|трека|треков}',
+  'music.add': 'Добавить треки',
+  'music.empty':
+    'Треков пока нет. Добавьте аудиофайлы с компьютера: они останутся на этом устройстве.',
+  'music.waiting': 'Ожидание…',
+  'music.analysing': 'Анализ…',
+  'music.selectFile': 'Выбрать файл',
+  'music.selectFileHint': 'Анализ сохранён; файл нужен, чтобы слушать',
+  'music.matched': 'совпал по {by}',
+  'music.by.fingerprint': 'отпечатку',
+  'music.by.nameLength': 'имени и длине',
+  'music.remove': 'Убрать {name}',
+  'music.removeHint': 'Убрать из коллекции',
+  'music.bpm': 'BPM',
+  'music.confirm': 'Подтвердить',
+  'music.confirmHint': 'Оценка звучит верно: оставить её как вашу',
+  'music.key': 'Тональность',
+  'music.sections': 'Секции',
+  'music.shape': 'Форма {name}: уровень по тактам',
+  'music.sectionBars': 'такты {from}–{to}',
+  'music.sectionsNote': 'Секции — предположение: послушайте и поправьте их в Лаборатории.',
+  'music.explore': 'Исследовать треки',
+  'music.needTwo': 'Добавьте хотя бы два трека, чтобы исследовать их.',
+  'music.ready': '{n} {n|трек готов|трека готовы|треков готовы}.',
+  'music.decodeError': 'Не удалось декодировать {name}: {error}',
+
+  'confirm.question': 'Убрать?',
+  'confirm.remove': 'Убрать',
+  'confirm.keep': 'Оставить',
+
+  'dj.1': 'DJ 1',
+  'dj.2': 'DJ 2',
+
+  // Knowledge layers
+  'layer.measured': 'измерено',
+  'layer.likely': 'вероятно',
+  'layer.interpretation': 'интерпретация',
+  'layer.yours': 'ваш выбор',
+  'layer.measured.hint': 'Измерено по аудио: темп, а также уровень, низ и верх по тактам.',
+  'layer.likely.hint': 'Предположение на основе измеренного: проверьте на слух.',
+  'layer.interpretation.hint': 'Одно из возможных прочтений музыки.',
+  'layer.yours.hint': 'Задано вами.',
+
+  // Concepts
+  'concepts.title': 'Какую историю может рассказать эта музыка?',
+  'concepts.lead':
+    'Несколько прочтений одних и тех же треков, и ни одно из них не ответ. Послушайте, на чём они держатся, затем исследуйте одно; вернуться и попробовать другое можно всегда.',
+  'concepts.noticed': 'Что мы заметили в ваших треках ({n})',
+  'concepts.observations': 'Наблюдения',
+  'concepts.hidden': 'Скрыто: {n}. Вы сказали, что это звучит не так.',
+  'concepts.showAgain': 'Показать снова',
+  'concepts.readings': 'Прочтения',
+  'concepts.hear': '▶ Послушать',
+  'concepts.stop': '■ Стоп',
+  'concepts.hearHint': 'Сыграть {n} тактов с такта {bar}',
+  'concepts.why': 'Почему это может сработать',
+  'concepts.check': 'Проверить на слух',
+  'concepts.claims': 'Утверждения прочтения «{name}»',
+  'concepts.notLikeThat': 'Звучит не так',
+  'concepts.fallback': 'Предлагается для любой коллекции: опирается только на темп и плотность.',
+  'concepts.toExplore': 'Что попробовать',
+  'concepts.uses': 'Использует {a} {a|трек|трека|треков} от {dj1} и {b} от {dj2}; порядок: {by}.',
+  'concepts.explore': 'Исследовать концепцию',
+  'concepts.chosen': 'Выбрано: это ваш сет',
+  'concepts.backToSet': 'Назад к сету',
+  'concepts.functions': 'Музыкальные функции по порядку',
+  'concepts.removedTrack': 'удалённый трек',
+
+  // Hear the idea
+  'idea.hear': '▶ Послушать идею',
+  'idea.stop': '■ Остановить идею ({n} из {total})',
+  'idea.hint': '{n} тактов каждого трека, по порядку',
+  'idea.details': 'Идея, момент за моментом',
+  'idea.bar': 'такт {bar}: {purpose}',
+
+  // The set
+  'set.title': 'Ваш сет',
+  'set.lead':
+    'Порядок из прочтения: слушайте и меняйте. Функция каждого слота задана прочтением и остаётся за слотом, когда треки двигаются. Каждый переход сводит тот диджей, чей трек входит.',
+  'set.change': 'Сменить концепцию',
+  'set.aria': 'Сет',
+  'set.arc': 'Энергетическая дуга',
+  'set.arcAria': 'Дуга против драйва каждого трека',
+  'set.arcCaptionReading':
+    'Линия — дуга прочтения; точки — драйв каждого трека (его темп и доля полного грува), и то и другое как порядок в сете. Дугу слота можно сдвинуть на его карточке.',
+  'set.arcCaptionYours':
+    'Линия — дуга, которую вы задали; точки — драйв каждого трека (его темп и доля полного грува), и то и другое как порядок в сете. Дугу слота можно сдвинуть на его карточке.',
+  'set.labError': 'Лаборатория не открылась: {error}',
+  'set.moveEarlier': 'Сдвинуть {name} раньше',
+  'set.moveLater': 'Сдвинуть {name} позже',
+  'set.remove': 'Убрать {name} из сета',
+  'set.arcLabel': 'Дуга',
+  'set.arcAt': 'Дуга в слоте {n}',
+  'set.above': 'Заметно выше дуги: драйва больше, чем просит этот слот.',
+  'set.below': 'Заметно ниже дуги: драйва меньше, чем просит этот слот.',
+  'set.removedTrack': 'Этот трек удалён из коллекции.',
+  'set.transition': 'Переход {n}',
+  'set.bringsIn': 'вводит {name}',
+  'set.opening': 'Открываем…',
+  'set.openLab': 'Открыть в Лаборатории',
+  'set.addFrom': 'Добавить из коллекции',
+  'set.choose': 'Выберите трек',
+  'set.addEnd': 'Добавить в конец',
+  'set.waiting': 'Рядом ждут:',
+  'set.swapIn': 'Поставить',
+  'set.stopConsidering': 'Больше не рассматривать {name} для слота {n}',
+  'set.altFor': 'Альтернатива для слота {n}',
+  'set.altPlaceholder': 'Альтернатива…',
+  'set.putBeside': 'Положить рядом',
+
+  'status.notTried': 'не опробован',
+  'status.tried': 'опробован',
+  'status.versions': 'есть версии на выбор',
+  'status.agreed': 'согласован обоими',
+
+  // The Lab
+  'lab.back': '← Назад к сету',
+  'lab.transition': 'Переход {n} из {total}',
+  'lab.autoNote':
+    'Точка сведения, предложенная Auto, уже на месте. Сетка, исправленная здесь, вернётся к треку.',
+
+  'work.aria': 'Версии и решение',
+  'work.versionName': 'Имя версии',
+  'work.versionPlaceholder': 'Версия: {name}',
+  'work.save': 'Сохранить как версию',
+  'work.saveHint': 'Сохраняет точку сведения, зону, луп и дубли того, что играет',
+  'work.versions': 'Версии',
+  'work.load': 'Загрузить',
+  'work.removeVersion': 'Удалить {name}',
+  'work.compare': 'Сравнить',
+  'work.compareAria': 'Сравнить две версии',
+  'work.hear': 'Слушать {n}',
+  'work.hearHint': 'Переключается на той же доле перехода',
+  'work.blind': 'Вслепую',
+  'work.reveal': 'Показать, где какая',
+  'work.decide': 'Решение',
+  'work.decideLead':
+    'Каждый из вас выбирает и объясняет почему. Переход согласован, когда вы выбрали одно и то же; приложение не выбирает никогда.',
+  'work.notPicked': 'ещё не выбрано',
+  'work.agreed': 'Согласовано обоими: {name}',
+  'work.picks': 'Выбор: {name}',
+  'work.pickAria': 'Выбор {name}',
+  'work.choose': 'Выберите…',
+  'work.both': 'Оставить обе, решить на выступлении',
+  'work.bothShort': 'оставить обе, решить на выступлении',
+  'work.reason': 'Причина',
+  'work.why': 'Почему',
+  'work.pick': 'Выбрать',
+  'work.takeBack': 'Отозвать мой выбор',
+  'work.comments': 'Комментарии',
+  'work.none': 'пока нет',
+  'work.bar': 'такт {bar}',
+  'work.comment': 'Комментарий',
+  'work.commentPlaceholder': 'Заметка к такту под курсором',
+  'work.pin': 'Прикрепить к такту под курсором',
+
+  'version.default': 'Версия {n}: {name}',
+  'versions.describe': 'Точка сведения A {a} с B {b}',
+  'versions.bars': '{before} + {after} тактов',
+  'versions.loop': 'луп на {deck}',
+  'versions.takes': '{n} {n|дубль|дубля|дублей}',
+
+  // Perform
+  'perform.title': 'Подготовка к выступлению',
+  'perform.lead':
+    '{title}: лист сета на вечер, из сохранённых версий. Такты считаются по уходящему треку. Здесь нет ничего нового: это ваш план, записанный для контроллера (в названиях Pioneer DDJ-400).',
+  'perform.ourSet': 'Наш сет',
+  'perform.print': 'Распечатать лист',
+  'perform.who': 'Кто и когда играет',
+  'perform.deck': 'Дека {n}',
+  'perform.deckArrow': 'Дека {out} → дека {in}',
+  'perform.transitionAria': 'Переход {n}',
+  'perform.versionBy': '{version}, автор {author}.',
+  'perform.cueLabel': 'Cue',
+  'perform.cueText':
+    'дека {in} на её такте {inAt}; нажмите PLAY на деке {in} на такте {playAt} деки {out}.',
+  'perform.bar': 'Такт',
+  'perform.move': 'Действие',
+  'perform.why': 'Почему',
+  'perform.rekordbox': 'rekordbox',
+  'perform.rbLead':
+    'Плейлист в порядке сета с сеткой каждого трека, memory cue там, где запускается следующий трек, hot cue A там, где трек ставится на cue перед входом, и эти заметки в комментарии. rekordbox находит треки по расположению файлов на вашем компьютере, которого браузер не знает: укажите папку, где они лежат.',
+  'perform.rbUnverified':
+    'Не проверено с вашим rekordbox: сохранит ли импорт этих cue ваши собственные cue на тех же треках. Импортируйте в новый плейлист и проверьте, прежде чем играть с него.',
+  'perform.folder': 'Папка с треками',
+  'perform.download': 'Скачать rekordbox XML',
+  'perform.playlist': '{title} ({a} и {b})',
+
+  // The set sheet (engine)
+  'sheet.faderDown': 'вниз',
+  'sheet.faderUp': 'вверх',
+  'sheet.faderTo': 'на {pct} %',
+  'sheet.channelFader': 'Фейдер канала {deck} {words}',
+  'sheet.crossfader': 'Кроссфейдер {words}',
+  'sheet.knobRamp': '{name} на деке {deck} до {clock}',
+  'sheet.knobStep': '{name} на деке {deck} на {clock}',
+  'sheet.clock': '{h} часов',
+  'sheet.clockMin': '{h} часов (до упора влево)',
+  'sheet.clockMax': '{h} часов (до упора вправо)',
+  'sheet.why.b-in': 'Следующий трек входит под этим, его бас ещё срезан.',
+  'sheet.why.b-mid': 'Его середина поднимается, пока он обживается.',
+  'sheet.why.b-high': 'Его верх поднимается, пока он обживается.',
+  'sheet.why.a-hp': 'Этот трек истончается, освобождая место.',
+  'sheet.why.a-low': 'Смена баса: один низ за раз.',
+  'sheet.why.b-low': 'Смена баса: новый низ берёт верх.',
+  'sheet.why.a-mid': 'Этот трек отступает.',
+  'sheet.why.a-high': 'Этот трек отступает.',
+  'sheet.why.a-out': 'Этот трек уходит.',
+  'sheet.takeWhy': 'Ваш дубль: движение, которое вы сыграли в Лаборатории.',
+  'sheet.note.none': 'Версия ещё не сохранена: откройте переход в Лаборатории и сохраните одну.',
+  'sheet.note.agreed': 'Согласовано обоими.',
+  'sheet.note.both': 'Оставили обе, чтобы решить на выступлении; это последняя.',
+  'sheet.note.latest': 'Ещё не согласовано; это последняя версия.',
+  'sheet.loop':
+    'LOOP IN на деке {deck} на её {start}, LOOP OUT через {bars} тактов; EXIT на {at} после {passes} проходов',
+  'sheet.loopWhy.before': 'Луп даёт интро следующего трека такты, которых ему не хватает.',
+  'sheet.loopWhy.after': 'Луп держит такты этого трека, пока входит следующий.',
+
+  'facts.key': 'тональность {key}',
+  'facts.noKey': 'тональность —',
+
+  // Observations (engine)
+  'obs.tempo.title': '{n} {n|трек|трека|треков} в узком диапазоне темпа',
+  'obs.tempo.detail':
+    'От {lo} до {hi} BPM, каждый в пределах {pct} % от соседнего: они могут идти друг за другом без большой смены темпа.',
+  'obs.steady.title': 'Долгий ровный грув в {n} {n|треке|треках|треках}',
+  'obs.steady.detail':
+    '{bars} тактов и больше, где уровень, низ и верх почти не меняются: можно держать одно состояние и дать ему работать.',
+  'obs.steady.hear': '{name}, {bars} тактов с такта {bar}',
+  'obs.breakdown.title': 'Брейкдаун с возвращением в {n} {n|треке|треках|треках}',
+  'obs.breakdown.detail':
+    'Участок с меньшим низом или уровнем, затем возвращается полный грув: задержанное дыхание и выдох внутри одного трека.',
+  'obs.breakdown.hear': '{name}, возвращение на такте {bar}',
+  'obs.late.title': 'Полный грув приходит поздно в {n} {n|треке|треках|треках}',
+  'obs.late.detail':
+    'Больше половины каждого из этих треков проходит до первой полной секции: они что-то придерживают.',
+  'obs.late.hear': '{name}, полный грув на такте {bar}',
+  'obs.room.title': 'Место для сведения в {n} {n|треке|треках|треках}',
+  'obs.room.detail':
+    'Интро или аутро от {bars} тактов с меньшим числом элементов: простор для долгого бленда.',
+  'obs.room.outro': '{name}, аутро на {bars} {bars|такт|такта|тактов}',
+  'obs.room.intro': '{name}, интро на {bars} {bars|такт|такта|тактов}',
+  'obs.pair.title': 'Пара между вашими коллекциями',
+  'obs.pair.detail':
+    '{a} ({da}) и {b} ({db}) ближе всех по темпу ({bpmA} и {bpmB} BPM) и больше всех похожи по форме на всей длине.',
+
+  // Readings (engine)
+  'reading.into-the-unknown.name': 'В неизвестное',
+  'reading.into-the-unknown.words': 'Погружение|тайна|постепенное раскрытие',
+  'reading.into-the-unknown.idea':
+    'Начать с пространства и немногих элементов, дать одному груву осесть настолько, чтобы забыть о времени, и раскрыть полный вес только ближе к концу.',
+  'reading.into-the-unknown.question':
+    'Как долго зал может оставаться внутри одного состояния, прежде чем ему понадобится раскрытие?',
+  'reading.into-the-unknown.why.room-to-mix':
+    'Долгие разреженные интро и аутро дают место, чтобы открываться медленно.',
+  'reading.into-the-unknown.why.steady-groove': 'Долгие ровные грувы могут держать состояние.',
+  'reading.hidden-euphoria.name': 'Скрытая эйфория',
+  'reading.hidden-euphoria.words': 'Сдержанность|предвкушение|эмоциональный подъём',
+  'reading.hidden-euphoria.idea':
+    'Держать энергию сдержанной большую часть сета, позволить брейкдаунам дразнить тем, что впереди, и раскрыть всё на одном позднем отрезке.',
+  'reading.hidden-euphoria.question':
+    'Какое возвращение достаточно сильно, чтобы вынести разрядку всего сета?',
+  'reading.hidden-euphoria.why.breakdown-return':
+    'Брейкдауны с возвращением могут дразнить разрядкой.',
+  'reading.hidden-euphoria.why.late-lift':
+    'Треки, придерживающие свою самую полную часть, подходят позднему пику.',
+  'reading.two-rooms.name': 'Две комнаты, одна ночь',
+  'reading.two-rooms.words': 'Диалог|контраст|встреча',
+  'reading.two-rooms.idea':
+    'Каждый диджей сохраняет свой цвет, и сет движется между ними трек за треком, пока две коллекции не встретятся.',
+  'reading.two-rooms.question':
+    'Где две коллекции звучат наиболее похоже, и должна ли там быть встреча?',
+  'reading.two-rooms.why.pair-across': 'Пара между двумя коллекциями может стать встречей.',
+  'reading.pressure-and-breath.name': 'Давление и дыхание',
+  'reading.pressure-and-breath.words': 'Напряжение|разрядка|пульс',
+  'reading.pressure-and-breath.idea':
+    'Волны вместо одной дуги: держать давление на ровном груве, дать выдохнуть в брейкдауне и возвращаться каждый раз сильнее.',
+  'reading.pressure-and-breath.question': 'Сколько волн хочет зал перед последней?',
+  'reading.pressure-and-breath.why.steady-groove': 'Ровные грувы могут держать давление.',
+  'reading.pressure-and-breath.why.breakdown-return':
+    'Брейкдауны с возвращением дают каждой волне её дыхание.',
+  'reading.steady-climb.name': 'Ровный подъём',
+  'reading.steady-climb.words': 'Терпение|движение|прибытие',
+  'reading.steady-climb.idea':
+    'Самая простая история: от самых медленных и разреженных треков к самым быстрым и плотным, по одному маленькому шагу, затем спокойная посадка.',
+  'reading.steady-climb.question': 'Хочет ли эта музыка прямого подъёма, или она просит поворота?',
+  'reading.orderedBy.alternate': 'два диджея по очереди, каждый в порядке темпа',
+  'reading.orderedBy.curve': 'темп и доля полного грува в каждом треке',
+
+  // Moments of a track (engine)
+  'moment.opens': 'как он открывается',
+  'moment.buildBack': 'подъём обратно в грув',
+  'moment.wayIn': 'путь в его грув',
+  'moment.letsGo': 'где он отпускает',
+  'moment.easesOff': 'где он спадает',
+  'moment.outro': 'аутро, где он передаёт ход',
+  'moment.changes': 'где он меняется сильнее всего',
+  'moment.lands': 'как он приземляется',
+  'moment.ends': 'как он заканчивается',
+  'moment.holds': 'состояние, которое он держит',
+  'moment.sounds': 'как он звучит',
+
+  // Store and persistence
+  'store.noTrack': 'Этого трека больше нет в коллекции',
+  'store.selectAgain': 'Выберите файл {name} заново, чтобы слушать его',
+  'store.labLoad': 'Лаборатория не смогла загрузить два трека',
+  'persist.saveError': 'Не удалось сохранить сет здесь: {error}',
+  'setFile.notJson': 'Это не файл сета: это не JSON.',
+  'setFile.notSet': 'Это не файл сета DJ Flow Lab.',
+  'setFile.version': 'Этот файл сета версии {version}; приложение читает версию {reads}.',
+  'setFile.noTracks': 'Файл сета повреждён: в нём нет треков.',
+  'setFile.damaged': 'Файл сета повреждён: у трека нет анализа.',
+}

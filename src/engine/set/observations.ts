@@ -1,3 +1,4 @@
+import { english, type Translate } from '../../i18n'
 import { mainLevels, type BarFeatures } from '../analysis/structure'
 import { barCount, sectionBars, shape, type TrackProfile } from './profile'
 
@@ -5,7 +6,8 @@ import { barCount, sectionBars, shape, type TrackProfile } from './profile'
 // collection, each resting only on what the analysis measures (tempo, and per bar the
 // level, low end and highs within a track), each with the tracks and bars it rests on,
 // so the DJs can hear it. Nothing here is about vocals, melody or key: they are not
-// measured yet, and the screen says so.
+// measured yet, and the screen says so. The words come from the dictionary, in the
+// language the store passes; English when none is given.
 
 export type ObservationKind =
   | 'tempo-neighbours'
@@ -42,19 +44,18 @@ const MAX_HEAR = 3
 
 const percentApart = (a: number, b: number) => (Math.abs(a - b) / Math.min(a, b)) * 100
 
-const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`
-
 const median = (xs: readonly number[]) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)]!
 
 /** Runs of tracks, in tempo order, where each is within the neighbour change of the last. */
-function tempoNeighbours(tracks: readonly TrackProfile[]): Observation[] {
+function tempoNeighbours(tracks: readonly TrackProfile[], t: Translate): Observation[] {
   const sorted = [...tracks].sort((a, b) => a.grid.bpm - b.grid.bpm)
   const runs: TrackProfile[][] = []
-  for (const t of sorted) {
+  for (const track of sorted) {
     const run = runs.at(-1)
     const last = run?.at(-1)
-    if (run && last && percentApart(last.grid.bpm, t.grid.bpm) <= NEIGHBOUR_PERCENT) run.push(t)
-    else runs.push([t])
+    if (run && last && percentApart(last.grid.bpm, track.grid.bpm) <= NEIGHBOUR_PERCENT)
+      run.push(track)
+    else runs.push([track])
   }
   const min = tracks.length >= 6 ? 3 : 2
   return runs
@@ -67,12 +68,14 @@ function tempoNeighbours(tracks: readonly TrackProfile[]): Observation[] {
         id: `tempo-neighbours-${k + 1}`,
         kind: 'tempo-neighbours',
         layer: 'measured',
-        title: `${plural(run.length, 'track')} within a small tempo change`,
-        detail:
-          `From ${lo.toFixed(1)} to ${hi.toFixed(1)} BPM, each within ${NEIGHBOUR_PERCENT} % ` +
-          `of the next: they can follow one another without a big change in tempo.`,
-        trackIds: run.map((t) => t.id),
-        hear: ends.map((t) => ({ trackId: t.id, bar: grooveBar(t), label: t.name })),
+        title: t('obs.tempo.title', { n: run.length }),
+        detail: t('obs.tempo.detail', {
+          lo: lo.toFixed(1),
+          hi: hi.toFixed(1),
+          pct: NEIGHBOUR_PERCENT,
+        }),
+        trackIds: run.map((x) => x.id),
+        hear: ends.map((x) => ({ trackId: x.id, bar: grooveBar(x), label: x.name })),
       }
     })
 }
@@ -98,19 +101,19 @@ function steadyStretch(bars: readonly BarFeatures[]): { fromBar: number; bars: n
   return best
 }
 
-function steadyGrooves(tracks: readonly TrackProfile[]): Observation[] {
+function steadyGrooves(tracks: readonly TrackProfile[], t: Translate): Observation[] {
   const found: { t: TrackProfile; run: { fromBar: number; bars: number } }[] = []
-  for (const t of tracks) {
+  for (const track of tracks) {
     // Only bars with the low end in: a long quiet intro is room to mix, not a groove.
-    const main = mainLevels(t.structure.bars)
+    const main = mainLevels(track.structure.bars)
     const pieces: BarFeatures[][] = [[]]
-    for (const b of t.structure.bars) {
+    for (const b of track.structure.bars) {
       if (b.lowDb >= main.low - 6) pieces.at(-1)!.push(b)
       else if (pieces.at(-1)!.length > 0) pieces.push([])
     }
     const runs = pieces.map(steadyStretch).filter((r) => r !== null)
     const run = runs.sort((a, b) => b.bars - a.bars)[0]
-    if (run && run.bars >= STEADY_BARS) found.push({ t, run })
+    if (run && run.bars >= STEADY_BARS) found.push({ t: track, run })
   }
   if (found.length === 0) return []
   return [
@@ -118,25 +121,23 @@ function steadyGrooves(tracks: readonly TrackProfile[]): Observation[] {
       id: 'steady-groove',
       kind: 'steady-groove',
       layer: 'likely',
-      title: `Long steady grooves in ${plural(found.length, 'track')}`,
-      detail:
-        `${STEADY_BARS} bars or more where level, low end and highs barely change: ` +
-        `room to hold one state and let it work.`,
+      title: t('obs.steady.title', { n: found.length }),
+      detail: t('obs.steady.detail', { bars: STEADY_BARS }),
       trackIds: found.map((x) => x.t.id),
       hear: found.slice(0, MAX_HEAR).map((x) => ({
         trackId: x.t.id,
         bar: x.run.fromBar + Math.floor(x.run.bars / 2) - 4,
-        label: `${x.t.name}, ${x.run.bars} bars from bar ${x.run.fromBar}`,
+        label: t('obs.steady.hear', { name: x.t.name, bars: x.run.bars, bar: x.run.fromBar }),
       })),
     },
   ]
 }
 
 /** Likely breakdowns followed by a fuller section; hear the four bars on either side of the return. */
-function breakdownReturns(tracks: readonly TrackProfile[]): Observation[] {
+function breakdownReturns(tracks: readonly TrackProfile[], t: Translate): Observation[] {
   const found: { t: TrackProfile; bar: number }[] = []
-  for (const t of tracks) {
-    const s = t.structure.sections
+  for (const track of tracks) {
+    const s = track.structure.sections
     const k = s.findIndex(
       (x, i) =>
         x.term === 'BREAKDOWN' &&
@@ -144,7 +145,7 @@ function breakdownReturns(tracks: readonly TrackProfile[]): Observation[] {
     )
     if (k < 0) continue
     const back = s.slice(k + 1).find((y) => y.term === 'DROP' || y.term === 'GROOVE')!
-    found.push({ t, bar: back.fromBar })
+    found.push({ t: track, bar: back.fromBar })
   }
   if (found.length === 0) return []
   return [
@@ -152,27 +153,25 @@ function breakdownReturns(tracks: readonly TrackProfile[]): Observation[] {
       id: 'breakdown-return',
       kind: 'breakdown-return',
       layer: 'likely',
-      title: `Breakdowns with a return in ${plural(found.length, 'track')}`,
-      detail:
-        'A stretch with less low end or level, then the full groove comes back: ' +
-        'a held breath and its release, inside one track.',
+      title: t('obs.breakdown.title', { n: found.length }),
+      detail: t('obs.breakdown.detail'),
       trackIds: found.map((x) => x.t.id),
       hear: found.slice(0, MAX_HEAR).map((x) => ({
         trackId: x.t.id,
         bar: Math.max(1, x.bar - 4),
-        label: `${x.t.name}, the return at bar ${x.bar}`,
+        label: t('obs.breakdown.hear', { name: x.t.name, bar: x.bar }),
       })),
     },
   ]
 }
 
 /** Tracks whose first full section starts after half of the track. */
-function lateLifts(tracks: readonly TrackProfile[]): Observation[] {
+function lateLifts(tracks: readonly TrackProfile[], t: Translate): Observation[] {
   const found: { t: TrackProfile; bar: number }[] = []
-  for (const t of tracks) {
-    const first = t.structure.sections.find((s) => s.term === 'GROOVE' || s.term === 'DROP')
-    if (first && first.fromBar - 1 >= LATE_SHARE * barCount(t))
-      found.push({ t, bar: first.fromBar })
+  for (const track of tracks) {
+    const first = track.structure.sections.find((s) => s.term === 'GROOVE' || s.term === 'DROP')
+    if (first && first.fromBar - 1 >= LATE_SHARE * barCount(track))
+      found.push({ t: track, bar: first.fromBar })
   }
   if (found.length === 0) return []
   return [
@@ -180,30 +179,38 @@ function lateLifts(tracks: readonly TrackProfile[]): Observation[] {
       id: 'late-lift',
       kind: 'late-lift',
       layer: 'likely',
-      title: `The full groove arrives late in ${plural(found.length, 'track')}`,
-      detail:
-        'More than half of each of these tracks passes before its first full section: ' +
-        'they hold something back.',
+      title: t('obs.late.title', { n: found.length }),
+      detail: t('obs.late.detail'),
       trackIds: found.map((x) => x.t.id),
       hear: found.slice(0, MAX_HEAR).map((x) => ({
         trackId: x.t.id,
         bar: Math.max(1, x.bar - 4),
-        label: `${x.t.name}, the full groove at bar ${x.bar}`,
+        label: t('obs.late.hear', { name: x.t.name, bar: x.bar }),
       })),
     },
   ]
 }
 
 /** Long likely intros or outros: room for another track to play over. */
-function roomToMix(tracks: readonly TrackProfile[]): Observation[] {
-  const found: { t: TrackProfile; bar: number; what: string }[] = []
-  for (const t of tracks) {
-    const s = t.structure.sections
+function roomToMix(tracks: readonly TrackProfile[], t: Translate): Observation[] {
+  const found: { t: TrackProfile; bar: number; label: string }[] = []
+  for (const track of tracks) {
+    const s = track.structure.sections
     const intro = s[0]?.term === 'INTRO' && sectionBars(s[0]) >= ROOM_BARS ? s[0] : undefined
     const last = s.at(-1)
     const outro = last?.term === 'OUTRO' && sectionBars(last) >= ROOM_BARS ? last : undefined
-    if (outro) found.push({ t, bar: outro.fromBar, what: `${sectionBars(outro)}-bar outro` })
-    else if (intro) found.push({ t, bar: 1, what: `${sectionBars(intro)}-bar intro` })
+    if (outro)
+      found.push({
+        t: track,
+        bar: outro.fromBar,
+        label: t('obs.room.outro', { name: track.name, bars: sectionBars(outro) }),
+      })
+    else if (intro)
+      found.push({
+        t: track,
+        bar: 1,
+        label: t('obs.room.intro', { name: track.name, bars: sectionBars(intro) }),
+      })
   }
   if (found.length === 0) return []
   return [
@@ -211,14 +218,10 @@ function roomToMix(tracks: readonly TrackProfile[]): Observation[] {
       id: 'room-to-mix',
       kind: 'room-to-mix',
       layer: 'likely',
-      title: `Room to mix in ${plural(found.length, 'track')}`,
-      detail: `Intros or outros of ${ROOM_BARS} bars or more with fewer elements: space for a long blend.`,
+      title: t('obs.room.title', { n: found.length }),
+      detail: t('obs.room.detail', { bars: ROOM_BARS }),
       trackIds: found.map((x) => x.t.id),
-      hear: found.slice(0, MAX_HEAR).map((x) => ({
-        trackId: x.t.id,
-        bar: x.bar,
-        label: `${x.t.name}, ${x.what}`,
-      })),
+      hear: found.slice(0, MAX_HEAR).map((x) => ({ trackId: x.t.id, bar: x.bar, label: x.label })),
     },
   ]
 }
@@ -232,7 +235,11 @@ export function distance(a: TrackProfile, b: TrackProfile): number {
 }
 
 /** The closest pair between one DJ's tracks and the other's. */
-function pairAcross(tracks: readonly TrackProfile[], names: Record<string, string>): Observation[] {
+function pairAcross(
+  tracks: readonly TrackProfile[],
+  names: Record<string, string>,
+  t: Translate,
+): Observation[] {
   let best: { a: TrackProfile; b: TrackProfile; d: number } | null = null
   for (const a of tracks)
     for (const b of tracks) {
@@ -247,13 +254,17 @@ function pairAcross(tracks: readonly TrackProfile[], names: Record<string, strin
       id: 'pair-across',
       kind: 'pair-across',
       layer: 'likely',
-      title: `A pair across your two collections`,
-      detail:
-        `${a.name} (${names[a.owner] ?? 'DJ 1'}) and ${b.name} (${names[b.owner] ?? 'DJ 2'}) ` +
-        `have the closest tempo (${a.grid.bpm.toFixed(1)} and ${b.grid.bpm.toFixed(1)} BPM) ` +
-        `and the most similar shape over their length.`,
+      title: t('obs.pair.title'),
+      detail: t('obs.pair.detail', {
+        a: a.name,
+        da: names[a.owner] ?? t('dj.1'),
+        b: b.name,
+        db: names[b.owner] ?? t('dj.2'),
+        bpmA: a.grid.bpm.toFixed(1),
+        bpmB: b.grid.bpm.toFixed(1),
+      }),
       trackIds: [a.id, b.id],
-      hear: [a, b].map((t) => ({ trackId: t.id, bar: grooveBar(t), label: t.name })),
+      hear: [a, b].map((x) => ({ trackId: x.id, bar: grooveBar(x), label: x.name })),
     },
   ]
 }
@@ -262,15 +273,16 @@ function pairAcross(tracks: readonly TrackProfile[], names: Record<string, strin
 export function observe(
   tracks: readonly TrackProfile[],
   names: Record<string, string> = {},
+  t: Translate = english,
 ): Observation[] {
-  const usable = tracks.filter((t) => barCount(t) > 0)
+  const usable = tracks.filter((x) => barCount(x) > 0)
   if (usable.length < 2) return []
   return [
-    ...tempoNeighbours(usable),
-    ...steadyGrooves(usable),
-    ...breakdownReturns(usable),
-    ...lateLifts(usable),
-    ...roomToMix(usable),
-    ...pairAcross(usable, names),
+    ...tempoNeighbours(usable, t),
+    ...steadyGrooves(usable, t),
+    ...breakdownReturns(usable, t),
+    ...lateLifts(usable, t),
+    ...roomToMix(usable, t),
+    ...pairAcross(usable, names, t),
   ]
 }

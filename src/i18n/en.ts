@@ -1,0 +1,376 @@
+// English, the source language. Keys are grouped by screen; the engine's prose
+// (observations, readings, moments, versions, the set sheet) is here too, so the engine
+// stays free of language while the words live in one place.
+
+export const en = {
+  // App shell
+  'app.title': 'DJ Flow Lab',
+  'app.steps': 'Steps',
+  'app.whoAtScreen': 'Who is at the screen',
+  'app.youAre': 'You are',
+  'app.youAreHint': 'Versions, comments and picks are signed by the DJ at the screen.',
+  'app.language': 'Language',
+  'app.setMenu': 'Set',
+  'app.ok': 'OK',
+  'app.lockedStep': 'Not available yet: {reason}',
+
+  'step.music': 'Your music',
+  'step.concepts': 'Concepts',
+  'step.set': 'The set',
+  'step.lab': 'Lab',
+  'step.perform': 'Perform',
+
+  'state.music.empty': 'Add tracks from both of you',
+  'state.music.ready': '{n} {n|track|tracks} ready',
+  'state.music.analysing': 'Analysing {n}…',
+  'state.music.missing': '{n} {n|needs its file|need their files}',
+  'state.concepts.locked': 'needs two ready tracks',
+  'state.concepts.open': '{n} {n|reading|readings} to hear',
+  'state.concepts.chosen': '{name} chosen',
+  'state.set.locked': 'choose a concept first',
+  'state.set.open':
+    '{tracks} {tracks|track|tracks} · {transitions} {transitions|transition|transitions}',
+  'state.lab.locked': 'opens from a transition on the set',
+  'state.lab.open': 'Transition {n} of {total}',
+  'state.lab.tried': '{tried} of {total} tried',
+  'state.perform.locked': 'needs a set',
+  'state.perform.open': '{agreed} of {total} agreed',
+  'state.perform.missing': '{n} without a version',
+
+  // Keep and pass the set (the Set menu)
+  'keep.title': 'Keep and pass the set',
+  'keep.text':
+    'The set is kept in this browser as you work: tracks, tempos and keys, the reading, the order, versions, comments and picks. No audio: after a reload, or on the other DJ’s computer, select the files again and they are matched to their tracks.',
+  'keep.missing': '{n} {n|track needs its file|tracks need their files} to listen.',
+  'keep.pass': 'Pass the set (file)',
+  'keep.open': 'Open a set file',
+  'keep.new': 'Start a new set',
+  'keep.newWarn': 'This clears the set kept in this browser.',
+  'keep.clear': 'Clear it',
+  'keep.keep': 'Keep it',
+  'keep.file': '{names} set',
+  'keep.and': '{a} and {b}',
+  'keep.our': 'our',
+
+  // Your music
+  'music.title': 'Your music',
+  'music.lead':
+    'The shared collection for your set, from both of you. Files are decoded and analysed in this browser; no audio and no data leaves this device.',
+  'music.notMeasured': 'Not measured yet: vocals, melody and key.',
+  'music.notMeasuredRest':
+    'Everything here rests on tempo and, bar by bar, the level, low end and highs within each track. A key is only what you type.',
+  'music.djTracks': "{name}'s tracks",
+  'music.djName': '{dj} name',
+  'music.djNamePlaceholder': '{dj}: type a name',
+  'music.count': '{n} {n|track|tracks}',
+  'music.add': 'Add tracks',
+  'music.empty': 'No tracks yet. Add local audio files: they stay on this device.',
+  'music.waiting': 'Waiting…',
+  'music.analysing': 'Analysing…',
+  'music.selectFile': 'Select its file',
+  'music.selectFileHint': 'Its analysis is kept; the file is needed to listen',
+  'music.matched': 'matched by {by}',
+  'music.by.fingerprint': 'fingerprint',
+  'music.by.nameLength': 'name and length',
+  'music.remove': 'Remove {name}',
+  'music.removeHint': 'Remove from the collection',
+  'music.bpm': 'BPM',
+  'music.confirm': 'Confirm',
+  'music.confirmHint': 'The estimate sounds right: keep it as yours',
+  'music.key': 'Key',
+  'music.sections': 'Sections',
+  'music.shape': 'Shape of {name}: level per bar',
+  'music.sectionBars': 'bars {from}–{to}',
+  'music.sectionsNote': 'Likely sections: listen and correct them in the Lab.',
+  'music.explore': 'Explore my tracks',
+  'music.needTwo': 'Add at least two tracks to explore them.',
+  'music.ready': '{n} {n|track|tracks} ready.',
+  'music.decodeError': 'Could not decode {name}: {error}',
+
+  'confirm.question': 'Remove?',
+  'confirm.remove': 'Remove',
+  'confirm.keep': 'Keep',
+
+  'dj.1': 'DJ 1',
+  'dj.2': 'DJ 2',
+
+  // Knowledge layers
+  'layer.measured': 'measured',
+  'layer.likely': 'likely',
+  'layer.interpretation': 'interpretation',
+  'layer.yours': 'your choice',
+  'layer.measured.hint': 'Measured from the audio: tempo, and level, low end and highs per bar.',
+  'layer.likely.hint': 'A guess from what is measured: check it by ear.',
+  'layer.interpretation.hint': 'A reading of the music, one of several possible.',
+  'layer.yours.hint': 'Set by you.',
+
+  // Concepts
+  'concepts.title': 'What story could this music tell?',
+  'concepts.lead':
+    'A few readings of the same tracks, none of them the answer. Hear what they rest on, then explore one; you can come back and try another.',
+  'concepts.noticed': 'What we noticed in your {n} tracks',
+  'concepts.observations': 'Observations',
+  'concepts.hidden': '{n} hidden because you said they don’t sound like that.',
+  'concepts.showAgain': 'Show them again',
+  'concepts.readings': 'Readings',
+  'concepts.hear': '▶ Hear it',
+  'concepts.stop': '■ Stop',
+  'concepts.hearHint': 'Play {n} bars from bar {bar}',
+  'concepts.why': 'Why it might work',
+  'concepts.check': 'Check it by ear',
+  'concepts.claims': 'Claims of {name}',
+  'concepts.notLikeThat': 'Doesn’t sound like that',
+  'concepts.fallback': 'Offered for any collection: it rests only on tempo and fullness.',
+  'concepts.toExplore': 'To explore',
+  'concepts.uses': 'Uses {a} of {dj1}’s and {b} of {dj2}’s tracks, ordered by {by}.',
+  'concepts.explore': 'Explore the concept',
+  'concepts.chosen': 'Chosen: this is your set',
+  'concepts.backToSet': 'Back to the set',
+  'concepts.functions': 'Musical functions in order',
+  'concepts.removedTrack': 'a removed track',
+
+  // Hear the idea
+  'idea.hear': '▶ Hear the idea',
+  'idea.stop': '■ Stop the idea ({n} of {total})',
+  'idea.hint': '{n} bars of each track, in order',
+  'idea.details': 'The idea, moment by moment',
+  'idea.bar': 'bar {bar}: {purpose}',
+
+  // The set
+  'set.title': 'Your set',
+  'set.lead':
+    'The reading’s order, to listen to and change. The function of each slot is the reading’s; it stays with the slot when tracks move. Each transition is mixed by the DJ bringing the next track in.',
+  'set.change': 'Change the concept',
+  'set.aria': 'Set',
+  'set.arc': 'Energy arc',
+  'set.arcAria': "The arc against each track's drive",
+  'set.arcCaptionReading':
+    'The line is the arc of the reading; the dots are each track’s drive (its tempo and how much of it runs at full groove), both as order over the set. Move a slot’s arc on its card.',
+  'set.arcCaptionYours':
+    'The line is the arc you set; the dots are each track’s drive (its tempo and how much of it runs at full groove), both as order over the set. Move a slot’s arc on its card.',
+  'set.labError': 'The Lab could not open: {error}',
+  'set.moveEarlier': 'Move {name} earlier',
+  'set.moveLater': 'Move {name} later',
+  'set.remove': 'Remove {name} from the set',
+  'set.arcLabel': 'Arc',
+  'set.arcAt': 'Arc at slot {n}',
+  'set.above': 'Sits clearly above the arc: it drives more than this slot asks for.',
+  'set.below': 'Sits clearly below the arc: it drives less than this slot asks for.',
+  'set.removedTrack': 'This track was removed from the collection.',
+  'set.transition': 'Transition {n}',
+  'set.bringsIn': '{name} brings it in',
+  'set.opening': 'Opening…',
+  'set.openLab': 'Open in the Lab',
+  'set.addFrom': 'Add from the collection',
+  'set.choose': 'Choose a track',
+  'set.addEnd': 'Add at the end',
+  'set.waiting': 'Waiting beside it:',
+  'set.swapIn': 'Swap in',
+  'set.stopConsidering': 'Stop considering {name} for slot {n}',
+  'set.altFor': 'Alternative for slot {n}',
+  'set.altPlaceholder': 'An alternative…',
+  'set.putBeside': 'Put beside it',
+
+  'status.notTried': 'not tried',
+  'status.tried': 'tried',
+  'status.versions': 'versions to choose between',
+  'status.agreed': 'agreed by both',
+
+  // The Lab
+  'lab.back': '← Back to the set',
+  'lab.transition': 'Transition {n} of {total}',
+  'lab.autoNote':
+    'Auto’s suggested blend start is in place. A grid you correct here goes back to the track.',
+
+  'work.aria': 'Versions and decision',
+  'work.versionName': 'Version name',
+  'work.versionPlaceholder': '{name}’s version',
+  'work.save': 'Save as a version',
+  'work.saveHint': 'Keeps the blend start, area, loop and takes of what plays',
+  'work.versions': 'Versions',
+  'work.load': 'Load',
+  'work.removeVersion': 'Remove {name}',
+  'work.compare': 'Compare',
+  'work.compareAria': 'Compare two versions',
+  'work.hear': 'Hear {n}',
+  'work.hearHint': 'Switches at the same beat of the transition',
+  'work.blind': 'Blind',
+  'work.reveal': 'Reveal which is which',
+  'work.decide': 'Decide',
+  'work.decideLead':
+    'Each of you picks, with a reason. It is agreed when you both pick the same; the app never picks.',
+  'work.notPicked': 'not picked yet',
+  'work.agreed': 'Agreed by both: {name}',
+  'work.picks': '{name} picks',
+  'work.pickAria': "{name}'s pick",
+  'work.choose': 'Choose…',
+  'work.both': 'Keep both, choose on the night',
+  'work.bothShort': 'keep both, choose on the night',
+  'work.reason': 'Reason',
+  'work.why': 'Why',
+  'work.pick': 'Pick',
+  'work.takeBack': 'Take my pick back',
+  'work.comments': 'Comments',
+  'work.none': 'none yet',
+  'work.bar': 'bar {bar}',
+  'work.comment': 'Comment',
+  'work.commentPlaceholder': 'A note on the bar at the cursor',
+  'work.pin': 'Pin to the bar at the cursor',
+
+  'version.default': '{name}’s version {n}',
+  'versions.describe': 'Blend start A {a} with B {b}',
+  'versions.bars': '{before} + {after} bars',
+  'versions.loop': 'loop on {deck}',
+  'versions.takes': '{n} {n|take|takes}',
+
+  // Perform
+  'perform.title': 'Prepare to perform',
+  'perform.lead':
+    '{title}: the set sheet for the night, from the versions you saved. Bars are counted on the track playing out. Nothing here is new: it is your plan, written for the controller (Pioneer DDJ-400 names).',
+  'perform.ourSet': 'Our set',
+  'perform.print': 'Print the sheet',
+  'perform.who': 'Who plays when',
+  'perform.deck': 'Deck {n}',
+  'perform.deckArrow': 'Deck {out} → deck {in}',
+  'perform.transitionAria': 'Transition {n}',
+  'perform.versionBy': '{version} by {author}.',
+  'perform.cueLabel': 'Cue',
+  'perform.cueText':
+    'deck {in} at its bar {inAt}; press PLAY on deck {in} at bar {playAt} of deck {out}.',
+  'perform.bar': 'Bar',
+  'perform.move': 'Move',
+  'perform.why': 'Why',
+  'perform.rekordbox': 'rekordbox',
+  'perform.rbLead':
+    'A playlist in set order with each track’s grid, a memory cue where the next track is started, a hot cue A where a track is cued when it comes in, and these notes in its comment. rekordbox finds tracks by where the files are on your computer, which this browser does not know: type the folder they are in.',
+  'perform.rbUnverified':
+    'Not checked yet with your rekordbox: whether importing these cues leaves your own cues on the same tracks alone. Import into a new playlist and look before you play from it.',
+  'perform.folder': 'Folder of the tracks',
+  'perform.download': 'Download rekordbox XML',
+  'perform.playlist': '{title} ({a} & {b})',
+
+  // The set sheet (engine)
+  'sheet.faderDown': 'down',
+  'sheet.faderUp': 'up',
+  'sheet.faderTo': 'to {pct} %',
+  'sheet.channelFader': 'Channel {deck} fader {words}',
+  'sheet.crossfader': 'Crossfader {words}',
+  'sheet.knobRamp': '{name} on deck {deck} to {clock}',
+  'sheet.knobStep': '{name} on deck {deck} at {clock}',
+  'sheet.clock': '{h} o’clock',
+  'sheet.clockMin': '{h} o’clock (all the way down)',
+  'sheet.clockMax': '{h} o’clock (all the way up)',
+  'sheet.why.b-in': 'The next track comes in under this one, its bass still cut.',
+  'sheet.why.b-mid': 'Its mids come up as it settles in.',
+  'sheet.why.b-high': 'Its highs come up as it settles in.',
+  'sheet.why.a-hp': 'This track thins out to make room.',
+  'sheet.why.a-low': 'Bass swap: one low end at a time.',
+  'sheet.why.b-low': 'Bass swap: the new low end takes over.',
+  'sheet.why.a-mid': 'This track steps back.',
+  'sheet.why.a-high': 'This track steps back.',
+  'sheet.why.a-out': 'This track leaves.',
+  'sheet.takeWhy': 'Your take: a move you played in the Lab.',
+  'sheet.note.none': 'No version saved yet: open it in the Lab and save one.',
+  'sheet.note.agreed': 'Agreed by both.',
+  'sheet.note.both': 'Kept both to choose on the night; this is the latest.',
+  'sheet.note.latest': 'Not agreed yet; this is the latest version.',
+  'sheet.loop':
+    'LOOP IN on deck {deck} at its {start}, LOOP OUT {bars} bars later; EXIT at {at} after {passes} passes',
+  'sheet.loopWhy.before': 'The loop gives the next track’s intro the bars it is short of.',
+  'sheet.loopWhy.after': 'The loop holds this track’s bars while the next one comes in.',
+
+  'facts.key': 'key {key}',
+  'facts.noKey': 'key —',
+
+  // Observations (engine)
+  'obs.tempo.title': '{n} {n|track|tracks} within a small tempo change',
+  'obs.tempo.detail':
+    'From {lo} to {hi} BPM, each within {pct} % of the next: they can follow one another without a big change in tempo.',
+  'obs.steady.title': 'Long steady grooves in {n} {n|track|tracks}',
+  'obs.steady.detail':
+    '{bars} bars or more where level, low end and highs barely change: room to hold one state and let it work.',
+  'obs.steady.hear': '{name}, {bars} bars from bar {bar}',
+  'obs.breakdown.title': 'Breakdowns with a return in {n} {n|track|tracks}',
+  'obs.breakdown.detail':
+    'A stretch with less low end or level, then the full groove comes back: a held breath and its release, inside one track.',
+  'obs.breakdown.hear': '{name}, the return at bar {bar}',
+  'obs.late.title': 'The full groove arrives late in {n} {n|track|tracks}',
+  'obs.late.detail':
+    'More than half of each of these tracks passes before its first full section: they hold something back.',
+  'obs.late.hear': '{name}, the full groove at bar {bar}',
+  'obs.room.title': 'Room to mix in {n} {n|track|tracks}',
+  'obs.room.detail':
+    'Intros or outros of {bars} bars or more with fewer elements: space for a long blend.',
+  'obs.room.outro': '{name}, {bars}-bar outro',
+  'obs.room.intro': '{name}, {bars}-bar intro',
+  'obs.pair.title': 'A pair across your two collections',
+  'obs.pair.detail':
+    '{a} ({da}) and {b} ({db}) have the closest tempo ({bpmA} and {bpmB} BPM) and the most similar shape over their length.',
+
+  // Readings (engine): authored content, by reading id
+  'reading.into-the-unknown.name': 'Into the Unknown',
+  'reading.into-the-unknown.words': 'Immersion|mystery|gradual revelation',
+  'reading.into-the-unknown.idea':
+    'Start with space and few elements, let one groove settle long enough to forget time, and reveal the full weight only near the end.',
+  'reading.into-the-unknown.question':
+    'How long can the room stay inside one state before it needs the reveal?',
+  'reading.into-the-unknown.why.room-to-mix':
+    'Long sparse intros and outros give space to open slowly.',
+  'reading.into-the-unknown.why.steady-groove': 'Long steady grooves can hold the state.',
+  'reading.hidden-euphoria.name': 'Hidden Euphoria',
+  'reading.hidden-euphoria.words': 'Restraint|anticipation|emotional uplift',
+  'reading.hidden-euphoria.idea':
+    'Keep the energy held back for most of the set, let breakdowns tease what is coming, and open it all up in one late stretch.',
+  'reading.hidden-euphoria.question':
+    'Which return is strong enough to carry the whole set’s release?',
+  'reading.hidden-euphoria.why.breakdown-return': 'Breakdowns with a return can tease the release.',
+  'reading.hidden-euphoria.why.late-lift':
+    'Tracks that hold their fullest part back fit a late peak.',
+  'reading.two-rooms.name': 'Two Rooms, One Night',
+  'reading.two-rooms.words': 'Dialogue|contrast|meeting',
+  'reading.two-rooms.idea':
+    'Each DJ keeps their own colour and the set moves between the two, track by track, until the two collections meet.',
+  'reading.two-rooms.question':
+    'Where do the two collections sound most alike, and should that be the meeting?',
+  'reading.two-rooms.why.pair-across': 'A pair across the two collections can be the meeting.',
+  'reading.pressure-and-breath.name': 'Pressure and Breath',
+  'reading.pressure-and-breath.words': 'Tension|release|pulse',
+  'reading.pressure-and-breath.idea':
+    'Waves instead of one arc: hold pressure on a steady groove, let it breathe in a breakdown, and come back stronger each time.',
+  'reading.pressure-and-breath.question': 'How many waves does the room want before the last one?',
+  'reading.pressure-and-breath.why.steady-groove': 'Steady grooves can hold the pressure.',
+  'reading.pressure-and-breath.why.breakdown-return':
+    'Breakdowns with a return give each wave its breath.',
+  'reading.steady-climb.name': 'A Steady Climb',
+  'reading.steady-climb.words': 'Patience|momentum|arrival',
+  'reading.steady-climb.idea':
+    'The plainest story: from the slowest and sparsest tracks to the fastest and fullest, one small step at a time, then a calm landing.',
+  'reading.steady-climb.question':
+    'Is a straight climb what this music wants, or does it ask for a turn?',
+  'reading.orderedBy.alternate': 'the two DJs in turns, each in tempo order',
+  'reading.orderedBy.curve': 'tempo and how much of each runs at its full groove',
+
+  // Moments of a track (engine)
+  'moment.opens': 'how it opens',
+  'moment.buildBack': 'the build back into its groove',
+  'moment.wayIn': 'the way into its groove',
+  'moment.letsGo': 'where it lets go',
+  'moment.easesOff': 'where it eases off',
+  'moment.outro': 'the outro, where it hands over',
+  'moment.changes': 'where it changes most',
+  'moment.lands': 'how it lands',
+  'moment.ends': 'how it ends',
+  'moment.holds': 'the state it holds',
+  'moment.sounds': 'how it sounds',
+
+  // Store and persistence
+  'store.noTrack': 'That track is no longer in the collection',
+  'store.selectAgain': 'Select the file of {name} again to listen to it',
+  'store.labLoad': 'The Lab could not load the two tracks',
+  'persist.saveError': 'Could not save the set here: {error}',
+  'setFile.notJson': 'This is not a set file: it is not JSON.',
+  'setFile.notSet': 'This is not a DJ Flow Lab set file.',
+  'setFile.version': 'This set file is version {version}; this app reads version {reads}.',
+  'setFile.noTracks': 'This set file is damaged: it has no tracks.',
+  'setFile.damaged': 'This set file is damaged: a track is missing its analysis.',
+} as const
