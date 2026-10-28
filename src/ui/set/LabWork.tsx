@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { DjId } from '../../engine/set/profile'
-import { agreed, describeState, type Choice } from '../../engine/set/versions'
+import { agreed, describeState, unheard, type Choice } from '../../engine/set/versions'
 import { useT } from '../../i18n/react'
 import { ConfirmButton } from './Bits'
 import type { SetStore } from './store'
@@ -161,6 +161,7 @@ function Decide({ store }: { store: SetStore }) {
 export function LabWork({ store }: { store: SetStore }) {
   const t = useT()
   const work = store.labWork
+  const toHear = new Set(unheard(work, store.me).map((v) => v.id))
   const [name, setName] = useState('')
   const [comment, setComment] = useState('')
   return (
@@ -191,6 +192,11 @@ export function LabWork({ store }: { store: SetStore }) {
               <strong>{v.name}</strong>{' '}
               <span className={`set-owner set-owner-${v.author}`}>{store.djName(v.author)}</span>
               <span className="muted"> · {describeState(v.state, t)}</span>{' '}
+              {toHear.has(v.id) && (
+                <span className="chip set-unheard" data-testid="unheard">
+                  {t('work.unheard')}
+                </span>
+              )}{' '}
               <button className="btn btn-small" onClick={() => store.loadVersion(v.id)}>
                 {t('work.load')}
               </button>{' '}

@@ -2,6 +2,7 @@ import type { Translate } from '../../i18n'
 import { readingName } from '../../engine/set/readings'
 import { transitions, type SetPlan } from '../../engine/set/spine'
 import type { TrackProfile } from '../../engine/set/profile'
+import { DECIDED } from './status'
 import type { LabOpen, Screen, TrackStatus } from './store'
 
 // The journey bar: the five steps of planning a set, each with where it stands in one
@@ -72,7 +73,7 @@ export function journey(input: JourneyInput, t: Translate): StepState[] {
     : withoutVersion > 0
       ? t('state.perform.missing', { n: withoutVersion })
       : t('state.perform.open', {
-          agreed: steps.filter((s) => s.status === 'agreed by both').length,
+          agreed: steps.filter((s) => DECIDED.includes(s.status)).length,
           total: steps.length,
         })
 

@@ -10,7 +10,7 @@ import { BlendControls, DeckPanel, SessionErrors } from '../../poc/Tracks'
 import { PHRASE, sign, useTransport } from '../../poc/useTransport'
 import { Mixer } from '../mixer/Mixer'
 import { LabWork } from '../set/LabWork'
-import { STATUS_KEY } from '../set/status'
+import { statusText } from '../set/status'
 import type { LabOpen, SetStore } from '../set/store'
 import '../../poc/poc.css'
 import './lab.css'
@@ -57,7 +57,9 @@ export function LabPage({ store, lab, plan }: { store: SetStore; lab: LabOpen; p
                 {' · '}
                 {t('set.bringsIn', { name: store.djName(step.mixedBy) })}
                 {' · '}
-                <span data-testid="lab-status">{t(STATUS_KEY[step.status])}</span>
+                <span data-testid="lab-status">
+                  {statusText(step.status, work, t, (dj) => store.djName(dj))}
+                </span>
               </>
             )}
             {' · '}

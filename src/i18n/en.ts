@@ -153,11 +153,19 @@ export const en = {
   'set.moveEarlier': 'Move {name} earlier',
   'set.moveLater': 'Move {name} later',
   'set.remove': 'Remove {name} from the set',
-  'set.arcLabel': 'Arc',
+  'set.arcLabel': 'Intended energy',
   'set.arcAt': 'Arc at slot {n}',
   'set.above': 'Sits clearly above the arc: it drives more than this slot asks for.',
   'set.below': 'Sits clearly below the arc: it drives less than this slot asks for.',
   'set.removedTrack': 'This track was removed from the collection.',
+  'set.tally':
+    '{tracks} {tracks|track|tracks} · {transitions} {transitions|transition|transitions}',
+  'set.tallyAgreed': '{n} agreed',
+  'set.tallyVersions': '{n} with versions to choose',
+  'set.tallyNotTried': '{n} not tried',
+  'set.versionCount': '{n} {n|version|versions}',
+  'set.toAudition': '{n} for you to hear',
+  'set.arcLegend': 'The line is your intention; the dots are measured drive.',
   'set.transition': 'Transition {n}',
   'set.bringsIn': '{name} brings it in',
   'set.opening': 'Opening…',
@@ -175,6 +183,8 @@ export const en = {
   'status.notTried': 'not tried',
   'status.tried': 'tried',
   'status.versions': 'versions to choose between',
+  'status.suggested': 'suggested by {name}',
+  'status.keepBoth': 'keep both for the night',
   'status.agreed': 'agreed by both',
 
   // The Lab
@@ -211,6 +221,7 @@ export const en = {
   'work.why': 'Why',
   'work.pick': 'Pick',
   'work.takeBack': 'Take my pick back',
+  'work.unheard': 'not heard by you yet',
   'work.comments': 'Comments',
   'work.none': 'none yet',
   'work.bar': 'bar {bar}',
@@ -241,6 +252,15 @@ export const en = {
   'perform.bar': 'Bar',
   'perform.move': 'Move',
   'perform.why': 'Why',
+  'perform.warnings': 'Before the night',
+  'perform.allSet':
+    'Everything is in place: every transition is decided and every track has its file.',
+  'perform.warn.noVersion': 'Transition {n} has no version yet',
+  'perform.warn.notAgreed': 'Transition {n} is not agreed yet',
+  'perform.warn.missingFile': '{name} needs its file on this device',
+  'perform.rbShort':
+    'A playlist in set order with each track’s grid, its cues and these notes. Type the folder the files are in so rekordbox can find them.',
+  'perform.rbMore': 'What the export contains, and a caution',
   'perform.rekordbox': 'rekordbox',
   'perform.rbLead':
     'A playlist in set order with each track’s grid, a memory cue where the next track is started, a hot cue A where a track is cued when it comes in, and these notes in its comment. rekordbox finds tracks by where the files are on your computer, which this browser does not know: type the folder they are in.',

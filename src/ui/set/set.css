@@ -842,3 +842,127 @@
 .set-dismiss {
   color: var(--text-muted);
 }
+
+/* The set and Perform (stage 4): the summary strip, the arc as a strip, slot rows, wider
+   transition rows in the shared vocabulary, the warnings box on the sheet. */
+.set-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 8px 12px;
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  font-size: 13px;
+}
+
+.set-tally {
+  color: var(--text-muted);
+}
+
+.set-arc svg {
+  max-height: 72px;
+}
+
+.set-arc-legend {
+  flex: 1;
+  font-size: 13px;
+}
+
+.set-arc figcaption {
+  font-size: 13px;
+}
+
+.set-slot-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 2fr);
+  gap: 8px 16px;
+  align-items: center;
+}
+
+.set-slot-body .set-shape {
+  height: 24px;
+}
+
+.set-slot-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .set-slot-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.set-transition {
+  margin: 4px 0;
+  padding: 10px 12px 10px 20px;
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+}
+
+.set-transition-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  color: var(--text);
+}
+
+.set-transition[data-status='not tried'] strong {
+  color: var(--text-muted);
+}
+
+.set-transition[data-status='suggested'] strong,
+.set-transition[data-status='versions to choose between'] strong {
+  color: var(--explain);
+}
+
+.set-transition[data-status='agreed by both'] strong,
+.set-transition[data-status='keep both'] strong {
+  color: var(--blend-mark);
+}
+
+.set-unheard {
+  border-color: var(--blend-mark);
+  color: var(--blend-mark);
+}
+
+.set-sheet-top {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr);
+  gap: 12px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .set-sheet-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.set-warnings ul {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.set-warnings[data-clear='false'] {
+  border-color: var(--blend-mark);
+}
+
+.set-perform .set-fold {
+  font-size: 13px;
+}
+
+.set-perform .set-fold p {
+  margin-top: 8px;
+}
