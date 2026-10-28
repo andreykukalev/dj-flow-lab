@@ -27,6 +27,8 @@ export interface TransitionVersion {
   state: LabState
   /** The plan that played, takes included: what the set sheet and export are made from. */
   plan: TransitionPlanV1
+  /** Who has listened to it; the author from the start. Absent in older saved sets. */
+  heardBy?: DjId[]
 }
 
 export interface BarComment {
@@ -51,7 +53,18 @@ export interface TransitionWork {
   picks: Partial<Record<DjId, Pick>>
 }
 
-export type WorkStatus = 'not tried' | 'tried' | 'versions to choose between' | 'agreed by both'
+/**
+ * Where a transition stands, in one vocabulary for the set, the Lab and the sheet: nobody
+ * has listened; tried; one DJ saved a version; two or more to choose between; the same
+ * one picked by both; or both kept to choose on the night.
+ */
+export type WorkStatus =
+  | 'not tried'
+  | 'tried'
+  | 'suggested'
+  | 'versions to choose between'
+  | 'agreed by both'
+  | 'keep both'
 
 export const emptyWork = (): TransitionWork => ({ versions: [], comments: [], picks: {} })
 
@@ -87,10 +100,27 @@ export function agreed(work: TransitionWork): Choice | null {
 }
 
 export function workStatus(work: TransitionWork | undefined, tried: boolean): WorkStatus {
-  if (work && agreed(work) !== null) return 'agreed by both'
+  const both = work ? agreed(work) : null
+  if (both === 'both') return 'keep both'
+  if (both !== null) return 'agreed by both'
   if (work && work.versions.length >= 2) return 'versions to choose between'
-  if (tried || (work && work.versions.length > 0)) return 'tried'
-  return 'not tried'
+  if (work && work.versions.length === 1) return 'suggested'
+  return tried ? 'tried' : 'not tried'
+}
+
+/** `dj` has listened to the version. */
+export function markHeard(work: TransitionWork, id: string, dj: DjId): TransitionWork {
+  return {
+    ...work,
+    versions: work.versions.map((v) =>
+      v.id !== id || v.heardBy?.includes(dj) ? v : { ...v, heardBy: [...(v.heardBy ?? []), dj] },
+    ),
+  }
+}
+
+/** The other DJ's versions that `dj` has not listened to yet: what needs auditioning. */
+export function unheard(work: TransitionWork | undefined, dj: DjId): TransitionVersion[] {
+  return (work?.versions ?? []).filter((v) => v.author !== dj && !v.heardBy?.includes(dj))
 }
 
 /** "Blend start A 49.1 with B 17.1 · 16 + 16 bars · loop on B · 2 takes" */

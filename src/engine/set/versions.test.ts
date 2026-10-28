@@ -21,8 +21,10 @@ import {
   agreed,
   describeState,
   emptyWork,
+  markHeard,
   pick,
   removeVersion,
+  unheard,
   workStatus,
   type LabState,
 } from './versions'
@@ -56,7 +58,7 @@ describe('versions and picks', () => {
     expect(workStatus(undefined, false)).toBe('not tried')
     expect(workStatus(w, true)).toBe('tried')
     w = addVersion(w, version('v1', 'dj1'))
-    expect(workStatus(w, false)).toBe('tried')
+    expect(workStatus(w, false)).toBe('suggested')
     w = addVersion(w, version('v2', 'dj2'))
     expect(workStatus(w, true)).toBe('versions to choose between')
     w = pick(w, 'dj1', { choice: 'v1', reason: 'the bass swap lands on the vocal' })
@@ -72,6 +74,18 @@ describe('versions and picks', () => {
     let w = addVersion(addVersion(emptyWork(), version('v1', 'dj1')), version('v2', 'dj2'))
     w = pick(pick(w, 'dj1', { choice: 'both', reason: '' }), 'dj2', { choice: 'both', reason: '' })
     expect(agreed(w)).toBe('both')
+    expect(workStatus(w, true)).toBe('keep both')
+  })
+
+  it('knows which versions each DJ still has to hear', () => {
+    let w = addVersion(emptyWork(), { ...version('v1', 'dj1'), heardBy: ['dj1'] })
+    w = addVersion(w, version('v2', 'dj2'))
+    expect(unheard(w, 'dj2').map((v) => v.id)).toEqual(['v1'])
+    expect(unheard(w, 'dj1').map((v) => v.id)).toEqual(['v2'])
+    w = markHeard(w, 'v1', 'dj2')
+    expect(unheard(w, 'dj2')).toEqual([])
+    expect(markHeard(w, 'v1', 'dj2')).toEqual(w)
+    expect(unheard(undefined, 'dj1')).toEqual([])
   })
 
   it('drops the picks of a removed version', () => {

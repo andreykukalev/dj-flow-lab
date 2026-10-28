@@ -29,6 +29,7 @@ import {
   addComment,
   addVersion,
   emptyWork,
+  markHeard,
   pick,
   removeVersion,
   type Pick,
@@ -514,12 +515,17 @@ export class SetStore {
       name.trim() || this.t('version.default', { name: this.djName(this.me), n: mine + 1 })
     const state = this.audio.snapshot()
     const plan = this.audio.plan
-    this.changeWork((w) => addVersion(w, { id, name: label, author: this.me, state, plan }))
+    this.changeWork((w) =>
+      addVersion(w, { id, name: label, author: this.me, state, plan, heardBy: [this.me] }),
+    )
   }
 
+  /** Puts a version on the decks; the DJ at the screen counts as having heard it. */
   loadVersion(id: string): void {
     const version = this.labWork.versions.find((v) => v.id === id)
-    if (version) this.audio.restore(version.state)
+    if (!version) return
+    this.audio.restore(version.state)
+    this.changeWork((w) => markHeard(w, id, this.me))
   }
 
   removeVersion(id: string): void {

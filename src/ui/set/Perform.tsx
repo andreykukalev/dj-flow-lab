@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import { trackFacts } from '../../engine/set/profile'
+import { formatDuration } from '../../engine/set/profile'
 import { readingName } from '../../engine/set/readings'
 import { rekordboxXml } from '../../engine/set/rekordbox'
 import { setSheet } from '../../engine/set/sheet'
+import { transitions } from '../../engine/set/spine'
 import { useT } from '../../i18n/react'
+import { DECIDED, missingTracks } from './status'
 import type { SetStore } from './store'
 
-// Prepare to perform (#95): who plays when, each transition as steps on the controller
-// (DDJ-400 names) at bars of the outgoing track, printable, and a rekordbox XML with
-// the playlist, the cues and the notes.
+// Prepare to perform (#95): the order first, then what is still unresolved before the
+// night, then each transition as steps on the controller (DDJ-400 names) at bars of the
+// outgoing track, printable, and a rekordbox XML with the playlist, the cues and the notes
+// as a short form.
 
 export function Perform({ store }: { store: SetStore }) {
   const t = useT()
@@ -16,8 +19,20 @@ export function Perform({ store }: { store: SetStore }) {
   const [folder, setFolder] = useState('')
   if (!plan) return null
   const sheet = setSheet(plan, store.profiles, t)
+  const steps = transitions(plan, store.profiles)
   const name = (id: string) => store.profile(id)?.name ?? id
   const title = store.reading ? readingName(store.reading, t) : t('perform.ourSet')
+  const warnings = [
+    ...sheet.transitions
+      .filter((tr) => !tr.version)
+      .map((tr) => t('perform.warn.noVersion', { n: tr.index + 1 })),
+    ...sheet.transitions
+      .filter((tr) => tr.version && !DECIDED.includes(steps[tr.index]!.status))
+      .map((tr) => t('perform.warn.notAgreed', { n: tr.index + 1 })),
+    ...missingTracks(plan, store.tracks).map((x) =>
+      t('perform.warn.missingFile', { name: x.fileName }),
+    ),
+  ]
 
   const download = () => {
     const tracks = plan.order.flatMap((id) => {
@@ -40,9 +55,11 @@ export function Perform({ store }: { store: SetStore }) {
 
   return (
     <div className="set-screen set-sheet">
-      <header className="set-screen-head">
-        <h2>{t('perform.title')}</h2>
-        <p className="muted">{t('perform.lead', { title })}</p>
+      <header className="set-screen-head set-screen-head-row">
+        <div>
+          <h2>{t('perform.title')}</h2>
+          <p className="muted">{t('perform.lead', { title })}</p>
+        </div>
         <div className="set-actions set-no-print">
           <button className="btn btn-small" onClick={() => window.print()}>
             {t('perform.print')}
@@ -50,22 +67,44 @@ export function Perform({ store }: { store: SetStore }) {
         </div>
       </header>
 
-      <section className="card set-perform" aria-label={t('perform.who')}>
-        <h3>{t('perform.who')}</h3>
-        <ol className="set-who">
-          {sheet.slots.map((s) => {
-            const p = store.profile(s.trackId)
-            return (
-              <li key={s.trackId} data-testid="sheet-slot">
-                <span className="chip">{t('perform.deck', { n: s.deck })}</span>{' '}
-                <span className={`set-owner set-owner-${s.player}`}>{store.djName(s.player)}</span>{' '}
-                <strong>{name(s.trackId)}</strong>
-                {p && <span className="muted"> · {trackFacts(p, t)}</span>}
-              </li>
-            )
-          })}
-        </ol>
-      </section>
+      <div className="set-sheet-top">
+        <section className="card set-perform" aria-label={t('perform.who')}>
+          <h3>{t('perform.who')}</h3>
+          <ol className="set-who">
+            {sheet.slots.map((s) => {
+              const p = store.profile(s.trackId)
+              return (
+                <li key={s.trackId} data-testid="sheet-slot">
+                  <span className="chip">{t('perform.deck', { n: s.deck })}</span>{' '}
+                  <span className={`set-owner set-owner-${s.player}`}>
+                    {store.djName(s.player)}
+                  </span>{' '}
+                  <strong>{name(s.trackId)}</strong>
+                  {p && <span className="muted"> · {formatDuration(p.durationSec)}</span>}
+                </li>
+              )
+            })}
+          </ol>
+        </section>
+
+        <section
+          className="card set-perform set-warnings"
+          aria-label={t('perform.warnings')}
+          data-testid="warnings"
+          data-clear={warnings.length === 0}
+        >
+          <h3>{t('perform.warnings')}</h3>
+          {warnings.length === 0 ? (
+            <p className="set-agreed">{t('perform.allSet')}</p>
+          ) : (
+            <ul>
+              {warnings.map((w) => (
+                <li key={w}>{w}</li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
 
       {sheet.transitions.map((tr) => (
         <section
@@ -74,9 +113,16 @@ export function Perform({ store }: { store: SetStore }) {
           aria-label={t('perform.transitionAria', { n: tr.index + 1 })}
           data-testid="sheet-transition"
         >
-          <h3>
-            {tr.index + 1}. {name(tr.from)} → {name(tr.to)}
-          </h3>
+          <div className="set-card-head">
+            <h3>
+              {tr.index + 1}. {name(tr.from)} → {name(tr.to)}
+            </h3>
+            <span className="set-functions">
+              <span className="chip set-function">{plan.roles[tr.index]}</span>
+              <span className="muted"> → </span>
+              <span className="chip set-function">{plan.roles[tr.index + 1]}</span>
+            </span>
+          </div>
           <p className="muted">
             {t('perform.deckArrow', { out: tr.outDeck, in: tr.inDeck })} ·{' '}
             {t('set.bringsIn', { name: store.djName(tr.mixedBy) })} ·{' '}
@@ -121,10 +167,7 @@ export function Perform({ store }: { store: SetStore }) {
 
       <section className="card set-perform set-no-print" aria-label={t('perform.rekordbox')}>
         <h3>{t('perform.rekordbox')}</h3>
-        <p className="muted">{t('perform.rbLead')}</p>
-        <p className="set-not-measured" role="note">
-          {t('perform.rbUnverified')}
-        </p>
+        <p className="muted">{t('perform.rbShort')}</p>
         <div className="set-actions">
           <label className="poc-field">
             {t('perform.folder')}
@@ -139,6 +182,13 @@ export function Perform({ store }: { store: SetStore }) {
             {t('perform.download')}
           </button>
         </div>
+        <details className="set-fold">
+          <summary>{t('perform.rbMore')}</summary>
+          <p className="muted">{t('perform.rbLead')}</p>
+          <p className="set-not-measured" role="note">
+            {t('perform.rbUnverified')}
+          </p>
+        </details>
       </section>
     </div>
   )
