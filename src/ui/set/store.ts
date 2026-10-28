@@ -132,7 +132,10 @@ export class SetStore {
 
   /** The Transition Builder's session, made on first need: it owns the audio context. */
   get audio(): PocSession {
-    this.session ??= createSession()
+    if (!this.session) {
+      this.session = createSession()
+      this.session.setTranslate(this.t)
+    }
     return this.session
   }
 
@@ -146,6 +149,13 @@ export class SetStore {
     if (lang === this.lang) return
     this.lang = lang
     saveLang(lang)
+    this.session?.setTranslate(this.t)
+    // Each track's sections are described again in the new words.
+    this.tracks = this.tracks.map((x) =>
+      x.features && x.profile
+        ? { ...x, profile: this.profileOf(x, x.features, x.profile.grid, x.profile.tempo) }
+        : x,
+    )
     this.notify()
   }
 
@@ -391,7 +401,7 @@ export class SetStore {
     tempo = features.tempo,
     key = track.profile?.key,
   ): TrackProfile {
-    const on = structureOn(features.frames, grid, tempo)
+    const on = structureOn(features.frames, grid, tempo, this.t)
     const profile: TrackProfile = {
       id: track.id,
       owner: track.owner,

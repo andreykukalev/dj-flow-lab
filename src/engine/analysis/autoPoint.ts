@@ -1,4 +1,5 @@
 import { isPhraseStart } from '../grid'
+import { english, type Translate } from '../../i18n'
 import type { BeatGrid } from '../model'
 import { fitArea, type AreaRequest, type FittedArea } from '../plan/area'
 import { areaContextFor, loopToFill, resolveLoop, type LoopRequest } from '../plan/loop'
@@ -66,6 +67,8 @@ export interface AutoCandidate {
   score: number
   /** Why it may work, from what was measured. */
   reasons: string[]
+  /** The bars it blends: the last of `reasons`, which the loop form restates. */
+  blends: string
   /** What to listen for, or what Auto could not check. */
   cautions: string[]
   /** A loop-assisted form of the same pairing, when a loop gives back trimmed bars. */
@@ -124,19 +127,20 @@ function sectionAt(s: TrackStructure, bar: number): string | undefined {
 }
 
 /** "B's bars 1–16 (likely INTRO)" or "B's bars 1–16". */
-function barsName(deck: 'A' | 'B', s: TrackStructure, w: Part): string {
+function barsName(deck: 'A' | 'B', s: TrackStructure, w: Part, t: Translate): string {
   const term = sectionAt(s, w.fromBar)
   const same = term !== undefined && term === sectionAt(s, w.toBar)
-  return `${deck}'s bars ${w.fromBar}–${w.toBar}${same ? ` (likely ${term})` : ''}`
+  const params = { deck, from: w.fromBar, to: w.toBar, term: term ?? '' }
+  return t(same ? 'auto.barsNamed' : 'auto.deckBars', params)
 }
 
 /** What is sparser about a window, in words. */
-function sparser(w: Part): string {
+function sparser(w: Part, t: Translate): string {
   const parts: string[] = []
-  if (w.lowBy >= 6) parts.push(`${dB(w.lowBy)} less low end`)
-  if (w.highsBy >= 6) parts.push(`${dB(w.highsBy)} less highs`)
-  if (-w.level >= 6) parts.push(`${dB(w.level)} quieter`)
-  return parts.length > 0 ? parts.join(', ') : 'a little sparser'
+  if (w.lowBy >= 6) parts.push(t('auto.lessLow', { db: dB(w.lowBy) }))
+  if (w.highsBy >= 6) parts.push(t('auto.lessHighs', { db: dB(w.highsBy) }))
+  if (-w.level >= 6) parts.push(t('auto.quieter', { db: dB(w.level) }))
+  return parts.length > 0 ? parts.join(', ') : t('auto.sparser')
 }
 
 const hasChangeNear = (s: TrackStructure, bar: number) =>
@@ -172,6 +176,7 @@ export function suggestBlendStarts(
   current: AreaRequest,
   prefs: AutoPreferences = {},
   count = 3,
+  t: Translate = english,
 ): AutoCandidate[] {
   const area = areaFor(prefs, current)
   const lift = prefs.energy === 'lift'
@@ -185,12 +190,16 @@ export function suggestBlendStarts(
   const scored: AutoCandidate[] = []
   for (const exitBarA of phraseLines(a)) {
     for (const entryBarB of phraseLines(b)) {
-      const fitted = fitArea(area, {
-        startBeatA: barToBeat(a.grid, exitBarA),
-        entryBeatB: barToBeat(b.grid, entryBarB),
-        beatsA: a.beats,
-        beatsB: b.beats,
-      })
+      const fitted = fitArea(
+        area,
+        {
+          startBeatA: barToBeat(a.grid, exitBarA),
+          entryBeatB: barToBeat(b.grid, entryBarB),
+          beatsA: a.beats,
+          beatsB: b.beats,
+        },
+        t,
+      )
       if (fitted.tooShort) continue
       const before = Math.floor(fitted.beforeBeats / 4)
       const after = Math.floor(fitted.afterBeats / 4)
@@ -225,73 +234,59 @@ export function suggestBlendStarts(
         2 * early +
         3 * fit * fit
 
-      const reasons = [
-        `A bar ${exitBarA} and B bar ${entryBarB} both start an 8-bar phrase on your grids.`,
-      ]
+      const reasons = [t('auto.phrase', { a: exitBarA, b: entryBarB })]
       const cautions: string[] = []
-      if (confirmA)
-        reasons.push(
-          `A's music changes at bar ${exitBarA}, so the swap lands on a real boundary in A.`,
-        )
-      if (confirmB)
-        reasons.push(
-          `B's music changes at bar ${entryBarB}, so the swap lands on a real boundary in B.`,
-        )
+      if (confirmA) reasons.push(t('auto.changesA', { bar: exitBarA }))
+      if (confirmB) reasons.push(t('auto.changesB', { bar: entryBarB }))
       if (bOut && arrive >= 0.5)
-        reasons.push(
-          `B's low end comes in at bar ${entryBarB} (${dB(bIn!.lowBy - bOut.lowBy)} more), right where the bass swap hands it over.`,
-        )
-      if (bassMissing)
-        cautions.push(
-          `B has little low end after bar ${entryBarB}: the bass may drop out at the swap.`,
-        )
+        reasons.push(t('auto.lowArrives', { bar: entryBarB, db: dB(bIn!.lowBy - bOut.lowBy) }))
+      if (bassMissing) cautions.push(t('auto.lowMissing', { bar: entryBarB }))
       if (aIn && aIn.lowBy >= LOW_ABSENT_DB && !bassMissing)
-        reasons.push(
-          `A's low end is mostly out before bar ${exitBarA}, so B's bass arrives rather than replacing A's.`,
-        )
+        reasons.push(t('auto.lowOutA', { bar: exitBarA }))
       if (bIn && bIn.thin >= 0.5)
         reasons.push(
-          `${barsName('B', b.structure, bIn)} are sparser than B's main part (${sparser(bIn)}), so B layers in with room.`,
+          t('auto.sparserB', { bars: barsName('B', b.structure, bIn, t), how: sparser(bIn, t) }),
         )
       if (aOut && aOut.thin >= 0.5)
         reasons.push(
-          `${barsName('A', a.structure, aOut)} are sparser than A's main part (${sparser(aOut)}), so A leaves without crowding B.`,
+          t('auto.sparserA', { bars: barsName('A', a.structure, aOut, t), how: sparser(aOut, t) }),
         )
-      if (room < 0.25 && (bIn || aOut))
-        cautions.push(
-          'Both tracks are close to full in the area: listen for clutter, or try a shorter length.',
-        )
+      if (room < 0.25 && (bIn || aOut)) cautions.push(t('auto.full'))
       if (aIn && bOut) {
-        if (lift && flow >= 3)
-          reasons.push(
-            `B after the swap is ${dB(flow)} fuller, each against its own main part, than A before it: the energy lifts.`,
-          )
-        else if (!lift && Math.abs(flow) < 3)
-          reasons.push(
-            'A before the swap and B after it are at a similar level, each against its own main part.',
-          )
+        if (lift && flow >= 3) reasons.push(t('auto.lifts', { db: dB(flow) }))
+        else if (!lift && Math.abs(flow) < 3) reasons.push(t('auto.similar'))
         else if (!lift && Math.abs(flow) >= 6)
-          cautions.push(
-            `The level ${flow > 0 ? 'rises' : 'drops'} by about ${dB(flow)} at the swap, each track against its own main part.`,
-          )
-        else if (lift && flow < 3)
-          cautions.push(
-            'The energy does not clearly lift here: B after the swap is not fuller than A before it.',
-          )
+          cautions.push(t(flow > 0 ? 'auto.levelRises' : 'auto.levelDrops', { db: dB(flow) }))
+        else if (lift && flow < 3) cautions.push(t('auto.noLift'))
       }
       const tailB = Math.max(0, nB - (entryBarB + after - 1))
-      reasons.push(
-        `It blends A's bars ${exitBarA - before}–${exitBarA + after - 1} of ${nA} with B's bars ${entryBarB - before}–${entryBarB + after - 1}, with ${tailB} bars of B after the blend.`,
-      )
-      if (late < 0.25) cautions.push(`This leaves A early, at bar ${exitBarA} of ${nA}.`)
-      if (early < 0.25)
-        cautions.push(`B comes in late, at bar ${entryBarB} of ${nB}, so little of B is left.`)
+      const blends = t('auto.blends', {
+        fromA: exitBarA - before,
+        toA: exitBarA + after - 1,
+        nA,
+        fromB: entryBarB - before,
+        toB: entryBarB + after - 1,
+        tail: tailB,
+      })
+      reasons.push(blends)
+      if (late < 0.25) cautions.push(t('auto.leavesEarly', { bar: exitBarA, n: nA }))
+      if (early < 0.25) cautions.push(t('auto.comesLate', { bar: entryBarB, n: nB }))
       cautions.push(...fitted.trimmed)
 
       const alternative =
-        loopAlternative(a, b, exitBarA, entryBarB, area, fitted, wantBeats) ?? undefined
+        loopAlternative(a, b, exitBarA, entryBarB, area, fitted, wantBeats, t) ?? undefined
       if (alternative) alternative.score += score - 3 * fit * fit
-      scored.push({ exitBarA, entryBarB, area, fitted, score, reasons, cautions, alternative })
+      scored.push({
+        exitBarA,
+        entryBarB,
+        area,
+        fitted,
+        score,
+        reasons,
+        blends,
+        cautions,
+        alternative,
+      })
     }
   }
 
@@ -306,22 +301,16 @@ export function suggestBlendStarts(
 
   // Cautions that hold for every candidate: the grids and how much structure was found.
   const shared: string[] = []
-  if (gridDoubt(a.structure))
-    shared.push("Few of A's changes fall on its phrase lines: check A's grid, Auto relies on it.")
-  if (gridDoubt(b.structure))
-    shared.push("Few of B's changes fall on its phrase lines: check B's grid, Auto relies on it.")
+  if (gridDoubt(a.structure)) shared.push(t('auto.gridDoubt', { deck: 'A' }))
+  if (gridDoubt(b.structure)) shared.push(t('auto.gridDoubt', { deck: 'B' }))
   if (a.structure.changes.length === 0 && b.structure.changes.length === 0)
-    shared.push(
-      'Neither track shows clear changes in level or low end, so this rests on phrase lines and where the tracks are.',
-    )
+    shared.push(t('auto.noChanges'))
   for (const c of picked) {
     c.cautions.push(...shared)
     if (c.alternative) {
       const deck = c.alternative.loop.deck
       if (gridDoubt((deck === 'A' ? a : b).structure))
-        c.alternative.cautions.push(
-          `Check ${deck}'s grid before trusting the loop: a loop on an off grid stutters at every pass.`,
-        )
+        c.alternative.cautions.push(t('auto.loopGrid', { deck }))
     }
   }
   return picked
@@ -339,17 +328,18 @@ function loopAlternative(
   area: AreaRequest,
   straight: FittedArea,
   wantBeats: number,
+  t: Translate,
 ): LoopAlternative | null {
   if (straight.trimmed.length === 0) return null
   const timing: TransitionTiming = { gridA: a.grid, gridB: b.grid, exitBarA, entryBarB }
   const beats = { A: a.beats, B: b.beats }
   const request = loopToFill(area, timing, beats)
   if (!request) return null
-  const t = request.deck === 'A' ? a : b
-  const entryBeat = barToBeat(t.grid, request.deck === 'A' ? exitBarA : entryBarB)
-  const resolved = resolveLoop(request, { grid: t.grid, entryBeat, beats: t.beats })
+  const on = request.deck === 'A' ? a : b
+  const entryBeat = barToBeat(on.grid, request.deck === 'A' ? exitBarA : entryBarB)
+  const resolved = resolveLoop(request, { grid: on.grid, entryBeat, beats: on.beats })
   if ('error' in resolved) return null
-  const fitted = fitArea(area, areaContextFor({ ...timing, loop: resolved.loop }, beats))
+  const fitted = fitArea(area, areaContextFor({ ...timing, loop: resolved.loop }, beats), t)
   const gained = fitted.beforeBeats + fitted.afterBeats - straight.beforeBeats - straight.afterBeats
   if (gained < 4 || fitted.tooShort) return null
   const fit = wantBeats > 0 ? clamp01((fitted.beforeBeats + fitted.afterBeats) / wantBeats) : 1
@@ -357,22 +347,32 @@ function loopAlternative(
   const { loop } = resolved
   const fromBar = loop.startBeat / 4 + 1
   const toBar = fromBar + request.bars - 1
-  const deckBars = `${request.deck}'s bars ${fromBar}–${toBar}`
+  const deckBars = t('auto.deckBars', { deck: request.deck, from: fromBar, to: toBar })
   const reasons: string[] = []
   const cautions: string[] = []
-  const times = request.passes === 2 ? 'twice' : `${request.passes} times`
+  const times = request.passes === 2 ? t('auto.twice') : t('auto.times', { n: request.passes })
   if (request.deck === 'B') {
     reasons.push(
-      `B has ${Math.floor(straight.beforeBeats / 4)} bars before bar ${entryBarB}. Looping ${deckBars} ${times} gives B ${Math.floor(fitted.beforeBeats / 4)} bars to come in, and bar ${entryBarB} still lands on the blend start.`,
+      t('auto.loopB', {
+        n: Math.floor(straight.beforeBeats / 4),
+        bar: entryBarB,
+        bars: deckBars,
+        times,
+        m: Math.floor(fitted.beforeBeats / 4),
+      }),
     )
   } else {
     reasons.push(
-      `A has ${Math.floor(straight.afterBeats / 4)} bars after bar ${exitBarA}. Looping ${deckBars} ${times} holds A for ${Math.floor(fitted.afterBeats / 4)} bars while B takes over.`,
+      t('auto.loopA', {
+        n: Math.floor(straight.afterBeats / 4),
+        bar: exitBarA,
+        bars: deckBars,
+        times,
+        m: Math.floor(fitted.afterBeats / 4),
+      }),
     )
   }
-  cautions.push(
-    `Listen to each jump back from bar ${toBar + 1} to bar ${fromBar}: a melody or vocal there repeats too.`,
-  )
+  cautions.push(t('auto.loopJump', { to: toBar + 1, from: fromBar }))
   cautions.push(...fitted.trimmed)
   return { loop: request, fitted, score: 3 * fit * fit - LOOP_COST, reasons, cautions }
 }

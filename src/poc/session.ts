@@ -1,4 +1,5 @@
 import { decodeAiff, isAiff } from '../audio/aiff'
+import { english, type Translate } from '../i18n'
 import {
   suggestBlendStarts,
   type AutoCandidate,
@@ -182,6 +183,8 @@ export class PocSession {
   timing!: TransitionTiming
   /** Auto's ideas since the last Auto click, or null. */
   auto: AutoState | null = null
+  /** The words of what the session says (structure reasons, Auto's reasons, errors). */
+  t: Translate = english
   /** Advisories on the plan in place, such as a loop on a grid that is not confirmed. */
   warnings: PlanIssue<WarningCode>[] = []
   /** Errors of the last change that was refused; the previous plan stays loaded. */
@@ -226,7 +229,7 @@ export class PocSession {
       frames = frameFeatures(channels, source.buffer.sampleRate)
       this.features.set(source.buffer, frames)
     }
-    const structure = analyseStructure(frames, source.grid)
+    const structure = analyseStructure(frames, source.grid, this.t)
     this.structures.set(deck, { source, structure })
     return structure
   }
@@ -335,9 +338,9 @@ export class PocSession {
         beats: secToBeat(source.grid, source.buffer.duration),
       }
     }
-    const candidates = suggestBlendStarts(track('A'), track('B'), this.area, prefs)
+    const candidates = suggestBlendStarts(track('A'), track('B'), this.area, prefs, 3, this.t)
     if (candidates.length === 0) {
-      this.errors = ['Auto found no place where both tracks have a bar of music to blend']
+      this.errors = [this.t('auto.noPlace')]
       this.notify()
       return
     }
@@ -347,6 +350,37 @@ export class PocSession {
         : { points: this.points, area: this.area, loop: this.loopRequest }
     this.auto = { prefs, candidates, index: 0, withLoop: false, yours }
     this.showIdea(0)
+  }
+
+  /**
+   * Another language for what the session says: the structures are described again and
+   * Auto's ideas, which are deterministic, are computed again in the new words.
+   */
+  setTranslate(t: Translate): void {
+    if (t === this.t) return
+    this.t = t
+    this.structures.clear()
+    const auto = this.auto
+    if (auto) {
+      const track = (deck: DeckId) => {
+        const source = this.decks[deck]
+        return {
+          structure: this.structure(deck),
+          grid: source.grid,
+          beats: secToBeat(source.grid, source.buffer.duration),
+        }
+      }
+      const candidates = suggestBlendStarts(
+        track('A'),
+        track('B'),
+        auto.yours.area,
+        auto.prefs,
+        3,
+        t,
+      )
+      if (candidates.length === auto.candidates.length) auto.candidates = candidates
+    }
+    this.notify()
   }
 
   /**
@@ -588,7 +622,7 @@ export class PocSession {
       // Shown as it plays: a gap the deck has no music for is shortened.
       this.loopRequest = requestOf(resolved.loop, timing)
     }
-    const fitted = fitArea(this.area, areaContextFor(timing, beats))
+    const fitted = fitArea(this.area, areaContextFor(timing, beats), this.t)
     // A blend too short to play is still built, so the validator can say why.
     const area = fitted.tooShort
       ? { ...fitted, beforeBeats: 0, afterBeats: MIN_AREA_BEATS }
@@ -609,7 +643,7 @@ export class PocSession {
     const { errors, warnings } = validate(plan, { durationSec })
     this.errors = errors.map((e) => e.message)
     if (errors.length === 0 && fitted.tooShort) {
-      this.errors = ['There is less than a bar of music in both tracks around this blend start']
+      this.errors = [this.t('auto.tooShort')]
     }
     if (this.errors.length > 0) return false
     // Takes are in transition beats, so they carry over to a corrected grid or point.

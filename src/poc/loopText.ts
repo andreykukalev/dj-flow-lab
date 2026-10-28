@@ -22,8 +22,8 @@ export const LOOP_KINDS: { id: string; deck: DeckId; side: 'before' | 'after'; l
   { id: 'B-after', deck: 'B', side: 'after', label: 'Loop B after the blend start' },
 ]
 
-const TIMES = ['', 'once', 'twice']
-const times = (n: number) => TIMES[n] ?? `${n} times`
+const times = (n: number, t: Translate) =>
+  n === 1 ? t('auto.once') : n === 2 ? t('auto.twice') : t('auto.times', { n })
 
 /** A position on track A, as `A 25.1`. */
 function onA(timing: TransitionTiming, beat: number): string {
@@ -31,14 +31,21 @@ function onA(timing: TransitionTiming, beat: number): string {
 }
 
 /** The loop of a timing, in words: what repeats, where, and what it changes. */
-export function describeLoop(timing: TransitionTiming): string | null {
+export function describeLoop(timing: TransitionTiming, t: Translate = english): string | null {
   const loop = loopSchedule(timing)
   if (!loop) return null
   const grid = loop.deck === 'A' ? timing.gridA : timing.gridB
   const from = loop.startBeat / grid.beatsPerBar + 1
   const to = from + loop.lengthBeats / grid.beatsPerBar - 1
   const extraBars = (loop.repeats * loop.lengthBeats) / grid.beatsPerBar
-  const what = `${loop.deck} plays its bars ${from}–${to} ${times(loop.passes)}, from ${onA(timing, loop.from)} to ${onA(timing, loop.to)}`
+  const what = t('loop.what', {
+    deck: loop.deck,
+    from,
+    to,
+    times: times(loop.passes, t),
+    start: onA(timing, loop.from),
+    end: onA(timing, loop.to),
+  })
   const entry = (deck: DeckId) =>
     formatBarBeat(
       toBarBeat(
@@ -47,30 +54,32 @@ export function describeLoop(timing: TransitionTiming): string | null {
       ),
     )
   if (loop.side === 'after') {
-    return loop.deck === 'A'
-      ? `${what}: A holds this groove while B plays on, and A's bar ${to + 1} comes ${extraBars} bars later.`
-      : `${what}: B repeats this idea before moving on, and B's bar ${to + 1} comes ${extraBars} bars later.`
+    return t(loop.deck === 'A' ? 'loop.afterA' : 'loop.afterB', {
+      what,
+      bar: to + 1,
+      extra: extraBars,
+    })
   }
   return loop.deck === 'B'
-    ? `${what}: B starts ${extraBars} bars earlier and still has its bar ${entry('B')} on the blend start.`
-    : `${what}: A stays on this groove before the blend start, and its bar ${entry('A')} still meets the blend start.`
+    ? t('loop.beforeB', { what, extra: extraBars, entry: entry('B') })
+    : t('loop.beforeA', { what, entry: entry('A') })
 }
 
 /** How to play the loop on a DJ controller with rekordbox (DDJ-400 and alike). */
-export function practiceLoop(timing: TransitionTiming): string | null {
+export function practiceLoop(timing: TransitionTiming, t: Translate = english): string | null {
   const loop = loopSchedule(timing)
   if (!loop) return null
   const grid = loop.deck === 'A' ? timing.gridA : timing.gridB
   const from = loop.startBeat / grid.beatsPerBar + 1
   const bars = loop.lengthBeats / grid.beatsPerBar
-  const set = `with Quantize on, set a ${loop.lengthBeats}-beat (${bars}-bar) loop on deck ${loop.deck} at its bar ${from} (LOOP IN there, LOOP OUT ${bars} bars later, or a Beat Loop pad)`
-  const exit = `press RELOOP/EXIT during pass ${loop.passes}, before ${onA(timing, loop.to)}`
+  const set = t('loop.set', { beats: loop.lengthBeats, bars, deck: loop.deck, from })
+  const exit = t('loop.exit', { pass: loop.passes, at: onA(timing, loop.to) })
   if (loop.deck === 'B') {
     // Bar 1 of B plays where its first run reaches deck beat 0, before any pass.
     const startB = -deckRuns(timing, 'B')[0]!.offset
-    return `On the controller: start B from its bar 1 at ${onA(timing, startB)}, ${set}, and ${exit}.`
+    return t('loop.practiceB', { at: onA(timing, startB), set, exit })
   }
-  return `On the controller: ${set} as A reaches ${onA(timing, loop.from)}, and ${exit}, or let A fade out inside the loop.`
+  return t('loop.practiceA', { set, at: onA(timing, loop.from), exit })
 }
 
 /** "B bars 1–4 × 3", for the folded loop section. */

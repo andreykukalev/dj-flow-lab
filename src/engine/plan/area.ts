@@ -3,6 +3,8 @@
 // the music both tracks have, and says what it had to trim. The fitted area is what
 // the plan is generated for, so the highlighted area and the blend cannot disagree.
 
+import { english, type Translate } from '../../i18n'
+
 /** The area the user asked for, in bars around the blend start. */
 export interface AreaRequest {
   beforeBars: number
@@ -47,18 +49,22 @@ export const LEAD_BEATS = 32
 /** The shortest blend: one bar. */
 export const MIN_AREA_BEATS = 4
 
-const barsText = (beats: number) => {
+const barsText = (beats: number, t: Translate) => {
   const bars = Math.floor(beats / 4)
   const rest = beats - bars * 4
   const parts = [
-    bars > 0 || rest === 0 ? `${bars} bar${bars === 1 ? '' : 's'}` : '',
-    rest > 0 ? `${rest} beat${rest === 1 ? '' : 's'}` : '',
+    bars > 0 || rest === 0 ? t('area.bars', { n: bars }) : '',
+    rest > 0 ? t('area.beats', { n: rest }) : '',
   ]
   return parts.filter(Boolean).join(' ')
 }
 
 /** The requested area, trimmed to the music both tracks have around the blend start. */
-export function fitArea(request: AreaRequest, context: AreaContext): FittedArea {
+export function fitArea(
+  request: AreaRequest,
+  context: AreaContext,
+  t: Translate = english,
+): FittedArea {
   const { startBeatA, entryBeatB, beatsA, beatsB } = context
   const wantBefore = Math.max(0, Math.round(request.beforeBars * 4))
   const wantAfter = Math.max(0, Math.round(request.afterBars * 4))
@@ -71,13 +77,12 @@ export function fitArea(request: AreaRequest, context: AreaContext): FittedArea 
 
   const trimmed: string[] = []
   if (beforeBeats < wantBefore) {
-    const why =
-      roomBeforeB <= roomBeforeA ? 'B has no music before that' : 'A has no music before that'
-    trimmed.push(`Before trimmed to ${barsText(beforeBeats)}: ${why}.`)
+    const why = t('area.noMusicBefore', { deck: roomBeforeB <= roomBeforeA ? 'B' : 'A' })
+    trimmed.push(t('area.trimBefore', { bars: barsText(beforeBeats, t), why }))
   }
   if (afterBeats < wantAfter) {
-    const why = roomAfterA <= roomAfterB ? 'A ends there' : 'B ends there'
-    trimmed.push(`After trimmed to ${barsText(afterBeats)}: ${why}.`)
+    const why = t('area.endsThere', { deck: roomAfterA <= roomAfterB ? 'A' : 'B' })
+    trimmed.push(t('area.trimAfter', { bars: barsText(afterBeats, t), why }))
   }
   return {
     beforeBeats,

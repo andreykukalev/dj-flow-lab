@@ -1,10 +1,5 @@
 import { useState } from 'react'
-import {
-  AUTO_LIMITS,
-  LENGTH_BARS,
-  type AutoEnergy,
-  type AutoLength,
-} from '../engine/analysis/autoPoint'
+import { LENGTH_BARS, type AutoEnergy, type AutoLength } from '../engine/analysis/autoPoint'
 import { useT } from '../i18n/react'
 import type { PocSession } from './session'
 
@@ -153,7 +148,7 @@ export function AutoPanel({ session }: { session: PocSession }) {
           <ul className="poc-auto-why" aria-label={t('poc.whyWork')}>
             {(looped
               ? // The straight form's bar ranges do not hold with the loop.
-                [...alt.reasons, ...idea.reasons.filter((r) => !r.startsWith('It blends'))]
+                [...alt.reasons, ...idea.reasons.filter((r) => r !== idea.blends)]
               : idea.reasons
             ).map((r) => (
               <li key={r}>{r}</li>
@@ -172,7 +167,7 @@ export function AutoPanel({ session }: { session: PocSession }) {
               ))}
             </ul>
           )}
-          <p className="muted poc-auto-note">{AUTO_LIMITS}</p>
+          <p className="muted poc-auto-note">{t('auto.limits')}</p>
         </div>
       )}
     </div>
