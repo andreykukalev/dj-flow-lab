@@ -300,6 +300,88 @@ export const en = {
   'sheet.loopWhy.before': 'The loop gives the next track’s intro the bars it is short of.',
   'sheet.loopWhy.after': 'The loop holds this track’s bars while the next one comes in.',
 
+  // What the engine says: trimmed areas, a track's sections, Auto's reasons, loops
+  'area.bars': '{n} {n|bar|bars}',
+  'area.beats': '{n} {n|beat|beats}',
+  'area.trimBefore': 'Before trimmed to {bars}: {why}.',
+  'area.trimAfter': 'After trimmed to {bars}: {why}.',
+  'area.noMusicBefore': '{deck} has no music before that',
+  'area.endsThere': '{deck} ends there',
+  'structure.lowAbsent': 'low end mostly absent',
+  'structure.lessLow': '{n} dB less low end',
+  'structure.quieter': '{n} dB quieter than the main part',
+  'structure.lessHighs': '{n} dB less highs (hats, cymbals)',
+  'structure.groove': 'full level, low end present',
+  'structure.rises': 'level rises {n} dB',
+  'structure.lowReturns': 'low end returns',
+  'structure.backUp': 'level back up {n} dB',
+  'auto.limits':
+    'Auto reads level, low end and highs per bar on your grids. It does not hear vocals, key or melody, so listen for clashes.',
+  'auto.noPlace': 'Auto found no place where both tracks have a bar of music to blend',
+  'auto.tooShort': 'There is less than a bar of music in both tracks around this blend start',
+  'auto.phrase': 'A bar {a} and B bar {b} both start an 8-bar phrase on your grids.',
+  'auto.changesA': "A's music changes at bar {bar}, so the swap lands on a real boundary in A.",
+  'auto.changesB': "B's music changes at bar {bar}, so the swap lands on a real boundary in B.",
+  'auto.lowArrives':
+    "B's low end comes in at bar {bar} ({db} more), right where the bass swap hands it over.",
+  'auto.lowMissing': 'B has little low end after bar {bar}: the bass may drop out at the swap.',
+  'auto.lowOutA':
+    "A's low end is mostly out before bar {bar}, so B's bass arrives rather than replacing A's.",
+  'auto.sparserB': "{bars} are sparser than B's main part ({how}), so B layers in with room.",
+  'auto.sparserA': "{bars} are sparser than A's main part ({how}), so A leaves without crowding B.",
+  'auto.full':
+    'Both tracks are close to full in the area: listen for clutter, or try a shorter length.',
+  'auto.lifts':
+    'B after the swap is {db} fuller, each against its own main part, than A before it: the energy lifts.',
+  'auto.similar':
+    'A before the swap and B after it are at a similar level, each against its own main part.',
+  'auto.levelRises':
+    'The level rises by about {db} at the swap, each track against its own main part.',
+  'auto.levelDrops':
+    'The level drops by about {db} at the swap, each track against its own main part.',
+  'auto.noLift':
+    'The energy does not clearly lift here: B after the swap is not fuller than A before it.',
+  'auto.blends':
+    "It blends A's bars {fromA}–{toA} of {nA} with B's bars {fromB}–{toB}, with {tail} bars of B after the blend.",
+  'auto.leavesEarly': 'This leaves A early, at bar {bar} of {n}.',
+  'auto.comesLate': 'B comes in late, at bar {bar} of {n}, so little of B is left.',
+  'auto.gridDoubt':
+    "Few of {deck}'s changes fall on its phrase lines: check {deck}'s grid, Auto relies on it.",
+  'auto.noChanges':
+    'Neither track shows clear changes in level or low end, so this rests on phrase lines and where the tracks are.',
+  'auto.loopGrid':
+    "Check {deck}'s grid before trusting the loop: a loop on an off grid stutters at every pass.",
+  'auto.deckBars': "{deck}'s bars {from}–{to}",
+  'auto.barsNamed': "{deck}'s bars {from}–{to} (likely {term})",
+  'auto.lessLow': '{db} less low end',
+  'auto.lessHighs': '{db} less highs',
+  'auto.quieter': '{db} quieter',
+  'auto.sparser': 'a little sparser',
+  'auto.once': 'once',
+  'auto.twice': 'twice',
+  'auto.times': '{n} times',
+  'auto.loopB':
+    'B has {n} bars before bar {bar}. Looping {bars} {times} gives B {m} bars to come in, and bar {bar} still lands on the blend start.',
+  'auto.loopA':
+    'A has {n} bars after bar {bar}. Looping {bars} {times} holds A for {m} bars while B takes over.',
+  'auto.loopJump':
+    'Listen to each jump back from bar {to} to bar {from}: a melody or vocal there repeats too.',
+  'loop.what': '{deck} plays its bars {from}–{to} {times}, from {start} to {end}',
+  'loop.afterA':
+    "{what}: A holds this groove while B plays on, and A's bar {bar} comes {extra} bars later.",
+  'loop.afterB':
+    "{what}: B repeats this idea before moving on, and B's bar {bar} comes {extra} bars later.",
+  'loop.beforeB':
+    '{what}: B starts {extra} bars earlier and still has its bar {entry} on the blend start.',
+  'loop.beforeA':
+    '{what}: A stays on this groove before the blend start, and its bar {entry} still meets the blend start.',
+  'loop.set':
+    'with Quantize on, set a {beats}-beat ({bars}-bar) loop on deck {deck} at its bar {from} (LOOP IN there, LOOP OUT {bars} bars later, or a Beat Loop pad)',
+  'loop.exit': 'press RELOOP/EXIT during pass {pass}, before {at}',
+  'loop.practiceB': 'On the controller: start B from its bar 1 at {at}, {set}, and {exit}.',
+  'loop.practiceA':
+    'On the controller: {set} as A reaches {at}, and {exit}, or let A fade out inside the loop.',
+
   'facts.key': 'key {key}',
   'facts.noKey': 'key —',
 

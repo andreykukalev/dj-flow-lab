@@ -79,13 +79,14 @@ export function structureOn(
   frames: FrameFeatures,
   grid: BeatGrid,
   tempo: TempoSource,
+  t: Translate = english,
 ): { grid: BeatGrid; structure: TrackStructure } {
-  const structure = analyseStructure(frames, grid)
+  const structure = analyseStructure(frames, grid, t)
   const offset = structure.phraseCheck.suggestedOffsetBars
   if (tempo === 'yours' || offset === undefined) return { grid, structure }
   const moved = { ...setPhraseOffset(grid, offset), source: grid.source }
   if (grid.confidence !== undefined) moved.confidence = grid.confidence
-  return { grid: moved, structure: analyseStructure(frames, moved) }
+  return { grid: moved, structure: analyseStructure(frames, moved, t) }
 }
 
 /** Bars of a track on its grid. */

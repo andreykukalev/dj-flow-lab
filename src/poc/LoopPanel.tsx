@@ -25,8 +25,8 @@ export function LoopPanel({ session }: { session: PocSession }) {
   const move = (bars: number) =>
     request &&
     set({ gapBars: Math.max(0, request.gapBars + (request.side === 'after' ? bars : -bars)) })
-  const text = describeLoop(session.timing)
-  const practice = practiceLoop(session.timing)
+  const text = describeLoop(session.timing, t)
+  const practice = practiceLoop(session.timing, t)
   const unsure = session.warnings.filter((w) => w.code === 'loop-grid')
 
   return (

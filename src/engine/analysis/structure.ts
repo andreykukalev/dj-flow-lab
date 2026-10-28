@@ -1,3 +1,4 @@
+import { english, type Translate } from '../../i18n'
 import { isPhraseStart } from '../grid'
 import type { BeatGrid } from '../model'
 import { beatToSec, barToBeat, secToBeat, beatToBar } from '../time'
@@ -235,7 +236,11 @@ export function mainLevels(bars: readonly BarFeatures[]): {
   return { energy: at('energyDb'), low: at('lowDb'), high: at('highDb') }
 }
 
-export function likelySections(bars: readonly BarFeatures[], grid: BeatGrid): LikelySection[] {
+export function likelySections(
+  bars: readonly BarFeatures[],
+  grid: BeatGrid,
+  t: Translate = english,
+): LikelySection[] {
   if (bars.length === 0) return []
   const main = mainLevels(bars)
 
@@ -296,38 +301,44 @@ export function likelySections(bars: readonly BarFeatures[], grid: BeatGrid): Li
 
   const fewer = (x: Stretch) => {
     const reasons: string[] = []
-    if (x.lowAbsent) reasons.push('low end mostly absent')
-    else if (x.lowByDb >= THIN_DB) reasons.push(`${Math.round(x.lowByDb)} dB less low end`)
+    if (x.lowAbsent) reasons.push(t('structure.lowAbsent'))
+    else if (x.lowByDb >= THIN_DB)
+      reasons.push(t('structure.lessLow', { n: Math.round(x.lowByDb) }))
     if (x.quietByDb >= QUIET_DB)
-      reasons.push(`${Math.round(x.quietByDb)} dB quieter than the main part`)
+      reasons.push(t('structure.quieter', { n: Math.round(x.quietByDb) }))
     if (x.highsByDb >= THIN_DB)
-      reasons.push(`${Math.round(x.highsByDb)} dB less highs (hats, cymbals)`)
+      reasons.push(t('structure.lessHighs', { n: Math.round(x.highsByDb) }))
     return reasons
   }
 
   return merged.map(({ term, bars: bs }, k) => {
     const x = measure(bs)
     let reasons: string[]
-    if (term === 'GROOVE') reasons = ['full level, low end present']
-    else if (term === 'BUILD-UP') reasons = [`level rises ${Math.round(x.riseDb)} dB`, ...fewer(x)]
+    if (term === 'GROOVE') reasons = [t('structure.groove')]
+    else if (term === 'BUILD-UP')
+      reasons = [t('structure.rises', { n: Math.round(x.riseDb) }), ...fewer(x)]
     else if (term === 'DROP') {
       const prev = measure(merged[k - 1]!.bars)
       reasons = []
-      if (prev.lowAbsent) reasons.push('low end returns')
+      if (prev.lowAbsent) reasons.push(t('structure.lowReturns'))
       const back = prev.quietByDb - x.quietByDb
-      if (back >= 1) reasons.push(`level back up ${Math.round(back)} dB`)
+      if (back >= 1) reasons.push(t('structure.backUp', { n: Math.round(back) }))
     } else reasons = fewer(x)
     return { term, fromBar: x.fromBar, toBar: x.toBar, reasons }
   })
 }
 
-export function analyseStructure(frames: FrameFeatures, grid: BeatGrid): TrackStructure {
+export function analyseStructure(
+  frames: FrameFeatures,
+  grid: BeatGrid,
+  t: Translate = english,
+): TrackStructure {
   const bars = barFeatures(frames, grid)
   const changes = findChanges(bars)
   return {
     bars,
     changes,
     phraseCheck: checkPhrases(changes, grid),
-    sections: likelySections(bars, grid),
+    sections: likelySections(bars, grid, t),
   }
 }
