@@ -78,9 +78,6 @@ export interface AutoCandidate {
 /** What a loop costs in the ranking: a straight form wins when the two are equal. */
 export const LOOP_COST = 0.5
 
-export const AUTO_LIMITS =
-  'Auto reads level, low end and highs per bar on your grids. It does not hear vocals, key or melody, so listen for clashes.'
-
 const PHRASE = 8
 /** Weak low end: about the threshold the structure analysis uses for "mostly absent". */
 const LOW_ABSENT_DB = 12

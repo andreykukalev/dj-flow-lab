@@ -609,11 +609,15 @@ export class PocSession {
     const beats = { A: this.beatsOf('A'), B: this.beatsOf('B') }
     if (this.loopRequest) {
       const deck = this.loopRequest.deck
-      const resolved = resolveLoop(this.loopRequest, {
-        grid: this.decks[deck].grid,
-        entryBeat: deckBeatAt(timing, deck, 0),
-        beats: beats[deck],
-      })
+      const resolved = resolveLoop(
+        this.loopRequest,
+        {
+          grid: this.decks[deck].grid,
+          entryBeat: deckBeatAt(timing, deck, 0),
+          beats: beats[deck],
+        },
+        this.t,
+      )
       if ('error' in resolved) {
         this.errors = [resolved.error]
         return false

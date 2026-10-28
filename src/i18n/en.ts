@@ -382,6 +382,11 @@ export const en = {
   'loop.practiceA':
     'On the controller: {set} as A reaches {at}, and {exit}, or let A fade out inside the loop.',
 
+  'loopErr.passes': 'A loop plays 2 to {max} times, not {n}',
+  'loopErr.name': '{bars}-bar loop on {deck}',
+  'loopErr.after': 'There is not enough of {deck} after the blend start for a {name}',
+  'loopErr.before': '{deck} has {n} {n|bar|bars} before the blend start: not enough for a {name}',
+  'poc.loopGridWarn': "Deck {deck}'s grid is not confirmed: a loop on it may stutter at each pass",
   'facts.key': 'key {key}',
   'facts.noKey': 'key —',
 

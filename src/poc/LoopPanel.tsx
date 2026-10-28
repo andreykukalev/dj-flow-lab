@@ -123,7 +123,7 @@ export function LoopPanel({ session }: { session: PocSession }) {
           {practice && <p className="muted poc-loop-note">{practice}</p>}
           {unsure.map((w) => (
             <p key={w.message} className="poc-trimmed">
-              {w.message}
+              {t('poc.loopGridWarn', { deck: w.deck ?? '' })}
             </p>
           ))}
         </>

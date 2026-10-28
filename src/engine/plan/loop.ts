@@ -1,3 +1,4 @@
+import { english, type Translate } from '../../i18n'
 import { MAX_LOOP_REPEATS, type BeatGrid, type DeckId, type DeckLoop } from '../model'
 import { beatToSec, deckEntryBeat, loopSchedule, type TransitionTiming } from '../time'
 import type { AreaContext, AreaRequest } from './area'
@@ -46,8 +47,6 @@ export interface LoopDeck {
   beats: number
 }
 
-const barsText = (bars: number) => `${bars} bar${bars === 1 ? '' : 's'}`
-
 /**
  * The loop for a request on a deck: on that deck's downbeats, as near the blend start
  * as the gap says. The gap shrinks when the deck has no music that far away; a loop
@@ -56,26 +55,26 @@ const barsText = (bars: number) => `${bars} bar${bars === 1 ? '' : 's'}`
 export function resolveLoop(
   request: LoopRequest,
   deck: LoopDeck,
+  t: Translate = english,
 ): { loop: DeckLoop } | { error: string } {
   const per = deck.grid.beatsPerBar
   const length = request.bars * per
   const passes = Math.round(request.passes)
   if (passes < 2 || passes > MAX_PASSES)
-    return { error: `A loop plays 2 to ${MAX_PASSES} times, not ${passes}` }
-  const name = `${request.bars}-bar loop on ${request.deck}`
+    return { error: t('loopErr.passes', { max: MAX_PASSES, n: passes }) }
+  const name = t('loopErr.name', { bars: request.bars, deck: request.deck })
   const gap = Math.max(0, Math.floor(request.gapBars))
   let start: number
   if (request.side === 'after') {
     const first = Math.ceil(deck.entryBeat / per - 1e-9) * per
     const last = Math.floor(deck.beats / per) * per - length
-    if (last < first)
-      return { error: `There is not enough of ${request.deck} after the blend start for a ${name}` }
+    if (last < first) return { error: t('loopErr.after', { deck: request.deck, name }) }
     start = Math.min(first + gap * per, last)
   } else {
     const end = Math.floor(deck.entryBeat / per + 1e-9) * per
     if (end - length < 0)
       return {
-        error: `${request.deck} has ${barsText(Math.max(0, end / per))} before the blend start: not enough for a ${name}`,
+        error: t('loopErr.before', { deck: request.deck, n: Math.max(0, end / per), name }),
       }
     start = Math.max(end - length - gap * per, 0)
   }
