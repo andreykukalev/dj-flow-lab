@@ -385,6 +385,12 @@ export const ru: Record<Key, string> = {
   'loop.practiceA':
     'На контроллере: {set}, когда A дойдёт до {at}, и {exit} — либо дайте A затихнуть внутри лупа.',
 
+  'loopErr.passes': 'Луп играет от 2 до {max} раз, а не {n}',
+  'loopErr.name': 'лупа на {bars} {bars|такт|такта|тактов} на деке {deck}',
+  'loopErr.after': 'После точки сведения у {deck} не хватает музыки для {name}',
+  'loopErr.before': 'У {deck} {n} {n|такт|такта|тактов} до точки сведения: не хватает для {name}',
+  'poc.loopGridWarn':
+    'Сетка деки {deck} не подтверждена: луп на ней может спотыкаться на каждом проходе',
   'facts.key': 'тональность {key}',
   'facts.noKey': 'тональность —',
 

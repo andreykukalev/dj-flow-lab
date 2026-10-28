@@ -59,7 +59,8 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* Five columns when they fit; a second row instead of sideways scrolling when not. */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 6px;
 }
 
@@ -129,20 +130,9 @@
   text-overflow: ellipsis;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 600px) {
   .set-journey ol {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .set-journey li {
-    flex: 0 0 auto;
-    max-width: 60vw;
-  }
-
-  .set-step-state {
-    white-space: normal;
+    grid-template-columns: 1fr 1fr;
   }
 }
 
