@@ -8,7 +8,8 @@ import { Perform } from './Perform'
 import { keep } from './persist'
 import { SetMenu } from './SetMenu'
 import { SetSpine } from './SetSpine'
-import { SetStore } from './store'
+import { SetStore, type Part } from './store'
+import { TechniquesPage } from '../techniques/TechniquesPage'
 import { YourMusic } from './YourMusic'
 import './set.css'
 
@@ -67,30 +68,46 @@ function Journey({ store }: { store: SetStore }) {
   )
 }
 
+const PARTS: readonly Part[] = ['plan', 'techniques']
+
 function Header({ store }: { store: SetStore }) {
   const t = useT()
   return (
     <header className="set-header">
       <h1>{t('app.title')}</h1>
+      <nav className="set-parts" aria-label={t('part.nav')}>
+        {PARTS.map((part) => (
+          <button
+            key={part}
+            className={`btn btn-small set-toggle ${store.part === part ? 'set-toggle-on' : ''}`}
+            aria-pressed={store.part === part}
+            onClick={() => store.setPart(part)}
+          >
+            {t(`part.${part}`)}
+          </button>
+        ))}
+      </nav>
       <div className="set-header-tools">
-        <div
-          className="set-me"
-          role="group"
-          aria-label={t('app.whoAtScreen')}
-          title={t('app.youAreHint')}
-        >
-          <span className="muted">{t('app.youAre')}</span>
-          {(['dj1', 'dj2'] as const).map((dj) => (
-            <button
-              key={dj}
-              className={`btn btn-small set-toggle set-owner-${dj} ${store.me === dj ? 'set-toggle-on' : ''}`}
-              aria-pressed={store.me === dj}
-              onClick={() => store.setMe(dj)}
-            >
-              {store.djName(dj)}
-            </button>
-          ))}
-        </div>
+        {store.part === 'plan' && (
+          <div
+            className="set-me"
+            role="group"
+            aria-label={t('app.whoAtScreen')}
+            title={t('app.youAreHint')}
+          >
+            <span className="muted">{t('app.youAre')}</span>
+            {(['dj1', 'dj2'] as const).map((dj) => (
+              <button
+                key={dj}
+                className={`btn btn-small set-toggle set-owner-${dj} ${store.me === dj ? 'set-toggle-on' : ''}`}
+                aria-pressed={store.me === dj}
+                onClick={() => store.setMe(dj)}
+              >
+                {store.djName(dj)}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="set-lang" role="group" aria-label={t('app.language')}>
           {LANGS.map((lang) => (
             <button
@@ -104,7 +121,7 @@ function Header({ store }: { store: SetStore }) {
             </button>
           ))}
         </div>
-        <SetMenu store={store} />
+        {store.part === 'plan' && <SetMenu store={store} />}
       </div>
     </header>
   )
@@ -134,13 +151,19 @@ export function SetApp({ store: given }: { store?: SetStore }) {
     <LangProvider lang={store.lang} t={store.t}>
       <div className="set-app" lang={store.lang} data-ready={store.ready ? 'true' : undefined}>
         <Header store={store} />
-        <Journey store={store} />
-        <Notice store={store} />
-        {store.screen === 'music' && <YourMusic store={store} />}
-        {store.screen === 'concepts' && <ConceptExplorer store={store} />}
-        {store.screen === 'set' && <SetSpine store={store} />}
-        {store.screen === 'perform' && <Perform store={store} />}
-        {store.screen === 'lab' && <LabScreen store={store} />}
+        {store.part === 'techniques' ? (
+          <TechniquesPage school={store.techniques} />
+        ) : (
+          <>
+            <Journey store={store} />
+            <Notice store={store} />
+            {store.screen === 'music' && <YourMusic store={store} />}
+            {store.screen === 'concepts' && <ConceptExplorer store={store} />}
+            {store.screen === 'set' && <SetSpine store={store} />}
+            {store.screen === 'perform' && <Perform store={store} />}
+            {store.screen === 'lab' && <LabScreen store={store} />}
+          </>
+        )}
       </div>
     </LangProvider>
   )

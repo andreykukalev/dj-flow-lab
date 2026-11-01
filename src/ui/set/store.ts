@@ -37,6 +37,7 @@ import {
 } from '../../engine/set/versions'
 import { barToBeat, beatToSec, secondsPerBar } from '../../engine/time'
 import { createSession, decodeFile, deckPosition, type PocSession } from '../../poc/session'
+import { TechniqueSchool } from '../techniques/school'
 import {
   decodeFrames,
   encodeFrames,
@@ -58,6 +59,19 @@ async function fingerprintOf(file: Blob): Promise<string> {
 // listens. The Lab is the proof of concept's Transition Builder, with its own session.
 
 export type Screen = 'music' | 'concepts' | 'set' | 'perform' | 'lab'
+
+/** The two parts of the app: planning a set together, and learning mixing techniques. */
+export type Part = 'plan' | 'techniques'
+
+const PART_KEY = 'dj-flow-lab.part'
+
+function loadPart(): Part {
+  try {
+    return localStorage.getItem(PART_KEY) === 'techniques' ? 'techniques' : 'plan'
+  } catch {
+    return 'plan'
+  }
+}
 
 /** `missing`: known from a saved or passed set, its file not selected on this device yet. */
 export type TrackStatus = 'waiting' | 'analysing' | 'ready' | 'failed' | 'missing'
@@ -95,6 +109,8 @@ export class SetStore {
   plan: SetPlan | null = null
   reading: Reading | null = null
   screen: Screen = 'music'
+  /** Which part of the app is open; kept in this browser. */
+  part: Part = loadPart()
   lab: LabOpen | null = null
   labError: string | null = null
   /** What "Hear it" or "Hear the idea" is playing: the list, and the moment in it. */
@@ -116,6 +132,7 @@ export class SetStore {
   version = 0
 
   private session: PocSession | null = null
+  private school: TechniqueSchool | null = null
   private nextId = 1
   private queue: Promise<void> = Promise.resolve()
   private readonly listeners = new Set<() => void>()
@@ -139,6 +156,29 @@ export class SetStore {
     return this.session
   }
 
+  /** The mixing techniques, made on first need: they have their own audio context. */
+  get techniques(): TechniqueSchool {
+    if (!this.school) this.school = new TechniqueSchool(this.t)
+    return this.school
+  }
+
+  /** Opens a part of the app; whatever plays in the other one pauses. */
+  setPart(part: Part): void {
+    if (part === this.part) return
+    this.part = part
+    try {
+      localStorage.setItem(PART_KEY, part)
+    } catch {
+      // Kept for this visit only.
+    }
+    if (part === 'techniques') {
+      this.stopHearing()
+      const transport = this.session?.transport
+      if (transport?.state.kind === 'playing') transport.pause()
+    } else this.school?.pause()
+    this.notify()
+  }
+
   /** The words in the DJs' language. */
   get t(): Translate {
     return translatorFor(this.lang)
@@ -150,6 +190,7 @@ export class SetStore {
     this.lang = lang
     saveLang(lang)
     this.session?.setTranslate(this.t)
+    this.school?.setTranslate(this.t)
     // Each track's sections are described again in the new words.
     this.tracks = this.tracks.map((x) =>
       x.features && x.profile

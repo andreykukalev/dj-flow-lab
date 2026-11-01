@@ -64,6 +64,12 @@ interface LaneLabel {
   side: 'top' | 'bottom'
 }
 
+/** A named moment of the plan, shown above the crossfader lane: an annotation's id and its label. */
+export interface TimelineMarker {
+  id: string
+  label: string
+}
+
 /** A mark the DJs made on the mixing line: a comment pinned to a bar of track A. */
 export interface TimelineMark {
   /** The bar of track A it is pinned to. */
@@ -84,12 +90,19 @@ export function Timeline({
   session,
   onSeek,
   marks = [],
+  markers,
+  controls = LANES.map((l) => l.control),
 }: {
   session: PocSession
   onSeek: (beat: number) => void
   marks?: readonly TimelineMark[]
+  /** The plan's moments to name; left out, the long blend's. */
+  markers?: readonly TimelineMarker[]
+  /** The deck lanes to draw; left out, every one (trim only when it moves). */
+  controls?: readonly DeckControl[]
 }) {
   const t = useT()
+  const named = markers ?? MARKERS.map((m) => ({ id: m.id, label: t(m.key) }))
   const { compiled, compared, timing, plan, loop, listening } = session
   const { startBeat, endBeat } = compiled.span
   const span = endBeat - startBeat
@@ -307,7 +320,7 @@ export function Timeline({
 
   /** A deck's EQ and filter lanes; trim only when a version moves it. */
   const controlLanes = (deck: DeckId) =>
-    LANES.map(({ control, label, always }) => {
+    LANES.filter((l) => controls.includes(l.control)).map(({ control, label, always }) => {
       const key: ControlKey = `${deck}.${control}`
       const { moves, differs } = laneInfo(key, compiled, compared)
       if (!always && moves.length === 0 && !differs) return null
@@ -420,12 +433,12 @@ export function Timeline({
           {loopRow('A')}
           {controlLanes('A')}
           <div className="timeline-markers">
-            {MARKERS.map((m) => {
+            {named.map((m) => {
               const a = plan.annotations.find((n) => n.id === m.id)
               return (
                 a && (
                   <span key={m.id} className="timeline-marker" style={{ left: pct(a.atBeat) }}>
-                    {t(m.key)}
+                    {m.label}
                   </span>
                 )
               )

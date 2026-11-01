@@ -23,6 +23,7 @@ import {
 } from '../engine/plan/area'
 import { compile, type CompiledPlan } from '../engine/plan/compile'
 import { longBlendPlan } from '../engine/plan/longBlend'
+import type { BlendArea } from '../engine/plan/area'
 import {
   areaContextFor,
   loopToFill,
@@ -32,7 +33,7 @@ import {
   type LoopRequest,
 } from '../engine/plan/loop'
 import { applyTakes, TakeHistory, type Take } from '../engine/plan/take'
-import type { TransitionPlanV1 } from '../engine/plan/types'
+import type { PlanDeck, TransitionPlanV1 } from '../engine/plan/types'
 import { validate, type PlanIssue, type WarningCode } from '../engine/plan/validate'
 import {
   barToBeat,
@@ -67,6 +68,35 @@ import { DEMO_TRACKS, renderDemoTrack } from './demoTracks'
 // to the blend start, like the area, and the plan carries it in that deck's beats. Takes
 // stay in transition beats, so they replay with the loop; Auto's ideas and "yours" each
 // keep their loop.
+
+/**
+ * What makes the plan for the decks, the points and the area that fits both tracks. The
+ * proof of concept and the Lab use the long blend; the mixing techniques bring their own.
+ */
+export type PlanBuilder = (
+  decks: Record<DeckId, PlanDeck>,
+  points: TransitionPoints,
+  area: BlendArea,
+) => TransitionPlanV1
+
+/** A session's starting tracks and arrangement; left out, the demo tracks and the long blend. */
+export interface SessionOptions {
+  logFrames?: number
+  sources?: (sampleRate: number) => Record<DeckId, DeckSource>
+  builder?: PlanBuilder
+  points?: TransitionPoints
+  area?: AreaRequest
+  loop?: LoopRequest | null
+}
+
+/** A whole arrangement put in place at once: tracks, points, area, loop and plan builder. */
+export interface Arrangement {
+  decks?: Record<DeckId, DeckSource>
+  builder: PlanBuilder
+  points: TransitionPoints
+  area: AreaRequest
+  loop: LoopRequest | null
+}
 
 export interface DeckSource {
   name: string
@@ -178,6 +208,8 @@ export class PocSession {
   /** Which version plays: the user's take or the strategy's original. */
   listening: 'take' | 'original' = 'take'
   compiled!: CompiledPlan
+  /** Makes the plan: the long blend unless the session was given another builder. */
+  builder: PlanBuilder = longBlendPlan
   /** The version not playing, while there are takes to compare it with; null otherwise. */
   compared: CompiledPlan | null = null
   timing!: TransitionTiming
@@ -195,16 +227,19 @@ export class PocSession {
   private readonly features = new WeakMap<AudioBuffer, FrameFeatures>()
   private readonly structures = new Map<DeckId, { source: DeckSource; structure: TrackStructure }>()
 
-  constructor(options: { logFrames?: number } = {}) {
+  constructor(options: SessionOptions = {}) {
     this.ctx = new AudioContext({ latencyHint: 'interactive' })
     this.mixer = new MixerGraph(this.ctx)
     this.transport = new Transport(this.ctx, this.mixer)
-    this.decks = {
+    this.decks = options.sources?.(this.ctx.sampleRate) ?? {
       A: demoSource('A', this.ctx.sampleRate),
       B: demoSource('B', this.ctx.sampleRate),
     }
-    this.points = DEMO_POINTS
-    this.apply()
+    this.points = options.points ?? DEMO_POINTS
+    if (options.area) this.area = options.area
+    if (options.loop) this.loopRequest = options.loop
+    if (options.builder) this.builder = options.builder
+    if (!this.apply()) throw new Error(this.errors.join('; '))
     this.loop = new ControllerLoop(this.transport, this.compiled, this.barAt, {
       logFrames: options.logFrames ?? 0,
     })
@@ -293,6 +328,32 @@ export class PocSession {
   /** A loop on one deck, or null for none (#81). The blend start and area stay where they are. */
   setLoop(loop: LoopRequest | null): void {
     this.change(this.decks, this.points, this.area, false, loop)
+  }
+
+  /**
+   * Puts a whole arrangement in place: other tracks, points, area, loop and the builder
+   * of its plan. The takes belong to the previous plan, so they are put aside (undo
+   * brings them back); playing goes on at the same transition beat, so two arrangements
+   * of one moment can be compared bar for bar. Refused like any change, with the reason.
+   */
+  arrange(arrangement: Arrangement): boolean {
+    this.auto = null
+    const builder = this.builder
+    const hadTakes = this.history.takes.length > 0
+    this.builder = arrangement.builder
+    this.history.reset()
+    this.listening = 'take'
+    this.change(
+      arrangement.decks ?? this.decks,
+      tidy(arrangement.points),
+      arrangement.area,
+      false,
+      arrangement.loop,
+    )
+    if (this.errors.length === 0) return true
+    this.builder = builder
+    if (hadTakes) this.history.undo()
+    return false
   }
 
   /**
@@ -632,7 +693,7 @@ export class PocSession {
       ? { ...fitted, beforeBeats: 0, afterBeats: MIN_AREA_BEATS }
       : fitted
     const plan: TransitionPlanV1 = {
-      ...longBlendPlan(
+      ...this.builder(
         {
           A: { trackFingerprint: A.name, grid: A.grid },
           B: { trackFingerprint: B.name, grid: B.grid },
@@ -676,6 +737,6 @@ function sameLoop(a: LoopRequest | null, b: LoopRequest | null): boolean {
   )
 }
 
-export function createSession(options: { logFrames?: number } = {}): PocSession {
+export function createSession(options: SessionOptions = {}): PocSession {
   return new PocSession(options)
 }
