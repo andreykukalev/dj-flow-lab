@@ -1,29 +1,20 @@
 name: Deploy
 
-# Production deploys on pushes to main (or a manual run on main); every pull request
-# gets its own preview environment, which is removed when the pull request closes.
+# Production deploys on pushes to main (or a manual run on main). There are no preview
+# environments: pull requests are checked by CI and go to the live site when merged.
 # Deployment is skipped until the AZURE_STATIC_WEB_APPS_API_TOKEN secret is set.
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches: [main]
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   deploy:
-    # A merged pull request's closed event has github.ref set to the base branch, so the
-    # event name must be checked too, or the deploy re-creates the preview that
-    # close-preview just removed.
-    if: >-
-      (github.event_name == 'pull_request' && github.event.action != 'closed') ||
-      (github.event_name != 'pull_request' && github.ref == 'refs/heads/main')
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -41,7 +32,6 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ env.SWA_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
           app_location: dist
           skip_app_build: true
@@ -49,18 +39,3 @@ jobs:
       - name: Explain skipped deploy
         if: env.SWA_TOKEN == ''
         run: echo "::notice::Deploy skipped because the AZURE_STATIC_WEB_APPS_API_TOKEN secret is not set."
-
-  close-preview:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    env:
-      SWA_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-    steps:
-      - name: Close preview environment
-        if: env.SWA_TOKEN != ''
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ env.SWA_TOKEN }}
-          action: close
-          app_location: dist
