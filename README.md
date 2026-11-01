@@ -4,6 +4,8 @@ A music-learning product that helps DJs understand **why** a transition works mu
 
 The first product is the **Transition Builder**: load two of your own tracks, choose where to leave one and enter the other, try different transition approaches, and watch the mixer perform each one while you listen. Choosing that moment is the heart of it: mark moments in both tracks, try any pairing (including ones that do not work), and find out why each one worked or did not.
 
+**Mixing techniques** is the second part of the app (header: _Mixing techniques_): eleven techniques from the basics to the advanced, with faders, EQ and loops only, the base that effects later sit on. Each one plays on whole generated lesson tracks (three pairs: made for mixing, melodic in two keys, awkward), with the mixing line and the mixer following it, its steps lit in time, a version without the technique to compare from the same bar, and what the floor hears, why it works, when to use it, which of your own tracks to practise on and an exercise. Code: `src/ui/techniques/`, words in `src/i18n/techniques.*.ts`.
+
 ## Documents
 
 - [Product brief v0.4](docs/PRODUCT_BRIEF_v0.4.md) (current), [v0.3](docs/PRODUCT_BRIEF_v0.3.md) and [v0.2](docs/product-brief.md) (history)

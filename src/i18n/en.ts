@@ -2,7 +2,10 @@
 // (observations, readings, moments, versions, the set sheet) is here too, so the engine
 // stays free of language while the words live in one place.
 
+import { techniquesEn } from './techniques.en'
+
 export const en = {
+  ...techniquesEn,
   // App shell
   'app.title': 'DJ Flow Lab',
   'app.steps': 'Steps',

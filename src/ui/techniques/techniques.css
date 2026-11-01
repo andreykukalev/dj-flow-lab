@@ -1,0 +1,406 @@
+/* Mixing techniques: the list on the left, the technique on the right, built on the
+   Lab's hero (mixing line, mixer, transport) and the proof of concept's styles. */
+
+.tech-intro h2 {
+  margin: 4px 0 4px;
+  font-size: 1.2rem;
+}
+
+.tech-intro p {
+  margin: 0;
+  max-width: 90ch;
+  line-height: 1.45;
+}
+
+.tech-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+@media (min-width: 1000px) {
+  .tech-layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .tech-list {
+    position: sticky;
+    top: 12px;
+  }
+}
+
+.tech-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* The list of techniques, by level. */
+.tech-list {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tech-progress {
+  margin: 0;
+  font-size: 12px;
+}
+
+.tech-level h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.tech-level ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tech-item {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-chip);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tech-item:hover {
+  background: var(--surface-raised);
+}
+
+.tech-item-on {
+  background: var(--surface-selected);
+  border-color: var(--text-muted);
+}
+
+.tech-item-n {
+  min-width: 1.4em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tech-item-name {
+  flex: 1;
+}
+
+.tech-item-done {
+  color: var(--blend-mark);
+}
+
+/* The technique's head: where it is, its name, tools, summary and with/without. */
+.tech-head {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tech-head h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.tech-head-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.tech-tools {
+  display: flex;
+  gap: 6px;
+}
+
+.tech-tool-loop {
+  border-color: var(--blend-mark);
+}
+
+.tech-summary {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  max-width: 80ch;
+}
+
+.tech-compare {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.tech-compare .poc-segmented {
+  flex-wrap: wrap;
+}
+
+/* The lesson tracks as their sections. */
+.tech-arr {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.tech-arr-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.tech-arr-label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: baseline;
+}
+
+.deck-a .tech-arr-label strong {
+  color: var(--deck-a);
+}
+
+.deck-b .tech-arr-label strong {
+  color: var(--deck-b);
+}
+
+.tech-arr-track {
+  position: relative;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+
+.tech-arr-section {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 4px;
+  border-right: 1px solid var(--bg);
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--surface-selected);
+}
+
+.tech-term-intro,
+.tech-term-outro {
+  background: #2b2e37;
+}
+
+.tech-term-breakdown {
+  background: #2b2645;
+}
+
+.tech-term-drop {
+  background: #46404f;
+}
+
+.tech-arr-term {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.tech-arr-parts {
+  font-size: 10px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tech-arr-used {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: 2px solid var(--blend-mark);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.tech-arr-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--blend-mark);
+  pointer-events: none;
+}
+
+.tech-arr-bands {
+  margin: 2px 0 0;
+}
+
+/* The steps, the one playing lit. */
+.tech-steps {
+  padding: 12px 14px;
+}
+
+.tech-steps h3 {
+  margin: 0 0 2px;
+  font-size: 1.05rem;
+}
+
+.tech-steps > p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.tech-without {
+  border-color: var(--deck-b);
+}
+
+.tech-steps ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tech-step {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.8em minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tech-step-on {
+  border-color: var(--blend-mark);
+  background: var(--surface-raised);
+}
+
+.tech-step-n {
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.tech-step-on .tech-step-n {
+  color: var(--blend-mark);
+}
+
+.tech-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.4;
+}
+
+.tech-step-text span {
+  color: var(--text-muted);
+}
+
+.tech-step-at {
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Why, when and when not. */
+.tech-explain {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 800px) {
+  .tech-explain {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.tech-explain .tech-block {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.tech-block h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--explain);
+}
+
+.tech-block p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tech-practice {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tech-done {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.tech-done .muted {
+  font-weight: 400;
+  font-size: 12px;
+}
+
+/* The filter and trim are on the mixer but not part of these techniques. */
+.tech .knob[data-control$='.filter'],
+.tech .knob[data-control$='.trim'] {
+  opacity: 0.3;
+}
+
+/* The two parts of the app, in the header. */
+.set-parts {
+  display: flex;
+  gap: 4px;
+}
+
+@media (max-width: 700px) {
+  .tech-arr-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

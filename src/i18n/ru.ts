@@ -1,9 +1,11 @@
 import type { Key } from './index'
+import { techniquesRu } from './techniques.ru'
 
 // Russian. The two DJs are addressed together as «вы»; DJ terms (BPM, EQ, cue, LOOP IN,
 // rekordbox, the section and function names) stay as DJs say them.
 
 export const ru: Record<Key, string> = {
+  ...techniquesRu,
   // App shell
   'app.title': 'DJ Flow Lab',
   'app.steps': 'Шаги',
