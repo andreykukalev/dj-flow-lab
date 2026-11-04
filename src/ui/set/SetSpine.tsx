@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { arcPoints, type ArcPoint } from '../../engine/set/arc'
+import { camelotText, fitTally, type PairFit } from '../../engine/set/fit'
 import { trackFacts } from '../../engine/set/profile'
 import { readingName, readingWords } from '../../engine/set/readings'
 import {
@@ -123,6 +124,50 @@ function Alternatives({
   )
 }
 
+/** How the two tracks of a transition fit, and the technique to try on them. */
+function Fit({ store, fit }: { store: SetStore; fit: PairFit }) {
+  const t = useT()
+  const pct = `${fit.tempo.percent >= 0 ? '+' : '−'}${Math.abs(fit.tempo.percent).toFixed(1)}%`
+  const { from, to } = fit.keys
+  const keys = from && to ? `${camelotText(from)} → ${camelotText(to)}` : t('fit.noKey')
+  return (
+    <div className="set-fit" role="group" aria-label={t('fit.aria')} data-testid="fit">
+      <span className="chip set-fit-grade" data-grade={fit.grade}>
+        {t(`fit.grade.${fit.grade}`)}
+      </span>
+      <span className="set-fit-fact" data-tempo={fit.tempo.grade}>
+        {fit.tempo.from.toFixed(1)} → {fit.tempo.to.toFixed(1)} BPM ({pct})
+      </span>
+      <span className="set-fit-fact" data-key={fit.keys.grade}>
+        {keys}
+      </span>
+      <span className="set-fit-try" data-technique={fit.technique}>
+        {t('fit.try', { name: t(`tech.${fit.technique}.name`) })}
+      </span>
+      <button
+        className="btn btn-small"
+        title={t('fit.lessonHint')}
+        onClick={() => store.openTechnique(fit.technique)}
+      >
+        {t('fit.lesson')}
+      </button>
+      <details className="set-fold">
+        <summary>{t('fit.details')}</summary>
+        <ul className="set-fit-reasons">
+          {fit.reasons.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+          {fit.cautions.map((c) => (
+            <li key={c} className="muted">
+              {c}
+            </li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  )
+}
+
 /** "4 tracks · 3 transitions · 1 agreed · 2 not tried", each part a whole phrase. */
 function Tally({ plan, steps }: { plan: SetPlan; steps: SpineTransition[] }) {
   const t = useT()
@@ -154,6 +199,9 @@ export function SetSpine({ store }: { store: SetStore }) {
   const points = arcPoints(plan, profiles)
   const pointOf = (id: string) => points.find((p) => p.trackId === id)
   const reading = store.reading
+  const fits = store.fits
+  const fitOf = (from: string, to: string) => fits.find((f) => f.from === from && f.to === to)
+  const tally = fitTally(fits)
   return (
     <div className="set-screen">
       <header className="set-screen-head set-screen-head-row">
@@ -165,6 +213,14 @@ export function SetSpine({ store }: { store: SetStore }) {
         <div className="set-actions">
           <button className="btn btn-small" onClick={() => store.go('concepts')}>
             {t('set.change')}
+          </button>
+          <button
+            className="btn btn-small"
+            disabled={plan.order.length < 3}
+            title={t('set.smoothHint')}
+            onClick={() => store.smoothOrder()}
+          >
+            {t('set.smooth')}
           </button>
           <HearIdea store={store} id="set" plan={plan} />
         </div>
@@ -180,6 +236,11 @@ export function SetSpine({ store }: { store: SetStore }) {
           ))}
         </span>
         <Tally plan={plan} steps={steps} />
+        {fits.length > 0 && (
+          <span className="set-fit-summary" data-testid="fit-summary">
+            {t('set.fitSummary', tally)}
+          </span>
+        )}
       </div>
 
       {points.length > 1 && <ArcChart plan={plan} points={points} />}
@@ -303,6 +364,9 @@ export function SetSpine({ store }: { store: SetStore }) {
                   >
                     {opening?.index === k ? t('set.opening') : t('set.openLab')}
                   </button>
+                  {fitOf(step.from, step.to) && (
+                    <Fit store={store} fit={fitOf(step.from, step.to)!} />
+                  )}
                 </div>
               )}
             </li>

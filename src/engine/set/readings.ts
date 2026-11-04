@@ -1,6 +1,9 @@
 import { english, type Translate } from '../../i18n'
 import type { Observation, ObservationKind } from './observations'
-import { fullShare, type DjId, type TrackProfile } from './profile'
+import { flowOrder, orderFits, CLOSE_PERCENT } from './fit'
+import { drive, type DjId, type TrackProfile } from './profile'
+
+export { drive }
 
 // The Concept Explorer (#90): "What story could this music tell?" Three or four readings
 // of the same tracks, none marked as best. Each one is an _interpretation_, authored
@@ -47,6 +50,8 @@ interface Authored {
   curve: (x: number) => number
   /** Alternates the two DJs instead of ordering by the curve. */
   alternate?: boolean
+  /** Orders by how well neighbours fit (tempo, key, drive) instead of by the curve. */
+  flow?: boolean
 }
 
 const AUTHORED: Authored[] = [
@@ -84,8 +89,23 @@ const FALLBACK: Authored = {
   curve: (x) => (x < 0.9 ? x / 0.9 : 0.8),
 }
 
+/**
+ * The practical order for a DJ preparing a set: each next track the closest in tempo and
+ * key, without a step down in drive. Always offered, after the fallback.
+ */
+const FLOW: Authored = {
+  id: 'smooth-flow',
+  functions: ['OPEN', 'BUILD', 'HOLD', 'BUILD', 'RESOLVE'],
+  needs: [],
+  curve: (x) => (x < 0.85 ? 0.25 + (0.75 * x) / 0.85 : 0.85),
+  flow: true,
+}
+
+/** The flow reading orders up to this many tracks: a whole evening's set. */
+export const MAX_FLOW = 30
+
 /** The ids of the authored readings, whose words the dictionary holds. */
-export const READING_IDS: readonly string[] = [...AUTHORED, FALLBACK].map((a) => a.id)
+export const READING_IDS: readonly string[] = [...AUTHORED, FALLBACK, FLOW].map((a) => a.id)
 
 /** A reading's name in the given language: an authored one from the dictionary, else as saved. */
 export function readingName(reading: { id: string; name: string }, t: Translate): string {
@@ -99,19 +119,6 @@ export function readingWords(reading: Reading, t: Translate): [string, string, s
   if (!READING_IDS.includes(reading.id)) return reading.words
   const words = t(`reading.${reading.id}.words`).split('|')
   return words.length === 3 ? (words as [string, string, string]) : reading.words
-}
-
-/** How far into its range a track drives: tempo and its share of full bars, 0..1 within the collection. */
-export function drive(tracks: readonly TrackProfile[]): Map<string, number> {
-  const bpms = tracks.map((t) => t.grid.bpm)
-  const lo = Math.min(...bpms)
-  const hi = Math.max(...bpms)
-  return new Map(
-    tracks.map((t) => [
-      t.id,
-      0.5 * (hi > lo ? (t.grid.bpm - lo) / (hi - lo) : 0.5) + 0.5 * fullShare(t),
-    ]),
-  )
 }
 
 /** The function of each slot: the reading's functions spread over the order. */
@@ -181,6 +188,38 @@ function pick(
   return out
 }
 
+/** Why the flow order may work, from the fits of its own pairs (not from observations). */
+function flowWhy(
+  order: readonly string[],
+  tracks: readonly TrackProfile[],
+  t: Translate,
+): Reading['why'] {
+  const fits = orderFits(order, tracks, t)
+  if (fits.length === 0) return []
+  const close = fits.filter((f) => f.tempo.grade === 'close').length
+  const keyed = fits.filter((f) => f.keys.grade !== 'unknown')
+  const compatible = keyed.filter((f) => f.keys.grade === 'compatible').length
+  const why: Reading['why'] = [
+    {
+      text: t('reading.smooth-flow.why.tempo', {
+        n: close,
+        total: fits.length,
+        pct: CLOSE_PERCENT,
+      }),
+      observationId: 'flow-tempo',
+    },
+  ]
+  why.push(
+    keyed.length === 0
+      ? { text: t('reading.smooth-flow.why.noKeys'), observationId: 'flow-keys' }
+      : {
+          text: t('reading.smooth-flow.why.keys', { n: compatible, total: keyed.length }),
+          observationId: 'flow-keys',
+        },
+  )
+  return why
+}
+
 function build(
   a: Authored,
   tracks: readonly TrackProfile[],
@@ -188,8 +227,12 @@ function build(
   drives: Map<string, number>,
   t: Translate,
 ): Reading {
-  const used = pick(tracks, evidence, a.alternate ?? false)
-  const order = a.alternate ? alternating(used) : byCurve(used, a.curve, drives)
+  const used = a.flow ? tracks.slice(0, MAX_FLOW) : pick(tracks, evidence, a.alternate ?? false)
+  const order = a.flow
+    ? flowOrder(used)
+    : a.alternate
+      ? alternating(used)
+      : byCurve(used, a.curve, drives)
   const owners = new Map(tracks.map((x) => [x.id, x.owner]))
   const uses: Record<DjId, number> = { dj1: 0, dj2: 0 }
   for (const id of order) uses[owners.get(id)!]++
@@ -200,16 +243,24 @@ function build(
     words: key('words').split('|') as [string, string, string],
     idea: key('idea'),
     functions: a.functions,
-    why: a.needs.map((kind) => ({
-      text: key(`why.${kind}`),
-      observationId: evidence.find((o) => o.kind === kind)!.id,
-    })),
+    why: a.flow
+      ? flowWhy(order, used, t)
+      : a.needs.map((kind) => ({
+          text: key(`why.${kind}`),
+          observationId: evidence.find((o) => o.kind === kind)!.id,
+        })),
     question: key('question'),
     order,
     roles: rolesFor(a.functions, order.length),
     arc: arcFor(a.curve, order.length),
     uses,
-    orderedBy: t(a.alternate ? 'reading.orderedBy.alternate' : 'reading.orderedBy.curve'),
+    orderedBy: t(
+      a.flow
+        ? 'reading.orderedBy.flow'
+        : a.alternate
+          ? 'reading.orderedBy.alternate'
+          : 'reading.orderedBy.curve',
+    ),
     layer: 'interpretation',
   }
 }
@@ -229,5 +280,6 @@ export function readings(
     out.push(build(a, tracks, evidence as Observation[], drives, t))
   }
   out.push(build(FALLBACK, tracks, [], drives, t))
+  if (tracks.length >= 2) out.push(build(FLOW, tracks, [], drives, t))
   return out
 }

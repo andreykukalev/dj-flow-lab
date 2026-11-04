@@ -61,7 +61,7 @@ describe('the journey bar', () => {
   })
 
   it('follows the set, the Lab and the decisions', () => {
-    const reading = readings(TRACKS, [], en).at(-1)!
+    const reading = readings(TRACKS, [], en).find((r) => r.id === 'steady-climb')!
     let plan = planFromReading(reading)
     const [t1, t2] = [
       pairKey(plan.order[0]!, plan.order[1]!),

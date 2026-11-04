@@ -94,11 +94,11 @@ function TrackRow({ store, track }: { store: SetStore; track: CollectionTrack })
                 {t('music.confirm')}
               </button>
             )}
-            <label className="poc-field">
+            <label className="poc-field" title={t('music.keyHint')}>
               {t('music.key')}
               <CommitField
                 label={t('music.key')}
-                placeholder="—"
+                placeholder={t('music.keyPlaceholder')}
                 className="set-key"
                 value={p.key ?? ''}
                 onCommit={(v) => store.setKey(track.id, v)}

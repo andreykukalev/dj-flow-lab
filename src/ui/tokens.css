@@ -18,6 +18,7 @@
   --explain: #cbbcff;
   /* The blend start and the transition area around it (#75). */
   --blend-mark: #f2c94c;
+  --fit-smooth: #6fcf97;
 
   /* Knowledge-layer chips (brief §10). */
   --layer-measured-border: #5b6070;

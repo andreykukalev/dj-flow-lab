@@ -956,3 +956,55 @@
 .set-perform .set-fold p {
   margin-top: 8px;
 }
+
+/* How the two tracks of a transition fit (set planner) */
+.set-fit {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding-left: 10px;
+  font-size: 13px;
+}
+
+.set-fit-grade[data-grade='smooth'] {
+  border-color: var(--fit-smooth);
+  color: var(--fit-smooth);
+}
+
+.set-fit-grade[data-grade='workable'] {
+  border-color: var(--blend-mark);
+  color: var(--blend-mark);
+}
+
+.set-fit-grade[data-grade='tricky'] {
+  border-color: var(--deck-b);
+  color: var(--deck-b-soft);
+}
+
+.set-fit-fact {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.set-fit-fact[data-tempo='jump'],
+.set-fit-fact[data-key='clash'] {
+  color: var(--deck-b-soft);
+}
+
+.set-fit-try {
+  color: var(--explain);
+}
+
+.set-fit-reasons {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+
+.set-fit-summary {
+  font-size: 13px;
+  color: var(--text-muted);
+}

@@ -117,6 +117,19 @@ export function fullShare(t: TrackProfile): number {
   return full / bars
 }
 
+/** How far into its range a track drives: tempo and its share of full bars, 0..1 within the collection. */
+export function drive(tracks: readonly TrackProfile[]): Map<string, number> {
+  const bpms = tracks.map((t) => t.grid.bpm)
+  const lo = Math.min(...bpms)
+  const hi = Math.max(...bpms)
+  return new Map(
+    tracks.map((t) => [
+      t.id,
+      0.5 * (hi > lo ? (t.grid.bpm - lo) / (hi - lo) : 0.5) + 0.5 * fullShare(t),
+    ]),
+  )
+}
+
 export const sectionBars = (s: LikelySection) => s.toBar - s.fromBar + 1
 
 /** "6:12" */
