@@ -460,6 +460,77 @@ export const en = {
     'Is a straight climb what this music wants, or does it ask for a turn?',
   'reading.orderedBy.alternate': 'the two DJs in turns, each in tempo order',
   'reading.orderedBy.curve': 'tempo and how much of each runs at its full groove',
+  'reading.orderedBy.flow': 'how well each pair of neighbours fits: tempo, key and drive',
+  'reading.smooth-flow.name': 'Smooth Flow',
+  'reading.smooth-flow.words': 'Continuity|harmony|momentum',
+  'reading.smooth-flow.idea':
+    'The practical order: each next track is the closest in tempo and key to the one before, and none is a step down in drive, so every transition can be long and quiet and the set sounds like one piece that slowly rises.',
+  'reading.smooth-flow.question':
+    'Where should the set break this flow on purpose, with a contrast the room will feel?',
+  'reading.smooth-flow.why.tempo':
+    '{n} of {total} {total|step|steps} change the tempo by {pct}% or less: no one hears the pitch move.',
+  'reading.smooth-flow.why.keys':
+    '{n} of {total} {total|pair|pairs} with keys are in compatible keys (the same, next door or relative on the Camelot wheel).',
+  'reading.smooth-flow.why.noKeys':
+    'No keys yet: type each track’s key on Your music (8A, Am or 1m, from rekordbox or Serato), and the order will follow the Camelot wheel too.',
+
+  // How two neighbours fit (engine)
+  'fit.grade.smooth': 'Flows',
+  'fit.grade.workable': 'Workable',
+  'fit.grade.tricky': 'Tricky',
+  'fit.try': 'Try: {name}',
+  'fit.lesson': 'How it’s done',
+  'fit.lessonHint': 'Opens this technique in Mixing techniques, with steps and a demo you can play',
+  'fit.details': 'Why, and what to check',
+  'fit.noKey': 'key ?',
+  'fit.aria': 'How the two tracks fit',
+  'set.smooth': 'Order by fit',
+  'set.smoothHint':
+    'Keeps the first track and puts the rest where each pair of neighbours fits best: tempo, key and drive.',
+  'set.fitSummary': 'Transitions: {smooth} flow, {workable} workable, {tricky} tricky',
+  'music.keyPlaceholder': '8A / Am',
+  'music.keyHint':
+    'Type the key from rekordbox or Serato (8A, Am, 1m): the order and the advice on each transition use it.',
+  'fit.tempo.close': 'Tempo {pct}%: B is matched to A without anyone hearing it.',
+  'fit.tempo.stretch':
+    'Tempo {pct}%: workable, but B plays noticeably stretched while they overlap.',
+  'fit.tempo.double':
+    'Tempo {pct}%: one runs at double time of the other, so the beats meet every other kick.',
+  'fit.tempo.jump': 'Tempo {pct}%: too far for a long overlap, the stretched track sounds wrong.',
+  'fit.key.same': 'Keys {from} → {to}: the same key, melodies can play together.',
+  'fit.key.neighbour':
+    'Keys {from} → {to}: next door on the Camelot wheel, a smooth harmonic step.',
+  'fit.key.relative':
+    'Keys {from} → {to}: relative minor and major, same notes with a change of mood.',
+  'fit.key.diagonal':
+    'Keys {from} → {to}: a diagonal step, a change of mood that works if the overlap is short.',
+  'fit.key.twoSteps':
+    'Keys {from} → {to}: two steps on the wheel, a lift in energy; keep the melodies apart.',
+  'fit.key.semitone':
+    'Keys {from} → {to}: a semitone apart, the classic key-change lift; switch melodies on the one.',
+  'fit.key.clash':
+    'Keys {from} → {to}: far apart on the wheel, two melodies together will sound out of tune.',
+  'fit.room': 'Room: A’s outro {out} {out|bar|bars}, B’s intro {in} {in|bar|bars}.',
+  'fit.why.longBlend':
+    'Both tracks leave room and the keys agree: a long EQ blend lets the two sound as one for a while.',
+  'fit.why.bassSwap':
+    'There is room to overlap: bring B in with its LOW cut and swap the bass on a phrase line, so only one bass plays.',
+  'fit.why.midSwap':
+    'The keys clash: keep B’s MID down until A’s melody ends, then swap melodies on the phrase line, so they never play together.',
+  'fit.why.cut':
+    'A long overlap would show the problem: cut to B on the one of a phrase, ideally from A’s breakdown into B’s strong part.',
+  'fit.why.loopIntro':
+    'B’s intro is short or missing ({in} {in|bar|bars}): loop its first bars so its beat has a whole phrase under A before its bass arrives.',
+  'fit.why.loopOutro':
+    'A ends quickly ({out} {out|bar|bars} of outro, or none): loop its last bars to hold the beat until B is ready.',
+  'fit.caution.noKey':
+    'Keys are not typed: listen to the overlap; if it sounds out of tune, keep it short or swap the melodies.',
+  'fit.caution.keyLock':
+    'Turn on key lock (Master Tempo) on the deck, so the stretched track keeps its key.',
+  'fit.caution.bridge':
+    'Or put a track with a tempo in between, so the set climbs in smaller steps.',
+  'fit.caution.drop':
+    'B drives a lot less than A: a step down; worth it only if the set wants to breathe here.',
 
   // Moments of a track (engine)
   'moment.opens': 'how it opens',

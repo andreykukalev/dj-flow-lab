@@ -38,6 +38,7 @@ import {
 import { barToBeat, beatToSec, secondsPerBar } from '../../engine/time'
 import { createSession, decodeFile, deckPosition, type PocSession } from '../../poc/session'
 import { TechniqueSchool } from '../techniques/school'
+import { flowOrder, orderFits, type PairFit } from '../../engine/set/fit'
 import {
   decodeFrames,
   encodeFrames,
@@ -514,6 +515,30 @@ export class SetStore {
     this.reading = reading
     this.plan = planFromReading(reading, this.plan ?? undefined)
     this.go('set')
+  }
+
+  /** How each pair of neighbours in the set fits: tempo, key, room and a technique. */
+  get fits(): PairFit[] {
+    return this.plan ? orderFits(this.plan.order, this.profiles, this.t) : []
+  }
+
+  /** The first track stays; the rest go where neighbours fit best. Slots keep their arc. */
+  smoothOrder(): void {
+    if (!this.plan || this.plan.order.length < 3) return
+    const byId = new Map(this.profiles.map((p) => [p.id, p]))
+    const tracks = this.plan.order.flatMap((id) => {
+      const p = byId.get(id)
+      return p ? [p] : []
+    })
+    if (tracks.length !== this.plan.order.length) return
+    this.plan = { ...this.plan, order: flowOrder(tracks, this.plan.order[0]) }
+    this.notify()
+  }
+
+  /** Opens a technique in the Mixing techniques part. */
+  openTechnique(id: string): void {
+    this.techniques.select(id)
+    this.setPart('techniques')
   }
 
   move(index: number, delta: number): void {

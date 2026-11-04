@@ -119,9 +119,12 @@ describe('readings', () => {
       'two-rooms',
       'pressure-and-breath',
       'steady-climb',
+      'smooth-flow',
     ])
     for (const r of all) {
       expect(r.layer).toBe('interpretation')
+      // The flow's reasons rest on its own pairs, not on observations.
+      if (r.id === 'smooth-flow') continue
       for (const w of r.why) expect(obs.map((o) => o.id)).toContain(w.observationId)
     }
     // Without the two DJs' pair or the late lifts, those readings are not offered.
@@ -133,8 +136,9 @@ describe('readings', () => {
       'into-the-unknown',
       'pressure-and-breath',
       'steady-climb',
+      'smooth-flow',
     ])
-    expect(readings(COLLECTION, []).map((r) => r.id)).toEqual(['steady-climb'])
+    expect(readings(COLLECTION, []).map((r) => r.id)).toEqual(['steady-climb', 'smooth-flow'])
   })
 
   it('orders every track once, with a function per slot and the count per DJ', () => {
@@ -161,6 +165,11 @@ describe('readings', () => {
       track(`t${k}`, k % 2 ? 'dj2' : 'dj1', (['deep', 'lift', 'tool'] as const)[k % 3]!, 120 + k),
     )
     for (const r of readings(many, observe(many))) {
+      if (r.id === 'smooth-flow') {
+        // The flow orders a whole evening: all of them.
+        expect(new Set(r.order).size).toBe(15)
+        continue
+      }
       expect(r.order).toHaveLength(MAX_SLOTS)
       expect(new Set(r.order).size).toBe(MAX_SLOTS)
     }
